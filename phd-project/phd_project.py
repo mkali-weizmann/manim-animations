@@ -152,7 +152,7 @@ def points_generator_plane_wave(x: float,
 def generate_bazier_wavefront(points: np.ndarray,
                               colors: Optional[Union[np.ndarray, str]] = None,
                               opacities: Optional[np.ndarray] = None, **kwargs):
-    if isinstance(colors, str):
+    if isinstance(colors, (str, utils.color.core.ManimColor)):
         colors = color_to_rgb(colors)
     if colors is not None and opacities is not None:
         colors = (colors.T * opacities).T
@@ -328,7 +328,7 @@ class Microscope(MovingCameraScene, VoiceoverScene):
         #
         self.wait(1)
         # self.next_slide()
-        title_0 = Tex("k", color=BLACK).to_corner(UL).scale(0.5)
+        title_0 = Tex("kasdasd", color=BLACK).to_corner(UL).scale(0.5)
         title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
         title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
         title_3 = Tex("3) Waves Decomposition").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
@@ -425,14 +425,14 @@ class Microscope(MovingCameraScene, VoiceoverScene):
                 <bookmark mark='C'/> the intensity of the wave after the sample changes accordingly.""") as tracker:
             self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, image], FadeIn)
             self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)
-            self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
             self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
                       TRACKER_TIME.animate.increment_value(0.5),
                       run_time=1, rate_func=linear)
             # self.next_slide(loop=True)
             self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
                       run_time=tracker.time_until_bookmark('B'), rate_func=linear)
-            self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
             # self.next_slide()
             self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
                       TRACKER_TIME.animate.increment_value(0.5),
@@ -440,16 +440,16 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             # self.next_slide(loop=Ture)
             self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
                       run_time=tracker.time_until_bookmark('C'), rate_func=linear)
-            self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
             # self.next_slide()
             self.play(focus_arrow.animate.become(
                 create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
                       TRACKER_TIME.animate.increment_value(0.5),
                       run_time=1, rate_func=linear)
             # self.next_slide(loop=True)
-            # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
-            #           run_time=tracker.get_remaining_duration()-1, rate_func=linear)
-            self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+            self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
+                      run_time=tracker.get_remaining_duration()-1, rate_func=linear)
+            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
             # self.next_slide()
             self.play(FadeOut(focus_arrow))
 
@@ -637,7 +637,7 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             # self.next_slide()
             self.wait_until_bookmark('A')
             self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(1), run_time=max(4, tracker.time_until_bookmark('B')))
-            self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)
+            # self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)
             TRACKER_SCANNING_CAMERA.set_value(0)
             # self.next_slide()
             self.play(Create(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2)), run_time=tracker.time_until_bookmark('C'))
@@ -811,7 +811,7 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)
             # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
             self.play(TRACKER_TIME.animate.increment_value(1), FadeIn(focus_arrow, shift=0.2*DOWN), run_time=2, rate_func=linear)
-            self.next_slide(loop=True)
+            # self.next_slide(loop=True)
             self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)
             # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
             # self.next_slide()
@@ -1031,15 +1031,14 @@ class Microscope(MovingCameraScene, VoiceoverScene):
                 text="""Since there are now two different wavelengths,
                         the intensity beats, and the intensity nodes propagate in space.""") as tracker:
 
-            # self.next_slide()
-            self.start_loop()
+            # self.next_slide(loop=True)
             self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
                       TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
                       run_time=tracker.get_remaining_duration(), rate_func=linear)
             # self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
             #           TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
             #           run_time=4, rate_func=linear)
-            self.end_loop()
+            # self.next_slide()
         # # END INDENTATION
 
         # ################################################################################################################
@@ -1049,13 +1048,12 @@ class Microscope(MovingCameraScene, VoiceoverScene):
                 laser tilt such that the electron's wavefronts surf on the intensity nodes. Each electron's wavefront
                 experiences a constant intensity - which is different intensity than that of the following wavefront""") as tracker:
             self.play(self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.4 * RIGHT))
-            # self.next_slide()
-            self.start_loop()
+            # self.next_slide(loop=True)
             self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
                       TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)
             # self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
             #           TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2), run_time=4, rate_func=linear)
-            self.end_loop()
+            # self.next_slide()
         # # END INDENTATION
 
 
@@ -1287,8 +1285,8 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             for updater in object_updaters[i]:
                 obj.add_updater(updater)
 
-m = Microscope()
-m.construct()
+# m = Microscope()
+# m.construct()
 
 # manim -pql slides/scene.py Microscope
 # manim-slides convert Microscope slides/presentation.html

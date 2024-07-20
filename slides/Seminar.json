@@ -1,0 +1,36 @@
+{
+  "slides": [
+    {
+      "type": "slide",
+      "start_animation": 0,
+      "end_animation": 1,
+      "number": 1,
+      "terminated": false
+    },
+    {
+      "type": "slide",
+      "start_animation": 1,
+      "end_animation": 2,
+      "number": 2,
+      "terminated": false
+    },
+    {
+      "type": "last",
+      "start_animation": 2,
+      "end_animation": 4,
+      "number": 3,
+      "terminated": false
+    }
+  ],
+  "files": [
+    "slides\\files\\Seminar\\1185818338_2268332985_631829896.mp4",
+    "slides\\files\\Seminar\\1185818338_1981914122_4131132508.mp4",
+    "slides\\files\\Seminar\\624642324_9357862_738441786.mp4",
+    "slides\\files\\Seminar\\624642324_618189769_55488351.mp4"
+  ],
+  "resolution": [
+    854,
+    480
+  ],
+  "background_color": "black"
+}

@@ -3,3 +3,4 @@ __pycache__
 media
 slides/files
 slides/presentation_assets
+.env

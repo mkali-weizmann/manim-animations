@@ -37,3 +37,5 @@ With voiceover (requires to disable caching):
 manim -pql --disable_caching file_name.py scene_object_name
 ```
 
+## Note!
+Having the folder in Dropbox causes troubles - both in the generation of Tex files, and in making a slide show!

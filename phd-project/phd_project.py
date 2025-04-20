@@ -315,14 +315,14 @@ def create_focus_arrow_object(point: np.ndarray):
 class Microscope(MovingCameraScene, VoiceoverScene):
 # class Microscope(Slide, MovingCameraScene):  # , ZoomedScene
     def construct(self):
-        # self.set_speech_service(GTTSService(transcription_model='base'))
-        self.set_speech_service(
-            AzureService(
-                voice="en-US-AriaNeural",
-                style="friendly",#"newscast-casual",
-                global_speed=1.07
-            )
-        )
+        self.set_speech_service(GTTSService(transcription_model='base'))
+        # self.set_speech_service(
+        #     AzureService(
+        #         voice="en-US-AriaNeural",
+        #         style="friendly",#"newscast-casual",
+        #         global_speed=1.07
+        #     )
+        # )
         ################################################################################################################
         # Intro titles:
         #
@@ -986,62 +986,62 @@ class Microscope(MovingCameraScene, VoiceoverScene):
         Dt_l = 1/2
         alpha = np.arcsin(Dt_l * WAVELENGTH_LASER / (Dt_e * WAVELENGTH))
         # ################################################################################################################
-        # # Rotate the phase plate:
-        # rotated_laser_waves = generate_wavefronts_start_to_end_gaussian(
-        #     start_point=POSITION_WAIST + LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(
-        #         alpha),
-        #     end_point=POSITION_WAIST - (
-        #             LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(alpha)),
-        #     tracker=TRACKER_TIME_LASER,
-        #     wavelength=WAVELENGTH_LASER,
-        #     x_R=X_R_LASER,
-        #     w_0=W_0_LASER,
-        #     center=POSITION_WAIST,
-        #     colors_generator=lambda t: RED)
-        # with self.voiceover(
-        #         text="""But can we do better? Due to camera's technology limitation, we can further improve the quality
-        #         of the image by not only delaying the unperturbed component of the wave, but also to attenuate it and
-        #         to darken the background of the sample.
-        #         <bookmark mark='A'/> Luckily for us, there is an energy filter in the microscope that knows how to throw away electrons with
-        #         different energies than the original electron energy. If we could only give or take some of the energy
-        #         of the unperturbed wave, it would be filtered out later by the energy filter.
-        #         The current set-up does not add or take energy from the electron, but only delays it.""") as tracker:
-        #     self.play(FadeOut(title_3, shift=dy * UP),
-        #               title_4.animate.move_to([title_4.get_center()[0], y_0, 0]),
-        #               title_5.animate.move_to([title_5.get_center()[0], y_1, 0]),
-        #               titles_square.animate.set_width(title_5.width + 0.1).move_to([title_5.get_center()[0], y_1, 0])
-        #               )
-        #     self.wait_until_bookmark("A")
-        #     focus_arrow = create_focus_arrow_object(point=POSITION_ENERGY_FILTER + HEIGHT_CAMERA / 2 * UP)
-        #     self.play(FadeIn(energy_filter, shift=DOWN), FadeIn(focus_arrow, shift=0.3*LEFT))
-        #     microscope_VGroup += energy_filter
-        #     self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
-        #     self.play(FadeOut(focus_arrow))
-        #     self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
-        #               run_time=tracker.get_remaining_duration(), rate_func=linear)
-        # # # END INDENTATION
-        # with self.voiceover(
-        #         text="""Let's see what happens when we rotate the laser slightly and put two different wavelengths of light.
-        #         The red lines of the laser represent nodes of high intensity.""") as tracker:
-        #     # self.next_slide()
-        #     self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
-        #     # self.next_slide()
-        #     self.remove(laser_waves)
-        #     self.add(rotated_laser_waves)
-        # # # END INDENTATION
-        # with self.voiceover(
-        #         text="""Since there are now two different wavelengths,
-        #                 the intensity beats, and the intensity nodes propagate in space.""") as tracker:
-        #
-        #     # self.next_slide(loop=True)
-        #     self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
-        #               TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
-        #               run_time=tracker.get_remaining_duration(), rate_func=linear)
-        #     # self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
-        #     #           TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
-        #     #           run_time=4, rate_func=linear)
-        #     # self.next_slide()
-        # # # END INDENTATION
+        # Rotate the phase plate:
+        rotated_laser_waves = generate_wavefronts_start_to_end_gaussian(
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(
+                alpha),
+            end_point=POSITION_WAIST - (
+                    LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(alpha)),
+            tracker=TRACKER_TIME_LASER,
+            wavelength=WAVELENGTH_LASER,
+            x_R=X_R_LASER,
+            w_0=W_0_LASER,
+            center=POSITION_WAIST,
+            colors_generator=lambda t: RED)
+        with self.voiceover(
+                text="""But can we do better? Due to camera's technology limitation, we can further improve the quality
+                of the image by not only delaying the unperturbed component of the wave, but also to attenuate it and
+                to darken the background of the sample.
+                <bookmark mark='A'/> Luckily for us, there is an energy filter in the microscope that knows how to throw away electrons with
+                different energies than the original electron energy. If we could only give or take some of the energy
+                of the unperturbed wave, it would be filtered out later by the energy filter.
+                The current set-up does not add or take energy from the electron, but only delays it.""") as tracker:
+            self.play(FadeOut(title_3, shift=dy * UP),
+                      title_4.animate.move_to([title_4.get_center()[0], y_0, 0]),
+                      title_5.animate.move_to([title_5.get_center()[0], y_1, 0]),
+                      titles_square.animate.set_width(title_5.width + 0.1).move_to([title_5.get_center()[0], y_1, 0])
+                      )
+            self.wait_until_bookmark("A")
+            focus_arrow = create_focus_arrow_object(point=POSITION_ENERGY_FILTER + HEIGHT_CAMERA / 2 * UP)
+            self.play(FadeIn(energy_filter, shift=DOWN), FadeIn(focus_arrow, shift=0.3*LEFT))
+            microscope_VGroup += energy_filter
+            self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
+            self.play(FadeOut(focus_arrow))
+            self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
+                      run_time=tracker.get_remaining_duration(), rate_func=linear)
+        # # END INDENTATION
+        with self.voiceover(
+                text="""Let's see what happens when we rotate the laser slightly and put two different wavelengths of light.
+                The red lines of the laser represent nodes of high intensity.""") as tracker:
+            # self.next_slide()
+            self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
+            # self.next_slide()
+            self.remove(laser_waves)
+            self.add(rotated_laser_waves)
+        # # END INDENTATION
+        with self.voiceover(
+                text="""Since there are now two different wavelengths,
+                        the intensity beats, and the intensity nodes propagate in space.""") as tracker:
+
+            # self.next_slide(loop=True)
+            self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
+                      TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
+                      run_time=tracker.get_remaining_duration(), rate_func=linear)
+            # self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
+            #           TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
+            #           run_time=4, rate_func=linear)
+            # self.next_slide()
+        # # END INDENTATION
         #
         # # ################################################################################################################
         # # # Zoom in:

@@ -1,0 +1,1 @@
+manim -pql scene.py TentToLogistic

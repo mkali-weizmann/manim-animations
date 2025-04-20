@@ -1,6 +1,6 @@
 # manim-animations
 A repository for my manim animations
-
+ 
 ## How to use:
 * For windows, install [chocolatey](https://chocolatey.org/install)
 * install manim from [manim documentation](https://docs.manim.community/en/stable/installation.html) (Use the chocolatey option for windows)

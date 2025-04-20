@@ -3,4 +3,10 @@ __pycache__
 media
 slides/files
 slides/presentation_assets
+amos-seminar/.idea
+amos-seminar/media
+amos-seminar/slides
+chaos-seminar/media
+media
+amo
 .env

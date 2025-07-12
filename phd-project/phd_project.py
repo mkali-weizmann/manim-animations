@@ -1286,6 +1286,174 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             for updater in object_updaters[i]:
                 obj.add_updater(updater)
 
+
+from manim import *
+import numpy as np
+import matplotlib.pyplot as plt
+
+BACKGROUND_COLOR = ORANGE  # background color behind SVG shape
+SAMPLE_COLOR = PURPLE      # SVG shape fill color
+SVG_PATH = r"phd-project/sea horse.svg"
+
+
+from manim import *
+import numpy as np
+import matplotlib.pyplot as plt
+import colorsys
+
+
+BACKGROUND_NOISE_PATH = "phd-project/hue_noise_background.png"
+SAMPLE_COLOR = PURPLE
+SVG_PATH = r"phd-project/sea horse.svg"
+SATURATION = 0.7
+BRIGHTNESS = 0.7
+
+
+class DualImageScene(Scene):
+    def construct(self):
+        # Axes
+        left_axes = Axes(
+            x_range=[-5, 5],
+            y_range=[-5, 5],
+            x_length=3,
+            y_length=3,
+            axis_config={"include_tip": False},
+            tips=False
+        ).move_to(LEFT * 2)
+        right_axes = left_axes.copy().next_to(left_axes, RIGHT, buff=1.5)
+
+        # Titles
+        left_title = Text("Intensity").next_to(left_axes, UP).scale(0.7)
+        right_title = Text("Phase").next_to(right_axes, UP).scale(0.7)
+        sup_title = Text("Electron's wave function at the camera").shift(6*UP).scale(0.7)
+
+        # Left image: intensity noise
+        intensity_noise = np.random.normal(loc=0.5, scale=0.05, size=(100, 100))
+        intensity_noise = np.clip(intensity_noise, 0, 1)
+        plt.imsave("phd-project/noise_img.png", intensity_noise, cmap="gray")
+
+        intensity_image = ImageMobject("phd-project/noise_img.png")
+        intensity_image.scale_to_fit_width(left_axes.width)
+        intensity_image.move_to(left_axes.c2p(0, 0))
+        intensity_image.set_z_index(-1)
+
+        # Right image: hue noise background
+        h = np.clip(np.random.normal(loc=0.3, scale=0.1, size=(100, 100)), 0, 1)
+        s = np.full_like(h, SATURATION)
+        v = np.full_like(h, BRIGHTNESS)
+
+        hsv_pixels = np.stack([h, s, v], axis=-1)
+        rgb_pixels = np.zeros_like(hsv_pixels)
+        for i in range(100):
+            for j in range(100):
+                rgb_pixels[i, j] = colorsys.hsv_to_rgb(*hsv_pixels[i, j])
+
+        plt.imsave(BACKGROUND_NOISE_PATH, rgb_pixels)
+
+        hue_noise_image = ImageMobject(BACKGROUND_NOISE_PATH)
+        hue_noise_image.scale_to_fit_width(right_axes.width)
+        hue_noise_image.move_to(right_axes.c2p(0, 0))
+        hue_noise_image.set_z_index(-2)
+
+        # SVG shape
+        phase_image = SVGMobject(SVG_PATH)
+        phase_image.set_fill(SAMPLE_COLOR, opacity=0.5)
+        phase_image.set_stroke(width=0)
+        phase_image.scale_to_fit_width(right_axes.width).scale(0.3)
+        phase_image.move_to(right_axes.c2p(0, 0))
+        phase_image.set_z_index(-1)
+
+        # Combine
+        self.add(intensity_image, hue_noise_image, phase_image)
+        self.add(left_axes, right_axes, left_title, right_title, sup_title)
+
+
+from manim import *
+import numpy as np
+
+
+class ParametricArcScene(Scene):
+    def construct(self):
+        radius = 3
+        arc_angle = PI / 16
+
+        # Axes setup
+        left_axes = Axes(
+            x_range=[-5, 5],
+            y_range=[-5, 5],
+            x_length=3,
+            y_length=3,
+            axis_config={"include_tip": False},
+            tips=False
+        ).move_to(LEFT * 2)
+
+        right_axes = left_axes.copy().next_to(left_axes, RIGHT, buff=1.5)
+
+        # Titles
+        left_title = Text("input").next_to(left_axes, UP)
+        right_title = Text("output").next_to(right_axes, UP)
+
+        # Full circle (parametric) on both sides
+        circle_func = lambda t: radius * np.array([np.cos(t), np.sin(t), 0])
+        left_circle = left_axes.plot_parametric_curve(
+            circle_func,
+            use_vectorized=False,
+            t_range=[0, TAU],
+            color=WHITE
+        ).move_to(left_axes.c2p(0, 0))
+
+        right_circle = left_circle.copy().move_to(right_axes.c2p(0, 0))
+
+        # Left arc (on circle)
+        left_arc = left_axes.plot_parametric_curve(
+            circle_func,
+            use_vectorized=False,
+            t_range=[0, arc_angle],
+            color=YELLOW,
+            stroke_width=6
+        )
+
+        # Right arc (lifted vertically)
+        lifted_func = lambda t: circle_func(t) + np.array([-radius, radius, 0])
+        right_arc = right_axes.plot_parametric_curve(
+            lifted_func,
+            use_vectorized=False,
+            t_range=[0, arc_angle],
+            color=YELLOW,
+            stroke_width=6
+        )
+
+        # Arrows
+        left_end = circle_func(arc_angle)
+        arrow_left = Arrow(
+            start=left_axes.c2p(0, 0),
+            end=left_axes.c2p(*left_end[:2]),
+            buff=0,
+            color=RED
+        )
+
+        right_end = lifted_func(arc_angle)
+        arrow_right = Arrow(
+            start=right_axes.c2p(0, 0),
+            end=right_axes.c2p(*right_end[:2]),
+            buff=0,
+            color=RED
+        )
+
+        # Display all
+        self.add(
+            left_axes, right_axes,
+            left_title, right_title,
+            left_circle, right_circle,
+            left_arc, right_arc,
+            arrow_left, arrow_right
+        )
+
+
+
+
+
+
 # m = Microscope()
 # m.construct()
 

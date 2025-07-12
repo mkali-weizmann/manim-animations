@@ -866,181 +866,181 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             self.updated_object_animation(laser_waves, FadeIn)
             self.wait(0.3)
         # # END INDENTATION
-        with self.voiceover(
-                text="""By placing an intense laser right at the focal point of the lens, we can shine laser almost purely
-                on the orange unperturbed wave. electron component that goes through a laser experience an effective higher potential energy,
-                and therefore travels slower then components of the electron wave that pass by the laser. This adds
-                relative phase shift to the unperturbed wave. the phase-shifted unperturbed wave is drawn in purple.""") as tracker:
-            self.play(gaussian_beam_waves_unperturbed.animate.become(gaussian_beam_waves_phase_shifted),
-                      second_lens_outgoing_waves_unperturbed.animate.become(second_lens_outgoing_waves_shifted))
-            self.remove(gaussian_beam_waves_unperturbed, second_lens_outgoing_waves_unperturbed)
-            self.add(gaussian_beam_waves_phase_shifted, second_lens_outgoing_waves_shifted)
-            # self.next_slide(loop=True)
-            self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)
-            # self.next_slide()
-        # # END INDENTATION
-
-
-        left_side_group = VGroup(incoming_waves, sample, sample_outgoing_unperturbed_waves,
-                                 sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
-                                 gaussian_beam_waves_phase_shifted, gaussian_beam_waves_perturbed_1,
-                                 gaussian_beam_waves_perturbed_2, laser_waves, lens_1)
-        with self.voiceover(
-                text="""Let's see how introducing the laser solves the problem""") as tracker:
-            # self.next_slide()
-            self.updated_object_animation([left_side_group, phase_image, sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
-                        gaussian_beam_waves_opacities], FadeOut)
-        # # END INDENTATION
-        ################################################################################################################
-        # Complex plane recap:
-        complex_amplitude_graph_group.move_to(POSITION_LENS_1 + RIGHT).scale(2)
-        dot_complex_amplitude.scale(0.5)
-        TRACKER_SCANNING_CAMERA.set_value(0)
-        with self.voiceover(
-                text="""Recall how the amplitude behaved on the camera before introducing the laser: It was just rotating in complex plane, right?""") as tracker:
-            self.updated_object_animation([complex_amplitude_graph_group, scanning_dot_2], FadeIn)
-            self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), TRACKER_SCANNING_SAMPLE.animate.set_value(1),
-                      run_time=tracker.get_remaining_duration())
-            # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), TRACKER_SCANNING_SAMPLE.animate.increment_value(1),
-            #           run_time=4)
-        # # END INDENTATION
-        TRACKER_SCANNING_CAMERA.set_value(0), TRACKER_SCANNING_SAMPLE.set_value(0)
-        circ_complex_amplitude.clear_updaters()
-        dot_complex_amplitude.clear_updaters()
-        line_amplitude_perturbation.clear_updaters()
-        scanning_dot_2.move_to(POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT - HEIGHT_CAMERA / 2 * UP)
-        complex_amplitude_graph_group -= line_complex_amplitude
-        complex_amplitude_graph_group -= line_amplitude_perturbation
-        # self.next_slide()
+        # with self.voiceover(
+        #         text="""By placing an intense laser right at the focal point of the lens, we can shine laser almost purely
+        #         on the orange unperturbed wave. electron component that goes through a laser experience an effective higher potential energy,
+        #         and therefore travels slower then components of the electron wave that pass by the laser. This adds
+        #         relative phase shift to the unperturbed wave. the phase-shifted unperturbed wave is drawn in purple.""") as tracker:
+        #     self.play(gaussian_beam_waves_unperturbed.animate.become(gaussian_beam_waves_phase_shifted),
+        #               second_lens_outgoing_waves_unperturbed.animate.become(second_lens_outgoing_waves_shifted))
+        #     self.remove(gaussian_beam_waves_unperturbed, second_lens_outgoing_waves_unperturbed)
+        #     self.add(gaussian_beam_waves_phase_shifted, second_lens_outgoing_waves_shifted)
+        #     # self.next_slide(loop=True)
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)
+        #     # self.next_slide()
+        # # # END INDENTATION
+        #
+        #
+        # left_side_group = VGroup(incoming_waves, sample, sample_outgoing_unperturbed_waves,
+        #                          sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
+        #                          gaussian_beam_waves_phase_shifted, gaussian_beam_waves_perturbed_1,
+        #                          gaussian_beam_waves_perturbed_2, laser_waves, lens_1)
+        # with self.voiceover(
+        #         text="""Let's see how introducing the laser solves the problem""") as tracker:
+        #     # self.next_slide()
+        #     self.updated_object_animation([left_side_group, phase_image, sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
+        #                 gaussian_beam_waves_opacities], FadeOut)
+        # # # END INDENTATION
         # ################################################################################################################
-        # Rotate the unperturbed component:
-        with self.voiceover(
-                text="""Well, now, since the laser induced a phase shift to the unperturbed component, the
-                unperturbed component alone <bookmark mark='A'/> rotates in the complex plane. Specifically, we choose the intensity of the
-                laser such that the rotation is exactly half pi. now - the unperturbed and perturbed components are
-                parallel to first order!""") as tracker:
-            self.wait_until_bookmark('A')
-            self.play(line_complex_amplitude.animate.become(Line(start=ax_complex_amplitude.c2p(0, 0),
-                                                                 end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
-                                                                 color=COLOR_PHASE_SHIFT_AMPLITUDE,
-                                                                 z_index=ax_complex_amplitude.z_index + 1)),
-                  dot_complex_amplitude.animate.move_to(ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE)))
-            # self.next_slide()
+        # # Complex plane recap:
+        # complex_amplitude_graph_group.move_to(POSITION_LENS_1 + RIGHT).scale(2)
+        # dot_complex_amplitude.scale(0.5)
+        # TRACKER_SCANNING_CAMERA.set_value(0)
+        # with self.voiceover(
+        #         text="""Recall how the amplitude behaved on the camera before introducing the laser: It was just rotating in complex plane, right?""") as tracker:
+        #     self.updated_object_animation([complex_amplitude_graph_group, scanning_dot_2], FadeIn)
+        #     self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), TRACKER_SCANNING_SAMPLE.animate.set_value(1),
+        #               run_time=tracker.get_remaining_duration())
+        #     # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), TRACKER_SCANNING_SAMPLE.animate.increment_value(1),
+        #     #           run_time=4)
+        # # # END INDENTATION
+        # TRACKER_SCANNING_CAMERA.set_value(0), TRACKER_SCANNING_SAMPLE.set_value(0)
+        # circ_complex_amplitude.clear_updaters()
+        # dot_complex_amplitude.clear_updaters()
+        # line_amplitude_perturbation.clear_updaters()
+        # scanning_dot_2.move_to(POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT - HEIGHT_CAMERA / 2 * UP)
+        # complex_amplitude_graph_group -= line_complex_amplitude
+        # complex_amplitude_graph_group -= line_amplitude_perturbation
+        # # self.next_slide()
+        # # ################################################################################################################
+        # # Rotate the unperturbed component:
+        # with self.voiceover(
+        #         text="""Well, now, since the laser induced a phase shift to the unperturbed component, the
+        #         unperturbed component alone <bookmark mark='A'/> rotates in the complex plane. Specifically, we choose the intensity of the
+        #         laser such that the rotation is exactly half pi. now - the unperturbed and perturbed components are
+        #         parallel to first order!""") as tracker:
+        #     self.wait_until_bookmark('A')
+        #     self.play(line_complex_amplitude.animate.become(Line(start=ax_complex_amplitude.c2p(0, 0),
+        #                                                          end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
+        #                                                          color=COLOR_PHASE_SHIFT_AMPLITUDE,
+        #                                                          z_index=ax_complex_amplitude.z_index + 1)),
+        #           dot_complex_amplitude.animate.move_to(ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE)))
+        #     # self.next_slide()
+        # # # END INDENTATION
+        # line_amplitude_perturbation = Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
+        #                                    end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
+        #                                    color=COLOR_PERTURBED_AMPLITUDE,
+        #                                    z_index=line_complex_amplitude.z_index + 1)
+        # complex_amplitude_graph_group += line_complex_amplitude
+        # complex_amplitude_graph_group += line_amplitude_perturbation
+        #
+        # dot_complex_amplitude.add_updater(lambda m: m.move_to(
+        #     ax_complex_amplitude.c2p(
+        #         AMPLITUDE_SIZE * (np.cos(PHASE_SHIFT_AMPLITUDE * np.sin(
+        #             2 * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
+        #         AMPLITUDE_SIZE * (np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
+        #             2 * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1))
+        # ))
+        # line_amplitude_perturbation.add_updater(lambda l: l.become(
+        #     Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
+        #          end=ax_complex_amplitude.c2p(
+        #              AMPLITUDE_SIZE * (np.cos(PHASE_SHIFT_AMPLITUDE * np.sin(
+        #                  2 * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
+        #              AMPLITUDE_SIZE * (np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
+        #                  2 * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1)),
+        #          color=COLOR_PERTURBED_AMPLITUDE,
+        #          z_index=ax_complex_amplitude.z_index + 1)))
+        # with self.voiceover(
+        #         text="""Now, when scanning the field across the camera's plane we see that the two components interfere
+        #         constractively, and so the absolute value of the amplitude is no longer constant.""") as tracker:
+        #     self.add(line_amplitude_perturbation)
+        #     self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())
+        #     # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)
+        #     # self.next_slide()
+        #     self.updated_object_animation([complex_amplitude_graph_group, scanning_dot_2], FadeOut)
+        # # # END INDENTATION
+        # TRACKER_SCANNING_CAMERA.set_value(0)
+        # camera_scanner_group -= scanning_dot_2
+        # camera_scanner_group.move_to(POSITION_LENS_1 - 0.2 * UP).scale(1.7)
+        # phase_contrast_function = ax_2.plot(lambda x: 0.3 + 0.1 * np.sin(8 * np.pi * x) - 0.1 * np.cos(3 * np.pi * x),
+        #                                     color=COLOR_INTENSITIES)
+        # camera_scanner_group -= constant_intensity_function
+        # scanning_dot_x_axis_2.scale(0.5)
+        # scanning_dot_2.move_to(POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT - HEIGHT_CAMERA / 2 * UP)
+        # with self.voiceover(
+        #         text="""When the camera will measure the intensity - it will measure a photo which is no longer
+        #         constant, and so we are finally able to see the phase object!""") as tracker:
+        #     self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeIn)
+        #     # self.next_slide()
+        #     self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())
+        #     # self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)
+        #     # self.next_slide()
+        #     camera_scanner_group += phase_contrast_function
+        #     self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeOut)
+        #
         # # END INDENTATION
-        line_amplitude_perturbation = Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
-                                           end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
-                                           color=COLOR_PERTURBED_AMPLITUDE,
-                                           z_index=line_complex_amplitude.z_index + 1)
-        complex_amplitude_graph_group += line_complex_amplitude
-        complex_amplitude_graph_group += line_amplitude_perturbation
-
-        dot_complex_amplitude.add_updater(lambda m: m.move_to(
-            ax_complex_amplitude.c2p(
-                AMPLITUDE_SIZE * (np.cos(PHASE_SHIFT_AMPLITUDE * np.sin(
-                    2 * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
-                AMPLITUDE_SIZE * (np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
-                    2 * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1))
-        ))
-        line_amplitude_perturbation.add_updater(lambda l: l.become(
-            Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
-                 end=ax_complex_amplitude.c2p(
-                     AMPLITUDE_SIZE * (np.cos(PHASE_SHIFT_AMPLITUDE * np.sin(
-                         2 * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
-                     AMPLITUDE_SIZE * (np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
-                         2 * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1)),
-                 color=COLOR_PERTURBED_AMPLITUDE,
-                 z_index=ax_complex_amplitude.z_index + 1)))
-        with self.voiceover(
-                text="""Now, when scanning the field across the camera's plane we see that the two components interfere
-                constractively, and so the absolute value of the amplitude is no longer constant.""") as tracker:
-            self.add(line_amplitude_perturbation)
-            self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())
-            # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)
-            # self.next_slide()
-            self.updated_object_animation([complex_amplitude_graph_group, scanning_dot_2], FadeOut)
-        # # END INDENTATION
-        TRACKER_SCANNING_CAMERA.set_value(0)
-        camera_scanner_group -= scanning_dot_2
-        camera_scanner_group.move_to(POSITION_LENS_1 - 0.2 * UP).scale(1.7)
-        phase_contrast_function = ax_2.plot(lambda x: 0.3 + 0.1 * np.sin(8 * np.pi * x) - 0.1 * np.cos(3 * np.pi * x),
-                                            color=COLOR_INTENSITIES)
-        camera_scanner_group -= constant_intensity_function
-        scanning_dot_x_axis_2.scale(0.5)
-        scanning_dot_2.move_to(POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT - HEIGHT_CAMERA / 2 * UP)
-        with self.voiceover(
-                text="""When the camera will measure the intensity - it will measure a photo which is no longer
-                constant, and so we are finally able to see the phase object!""") as tracker:
-            self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeIn)
-            # self.next_slide()
-            self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())
-            # self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)
-            # self.next_slide()
-            camera_scanner_group += phase_contrast_function
-            self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeOut)
-
-        # END INDENTATION
-        self.updated_object_animation(left_side_group, FadeIn)
-        # self.next_slide()
-
-        Dt_e = 3/2
-        Dt_l = 1/2
-        alpha = np.arcsin(Dt_l * WAVELENGTH_LASER / (Dt_e * WAVELENGTH))
-        # ################################################################################################################
-        # Rotate the phase plate:
-        rotated_laser_waves = generate_wavefronts_start_to_end_gaussian(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(
-                alpha),
-            end_point=POSITION_WAIST - (
-                    LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(alpha)),
-            tracker=TRACKER_TIME_LASER,
-            wavelength=WAVELENGTH_LASER,
-            x_R=X_R_LASER,
-            w_0=W_0_LASER,
-            center=POSITION_WAIST,
-            colors_generator=lambda t: RED)
-        with self.voiceover(
-                text="""But can we do better? Due to camera's technology limitation, we can further improve the quality
-                of the image by not only delaying the unperturbed component of the wave, but also to attenuate it and
-                to darken the background of the sample.
-                <bookmark mark='A'/> Luckily for us, there is an energy filter in the microscope that knows how to throw away electrons with
-                different energies than the original electron energy. If we could only give or take some of the energy
-                of the unperturbed wave, it would be filtered out later by the energy filter.
-                The current set-up does not add or take energy from the electron, but only delays it.""") as tracker:
-            self.play(FadeOut(title_3, shift=dy * UP),
-                      title_4.animate.move_to([title_4.get_center()[0], y_0, 0]),
-                      title_5.animate.move_to([title_5.get_center()[0], y_1, 0]),
-                      titles_square.animate.set_width(title_5.width + 0.1).move_to([title_5.get_center()[0], y_1, 0])
-                      )
-            self.wait_until_bookmark("A")
-            focus_arrow = create_focus_arrow_object(point=POSITION_ENERGY_FILTER + HEIGHT_CAMERA / 2 * UP)
-            self.play(FadeIn(energy_filter, shift=DOWN), FadeIn(focus_arrow, shift=0.3*LEFT))
-            microscope_VGroup += energy_filter
-            self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
-            self.play(FadeOut(focus_arrow))
-            self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
-                      run_time=tracker.get_remaining_duration(), rate_func=linear)
-        # # END INDENTATION
-        with self.voiceover(
-                text="""Let's see what happens when we rotate the laser slightly and put two different wavelengths of light.
-                The red lines of the laser represent nodes of high intensity.""") as tracker:
-            # self.next_slide()
-            self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
-            # self.next_slide()
-            self.remove(laser_waves)
-            self.add(rotated_laser_waves)
-        # # END INDENTATION
-        with self.voiceover(
-                text="""Since there are now two different wavelengths,
-                        the intensity beats, and the intensity nodes propagate in space.""") as tracker:
-
-            # self.next_slide(loop=True)
-            self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
-                      TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
-                      run_time=tracker.get_remaining_duration(), rate_func=linear)
-            # self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
-            #           TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
-            #           run_time=4, rate_func=linear)
-            # self.next_slide()
+        # self.updated_object_animation(left_side_group, FadeIn)
+        # # self.next_slide()
+        #
+        # Dt_e = 3/2
+        # Dt_l = 1/2
+        # alpha = np.arcsin(Dt_l * WAVELENGTH_LASER / (Dt_e * WAVELENGTH))
+        # # ################################################################################################################
+        # # Rotate the phase plate:
+        # rotated_laser_waves = generate_wavefronts_start_to_end_gaussian(
+        #     start_point=POSITION_WAIST + LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(
+        #         alpha),
+        #     end_point=POSITION_WAIST - (
+        #             LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(alpha)),
+        #     tracker=TRACKER_TIME_LASER,
+        #     wavelength=WAVELENGTH_LASER,
+        #     x_R=X_R_LASER,
+        #     w_0=W_0_LASER,
+        #     center=POSITION_WAIST,
+        #     colors_generator=lambda t: RED)
+        # with self.voiceover(
+        #         text="""But can we do better? Due to camera's technology limitation, we can further improve the quality
+        #         of the image by not only delaying the unperturbed component of the wave, but also to attenuate it and
+        #         to darken the background of the sample.
+        #         <bookmark mark='A'/> Luckily for us, there is an energy filter in the microscope that knows how to throw away electrons with
+        #         different energies than the original electron energy. If we could only give or take some of the energy
+        #         of the unperturbed wave, it would be filtered out later by the energy filter.
+        #         The current set-up does not add or take energy from the electron, but only delays it.""") as tracker:
+        #     self.play(FadeOut(title_3, shift=dy * UP),
+        #               title_4.animate.move_to([title_4.get_center()[0], y_0, 0]),
+        #               title_5.animate.move_to([title_5.get_center()[0], y_1, 0]),
+        #               titles_square.animate.set_width(title_5.width + 0.1).move_to([title_5.get_center()[0], y_1, 0])
+        #               )
+        #     self.wait_until_bookmark("A")
+        #     focus_arrow = create_focus_arrow_object(point=POSITION_ENERGY_FILTER + HEIGHT_CAMERA / 2 * UP)
+        #     self.play(FadeIn(energy_filter, shift=DOWN), FadeIn(focus_arrow, shift=0.3*LEFT))
+        #     microscope_VGroup += energy_filter
+        #     self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
+        #     self.play(FadeOut(focus_arrow))
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
+        #               run_time=tracker.get_remaining_duration(), rate_func=linear)
+        # # # END INDENTATION
+        # with self.voiceover(
+        #         text="""Let's see what happens when we rotate the laser slightly and put two different wavelengths of light.
+        #         The red lines of the laser represent nodes of high intensity.""") as tracker:
+        #     # self.next_slide()
+        #     self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
+        #     # self.next_slide()
+        #     self.remove(laser_waves)
+        #     self.add(rotated_laser_waves)
+        # # # END INDENTATION
+        # with self.voiceover(
+        #         text="""Since there are now two different wavelengths,
+        #                 the intensity beats, and the intensity nodes propagate in space.""") as tracker:
+        #
+        #     # self.next_slide(loop=True)
+        #     self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
+        #               TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
+        #               run_time=tracker.get_remaining_duration(), rate_func=linear)
+        #     # self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
+        #     #           TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
+        #     #           run_time=4, rate_func=linear)
+        #     # self.next_slide()
         # # END INDENTATION
         #
         # # ################################################################################################################
@@ -1301,43 +1301,52 @@ import numpy as np
 import matplotlib.pyplot as plt
 import colorsys
 
-
+BACKGROUND_COLOR = "#29505B"
+TEXT_COLOR = "#D8E1E3"
 BACKGROUND_NOISE_PATH = "phd-project/hue_noise_background.png"
 SAMPLE_COLOR = PURPLE
 SVG_PATH = r"phd-project/sea horse.svg"
 SATURATION = 0.7
 BRIGHTNESS = 0.7
-
+import cv2
 
 class DualImageScene(Scene):
     def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+        x_len = 5
         # Axes
         left_axes = Axes(
-            x_range=[-5, 5],
-            y_range=[-5, 5],
-            x_length=3,
-            y_length=3,
+            x_range=[-4, 4],
+            y_range=[-4, 4],
+            x_length=x_len,
+            y_length=x_len,
             axis_config={"include_tip": False},
             tips=False
-        ).move_to(LEFT * 2)
+        ).move_to(LEFT * x_len/2+1*DOWN)
         right_axes = left_axes.copy().next_to(left_axes, RIGHT, buff=1.5)
 
         # Titles
-        left_title = Text("Intensity").next_to(left_axes, UP).scale(0.7)
-        right_title = Text("Phase").next_to(right_axes, UP).scale(0.7)
-        sup_title = Text("Electron's wave function at the camera").shift(6*UP).scale(0.7)
+        left_title = Tex("Intensity", color=TEXT_COLOR).next_to(left_axes, UP).scale(0.9)
+        right_title = Tex("Phase", color=TEXT_COLOR).next_to(right_axes, UP).scale(0.9)
+        sup_title = Tex("Electron's wave function at the camera", color=TEXT_COLOR).to_corner(UP).scale(1.1)
 
-        # Left image: intensity noise
+        # Create and save grayscale noise
         intensity_noise = np.random.normal(loc=0.5, scale=0.05, size=(100, 100))
         intensity_noise = np.clip(intensity_noise, 0, 1)
-        plt.imsave("phd-project/noise_img.png", intensity_noise, cmap="gray")
+        plt.imsave("phd-project/noise_img_raw.png", intensity_noise, cmap="gray")
 
-        intensity_image = ImageMobject("phd-project/noise_img.png")
+        # Apply blur using OpenCV
+        img_gray = cv2.imread("phd-project/noise_img_raw.png", cv2.IMREAD_GRAYSCALE)
+        img_gray_blurred = cv2.GaussianBlur(img_gray, (3, 3), sigmaX=1.5)
+        cv2.imwrite("phd-project/noise_img_blur.png", img_gray_blurred)
+
+        # Load as Manim object
+        intensity_image = ImageMobject("phd-project/noise_img_blur.png")
         intensity_image.scale_to_fit_width(left_axes.width)
         intensity_image.move_to(left_axes.c2p(0, 0))
         intensity_image.set_z_index(-1)
 
-        # Right image: hue noise background
+        # Generate hue-based image
         h = np.clip(np.random.normal(loc=0.3, scale=0.1, size=(100, 100)), 0, 1)
         s = np.full_like(h, SATURATION)
         v = np.full_like(h, BRIGHTNESS)
@@ -1348,8 +1357,14 @@ class DualImageScene(Scene):
             for j in range(100):
                 rgb_pixels[i, j] = colorsys.hsv_to_rgb(*hsv_pixels[i, j])
 
-        plt.imsave(BACKGROUND_NOISE_PATH, rgb_pixels)
+        plt.imsave("phd-project/hue_noise_raw.png", rgb_pixels)
 
+        # Read and blur with OpenCV
+        img_rgb = cv2.imread("phd-project/hue_noise_raw.png")
+        img_rgb_blurred = cv2.GaussianBlur(img_rgb, (3, 3), sigmaX=1.5)
+        cv2.imwrite(BACKGROUND_NOISE_PATH, img_rgb_blurred)
+
+        # Load as Manim object
         hue_noise_image = ImageMobject(BACKGROUND_NOISE_PATH)
         hue_noise_image.scale_to_fit_width(right_axes.width)
         hue_noise_image.move_to(right_axes.c2p(0, 0))
@@ -1367,31 +1382,82 @@ class DualImageScene(Scene):
         self.add(intensity_image, hue_noise_image, phase_image)
         self.add(left_axes, right_axes, left_title, right_title, sup_title)
 
+        # all_mobjects = Group(
+        #     intensity_image, hue_noise_image, phase_image, left_axes, right_axes, left_title, right_title, sup_title)
 
-from manim import *
-import numpy as np
+
+
+COLOR_ARC = BLUE
+COLOR_CIRCLE = GRAY
+COLOR_LINE = GOLD_B
+COLOR_ARROW = TEAL
+WIDTH_LINES_THICK = 3.5
+WIDTH_LINES_THIN = 1.5
 
 
 class ParametricArcScene(Scene):
     def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
         radius = 3
-        arc_angle = PI / 16
+        arc_angle = PI / 6
+
+        middle_point = (0, -1.5, 0)
+
+        # Style samples
+        legend_signal = Line(LEFT * 0.3, RIGHT * 0.3, color=COLOR_ARC, stroke_width=WIDTH_LINES_THICK)
+        legend_dc = Line(LEFT * 0.3, RIGHT * 0.3, color=COLOR_LINE, stroke_width=WIDTH_LINES_THICK)
+        legend_total = Line(LEFT * 0.3, RIGHT * 0.3, color=COLOR_ARROW, stroke_width=WIDTH_LINES_THICK)
+
+        # Positioning
+        legend_signal.next_to(middle_point, LEFT)
+        legend_dc.next_to(legend_signal, 3 * UP)
+        legend_total.next_to(legend_signal, 3 * DOWN)
+
+        # Labels
+        label_dc = Tex("DC", font_size=35, color=TEXT_COLOR).next_to(legend_dc, RIGHT)
+        label_signal = Tex("signal", font_size=35, color=TEXT_COLOR).next_to(legend_signal, RIGHT)
+        label_total = Tex("Total amplitude", font_size=35, color=TEXT_COLOR).next_to(legend_total, RIGHT)
 
         # Axes setup
         left_axes = Axes(
-            x_range=[-5, 5],
-            y_range=[-5, 5],
-            x_length=3,
-            y_length=3,
+            x_range=[-4, 4],
+            y_range=[-4, 4],
+            x_length=4,
+            y_length=4,
             axis_config={"include_tip": False},
-            tips=False
-        ).move_to(LEFT * 2)
+            tips=False, color=TEXT_COLOR
+        ).shift(4.5*LEFT+1.5*DOWN)
 
-        right_axes = left_axes.copy().next_to(left_axes, RIGHT, buff=1.5)
+        right_axes = Axes(
+            x_range=[-4, 4],
+            y_range=[-4, 4],
+            x_length=4,
+            y_length=4,
+            axis_config={"include_tip": False},
+            tips=False, color=TEXT_COLOR
+        ).shift(4.5*RIGHT+1.5*DOWN)
 
+        x_label_left = left_axes.get_x_axis_label(
+            MathTex(r"\Re\left(\psi\right)", color=TEXT_COLOR).scale(0.6)
+        )
+        y_label_left = left_axes.get_y_axis_label(
+            MathTex(r"\Im\left(\psi\right)", color=TEXT_COLOR).scale(0.6),
+            edge=UP,
+            direction=2*UP,
+        )
+
+        x_label_right = right_axes.get_x_axis_label(
+            MathTex(r"\Re\left(\psi\right)", color=TEXT_COLOR).scale(0.6)
+        )
+        y_label_right = right_axes.get_y_axis_label(
+            MathTex(r"\Im\left(\psi\right)", color=TEXT_COLOR).scale(0.6),
+            edge=UP,
+            direction=2*UP,
+        )
         # Titles
-        left_title = Text("input").next_to(left_axes, UP)
-        right_title = Text("output").next_to(right_axes, UP)
+        left_title = Tex("With original DC", color=TEXT_COLOR).next_to(left_axes, 2.7*UP).scale(0.9)
+        right_title = Tex("With phase shifted DC", color=TEXT_COLOR).next_to(right_axes, 2.7*UP).scale(0.9)
+        sup_title = Tex(r"Wave function at some specific pixel: $\psi\left(x_{0},y_{0}\right)$", color=TEXT_COLOR).shift(3.2 * UP).scale(1.2)
 
         # Full circle (parametric) on both sides
         circle_func = lambda t: radius * np.array([np.cos(t), np.sin(t), 0])
@@ -1399,18 +1465,26 @@ class ParametricArcScene(Scene):
             circle_func,
             use_vectorized=False,
             t_range=[0, TAU],
-            color=WHITE
+            color=COLOR_CIRCLE,
+            stroke_width=WIDTH_LINES_THIN
         ).move_to(left_axes.c2p(0, 0))
 
-        right_circle = left_circle.copy().move_to(right_axes.c2p(0, 0))
+        right_circle = right_axes.plot_parametric_curve(
+            circle_func,
+            use_vectorized=False,
+            t_range=[0, TAU],
+            color=COLOR_CIRCLE,
+            stroke_width=WIDTH_LINES_THIN
+        )
+
 
         # Left arc (on circle)
         left_arc = left_axes.plot_parametric_curve(
             circle_func,
             use_vectorized=False,
             t_range=[0, arc_angle],
-            color=YELLOW,
-            stroke_width=6
+            color=COLOR_ARC,
+            stroke_width=WIDTH_LINES_THICK
         )
 
         # Right arc (lifted vertically)
@@ -1419,35 +1493,184 @@ class ParametricArcScene(Scene):
             lifted_func,
             use_vectorized=False,
             t_range=[0, arc_angle],
-            color=YELLOW,
-            stroke_width=6
+            color=COLOR_ARC,
+            stroke_width=WIDTH_LINES_THICK
         )
 
         # Arrows
         left_end = circle_func(arc_angle)
+        line_left = Line(
+            start=left_axes.c2p(0, 0),
+            end=left_axes.c2p(radius, 0),
+            color=COLOR_LINE,
+            stroke_width=WIDTH_LINES_THICK
+        )
         arrow_left = Arrow(
             start=left_axes.c2p(0, 0),
             end=left_axes.c2p(*left_end[:2]),
             buff=0,
-            color=RED
+            color=COLOR_ARROW,
+            stroke_width=WIDTH_LINES_THICK,
+            max_tip_length_to_length_ratio=0.15
         )
 
         right_end = lifted_func(arc_angle)
+        line_right = Line(
+            start=right_axes.c2p(0, 0),
+            end=right_axes.c2p(0, radius),
+            color=COLOR_LINE,
+            stroke_width=WIDTH_LINES_THICK
+        )
         arrow_right = Arrow(
             start=right_axes.c2p(0, 0),
             end=right_axes.c2p(*right_end[:2]),
             buff=0,
-            color=RED
+            color=COLOR_ARROW,
+            stroke_width=WIDTH_LINES_THICK,
+            max_tip_length_to_length_ratio=0.1
         )
+
 
         # Display all
         self.add(
-            left_axes, right_axes,
-            left_title, right_title,
+            left_axes, right_axes, x_label_left, y_label_left, x_label_right, y_label_right,
+            left_title, right_title, sup_title,
             left_circle, right_circle,
             left_arc, right_arc,
-            arrow_left, arrow_right
+            line_left, line_right,
+            arrow_left, arrow_right,
+            legend_signal, legend_dc, legend_total,
+            label_signal, label_dc, label_total
         )
+
+
+COLOR_LENS = BLUE
+COLOR_MIRROR = GREEN
+COLOR_LASER = RED
+COLOR_ELECTRON = PURPLE
+
+class Cavity(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+        mm = 0.1
+        global_shift = -6
+        global_vertical_shift = -1
+
+        lens_R_right = 5.49 * mm
+        lens_R_left = 24.21 * mm
+        lens_D = 7.75 * mm
+        lens_thickness = 2.91 * mm
+        lens_left_location = 5 * mm
+        lens_right_location = lens_left_location + lens_thickness
+        lens_arc_angle_left = np.arcsin(lens_D / (2 * lens_R_left))
+        lens_arc_angle_right = np.arcsin(lens_D / (2 * lens_R_right))
+
+        lens_arc_left = Arc(
+            radius=lens_R_left,
+            start_angle=PI - lens_arc_angle_left,
+            angle=2 * lens_arc_angle_left,
+            color=COLOR_LENS,
+            stroke_width=WIDTH_LINES_THICK
+        ).move_to([lens_left_location + global_shift, global_vertical_shift, 0])
+
+        lens_arc_right = Arc(
+            radius=lens_R_right,
+            start_angle=-lens_arc_angle_right,
+            angle=2 * lens_arc_angle_right,
+            color=COLOR_LENS,
+            stroke_width=WIDTH_LINES_THICK
+        ).move_to([lens_right_location + global_shift, global_vertical_shift, 0])
+
+        small_mirror_R = 5 * mm
+        small_mirror_D = 7.75 * mm
+        small_mirror_location = -5 * mm
+        small_mirror_arc_angle = np.arcsin(small_mirror_D / (2 * small_mirror_R))
+
+        small_mirror_arc = Arc(
+            radius=small_mirror_R,
+            start_angle=np.pi - small_mirror_arc_angle,
+            angle=2 * small_mirror_arc_angle,
+            color=COLOR_MIRROR,
+            stroke_width=WIDTH_LINES_THICK
+        ).move_to([small_mirror_location + global_shift, global_vertical_shift, 0])
+
+        big_mirror_R = 200*mm
+        big_mirror_location = 120*mm
+        big_mirror_D = 25.4*mm
+        big_mirror_arc_angle = np.arcsin(big_mirror_D / (2 * big_mirror_R))
+
+        big_mirror_arc = Arc(
+            radius=big_mirror_R,
+            start_angle=-big_mirror_arc_angle,
+            angle=2 * big_mirror_arc_angle,
+            color=COLOR_MIRROR,
+            stroke_width=WIDTH_LINES_THICK
+        ).move_to([big_mirror_location + global_shift, global_vertical_shift, 0])
+        a = ValueTracker(0.6)
+        b = ValueTracker(0.6)
+        c = ValueTracker(0.5)
+        WAVELENGTH = 0.2
+        waves_left = generate_wavefronts_start_to_end_gaussian(start_point=[small_mirror_location + global_shift+1*mm, global_vertical_shift, 0],
+                                                          end_point=[lens_left_location + global_shift-1*mm, global_vertical_shift, 0],
+                                                          tracker=a,
+                                                          wavelength=WAVELENGTH,
+                                                          x_R=X_R/20,
+                                                          w_0=W_0/5,
+                                                          center=[(small_mirror_location + lens_left_location) / 2 + global_shift, global_vertical_shift, 0],
+                                                          colors_generator=lambda t: COLOR_LASER)
+        waves_right = generate_wavefronts_start_to_end_gaussian(start_point=[lens_right_location + global_shift+1*mm, global_vertical_shift, 0],
+                                                               end_point=[big_mirror_location + global_shift+1*mm, global_vertical_shift, 0],
+                                                               tracker=b,
+                                                               wavelength=WAVELENGTH,
+                                                               x_R=X_R*5,
+                                                               w_0=W_0/1.5,
+                                                               center=None,
+                                                               colors_generator=lambda t: COLOR_LASER)
+        waves_lens = generate_wavefronts_start_to_end_gaussian(start_point=[lens_left_location + global_shift, global_vertical_shift, 0],
+                                                                end_point=[lens_right_location + global_shift, global_vertical_shift, 0],
+                                                                tracker=c,
+                                                                wavelength=WAVELENGTH,
+                                                                x_R=X_R * 2,
+                                                                w_0=W_0,
+                                                                center=[small_mirror_location + global_shift, global_vertical_shift, 0],
+                                                                colors_generator=lambda t: COLOR_LASER)
+
+        electron_line = DashedLine(start=[global_shift, 1 + global_vertical_shift, 0], end=[global_shift, -1 + global_vertical_shift, 0],
+                             color=COLOR_UNPERTURBED_AMPLITUDE, stroke_width=WIDTH_LINES_THICK)
+
+        self.add(
+            lens_arc_left, lens_arc_right,
+            small_mirror_arc, big_mirror_arc, waves_left, waves_right, waves_lens, electron_line
+        )
+
+        # Legend items setup
+        legend_items = [
+            {"label": "Cavity mirrors", "color": COLOR_MIRROR, "type": Line},
+            {"label": "Lens", "color": COLOR_LENS, "type": Line},
+            {"label": "Laser beam", "color": COLOR_LASER, "type": Line},
+            {"label": "Electron beam", "color": COLOR_UNPERTURBED_AMPLITUDE, "type": DashedLine}
+        ]
+
+        legend_lines = []
+        legend_labels = []
+
+        legend_start = [-1.3, 3+global_vertical_shift, 0]  # Top-right relative position
+
+        for i, item in enumerate(legend_items):
+            line = item["type"](
+                LEFT * 0.4, RIGHT * 0.4,
+                color=item["color"],
+                stroke_width=WIDTH_LINES_THICK
+            ).move_to([legend_start[0], legend_start[1] - i * 0.5, 0])
+
+            label = Tex(item["label"], font_size=40, color=TEXT_COLOR).next_to(line, RIGHT, buff=0.3)
+
+            legend_lines.append(line)
+            legend_labels.append(label)
+
+
+        # Add legend to scene
+        self.add(*legend_lines, *legend_labels)
 
 
 

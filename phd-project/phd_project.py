@@ -311,10 +311,12 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
 def create_focus_arrow_object(point: np.ndarray):
     return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
 
+BACKGROUND_COLOR = "#29505B"
 
 class Microscope(MovingCameraScene, VoiceoverScene):
 # class Microscope(Slide, MovingCameraScene):  # , ZoomedScene
     def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
         self.set_speech_service(GTTSService(transcription_model='base'))
         # self.set_speech_service(
         #     AzureService(
@@ -326,7 +328,7 @@ class Microscope(MovingCameraScene, VoiceoverScene):
         ################################################################################################################
         # Intro titles:
         #
-        self.wait(1)
+        # self.wait(1)
         # self.next_slide()
         title_0 = Tex("kasdasd", color=BLACK).to_corner(UL).scale(0.5)
         title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
@@ -343,18 +345,18 @@ class Microscope(MovingCameraScene, VoiceoverScene):
         focus_arrow = create_focus_arrow_object(point=POSITION_SAMPLE - WIDTH_SAMPLE / 2 * RIGHT + HEIGHT_SAMPLE / 2 * UP - 0.15*RIGHT + 0.05*UP)
         bad_title = Tex("Transmission Electron Microscope image enhancement\nusing free electron-photon ponderomotive interaction",  color=WHITE).scale(0.75)
         good_title = Tex("Shooting laser on electrons\nmakes images good", color=WHITE).scale(0.75)
-        with self.voiceover(
-                text="Today we are going to talk about Transmission Electron Microscope image enhancement, using free electron-photon ponderomotive interaction.") as tracker:  #
-            self.wait(1)
-            self.play(FadeIn(bad_title, shift=DOWN))
+        # with self.voiceover(
+        #         text="Today we are going to talk about Transmission Electron Microscope image enhancement, using free electron-photon ponderomotive interaction.") as tracker:  #
+        #     self.wait(1)
+        #     self.play(FadeIn(bad_title, shift=DOWN))
         # self.next_slide()
-        with self.voiceover(
-                text="This name is not very catchy. Simply speaking, we are going to see how <bookmark mark='A'/> Shooting laser on electrons makes images good.<bookmark mark='B'/>") as tracker:  #
-            self.wait_until_bookmark("A")
-            self.play(FadeOut(bad_title, shift=DOWN), FadeIn(good_title, shift=DOWN))
-            # self.next_slide()
-            self.wait_until_bookmark("B")
-            self.play(FadeOut(good_title, shift=DOWN))
+        # with self.voiceover(
+        #         text="This name is not very catchy. Simply speaking, we are going to see how <bookmark mark='A'/> Shooting laser on electrons makes images good.<bookmark mark='B'/>") as tracker:  #
+        #     self.wait_until_bookmark("A")
+        #     self.play(FadeOut(bad_title, shift=DOWN), FadeIn(good_title, shift=DOWN))
+        #     # self.next_slide()
+        #     self.wait_until_bookmark("B")
+        #     self.play(FadeOut(good_title, shift=DOWN))
 
         ###############################################################################################################
         # Microscope introduction:
@@ -418,41 +420,41 @@ class Microscope(MovingCameraScene, VoiceoverScene):
         microscope_VGroup = VGroup(incoming_waves, sample, lens_1, sample_outgoing_waves_opacities, lens_2,
                                    gaussian_beam_waves_opacities,
                                    second_lens_outgoing_waves_opacities, camera)
-        with self.voiceover(
-                text="""Let's start by seeing how does a transmission microscope work.
-                This explanation applies both for a regular optical microscopes, and for electron microscopes.
-                <bookmark mark='A'/> An incoming plane wave is approaching the sample we want to image from the left.
-                <bookmark mark='B'/> The sample scatters or absorbs parts of the wave, and so
-                <bookmark mark='C'/> the intensity of the wave after the sample changes accordingly.""") as tracker:
-            self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, image], FadeIn)
-            self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)
-            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
-            self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
-                      TRACKER_TIME.animate.increment_value(1),
-                      run_time=1, rate_func=linear)
-            # self.next_slide(loop=True)
-            self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
-                      run_time=tracker.time_until_bookmark('B'), rate_func=linear)
-            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
-            # self.next_slide()
-            self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
-                      TRACKER_TIME.animate.increment_value(1),
-                      run_time=1, rate_func=linear)
-            # self.next_slide(loop=Ture)
-            self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
-                      run_time=tracker.time_until_bookmark('C'), rate_func=linear)
-            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
-            # self.next_slide()
-            self.play(focus_arrow.animate.become(
-                create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
-                      TRACKER_TIME.animate.increment_value(1),
-                      run_time=1, rate_func=linear)
-            # self.next_slide(loop=True)
-            self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
-                      run_time=tracker.get_remaining_duration()-1, rate_func=linear)
-            # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
-            # self.next_slide()
-            self.play(FadeOut(focus_arrow))
+        # with self.voiceover(
+        #         text="""Let's start by seeing how does a transmission microscope work.
+        #         This explanation applies both for a regular optical microscopes, and for electron microscopes.
+        #         <bookmark mark='A'/> An incoming plane wave is approaching the sample we want to image from the left.
+        #         <bookmark mark='B'/> The sample scatters or absorbs parts of the wave, and so
+        #         <bookmark mark='C'/> the intensity of the wave after the sample changes accordingly.""") as tracker:
+        #     self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, image], FadeIn)
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)
+        #     # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+        #     self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
+        #               TRACKER_TIME.animate.increment_value(1),
+        #               run_time=1, rate_func=linear)
+        #     # self.next_slide(loop=True)
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
+        #               run_time=tracker.time_until_bookmark('B'), rate_func=linear)
+        #     # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+        #     # self.next_slide()
+        #     self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
+        #               TRACKER_TIME.animate.increment_value(1),
+        #               run_time=1, rate_func=linear)
+        #     # self.next_slide(loop=Ture)
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
+        #               run_time=tracker.time_until_bookmark('C'), rate_func=linear)
+        #     # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+        #     # self.next_slide()
+        #     self.play(focus_arrow.animate.become(
+        #         create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
+        #               TRACKER_TIME.animate.increment_value(1),
+        #               run_time=1, rate_func=linear)
+        #     # self.next_slide(loop=True)
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
+        #               run_time=tracker.get_remaining_duration()-1, rate_func=linear)
+        #     # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
+        #     # self.next_slide()
+        #     self.play(FadeOut(focus_arrow))
 
         ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1 = generate_scanning_axes(
             dot_start_point=POSITION_SAMPLE + WIDTH_SAMPLE / 2 * RIGHT + HEIGHT_SAMPLE / 2 * UP,
@@ -463,16 +465,16 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             axis_x_label="Position",
             axis_y_label="Intensity")
 
-        with self.voiceover(
-                text="""If we measured the intensity of the field right after the sample. The
-                Intensity as a function of position would be our image.
-                <bookmark mark='A'/>  However, the sample is small, and so we can not probe the field at such
-                small scales.""") as tracker:
-            self.play(Create(ax_1), Write(labels_1), run_time=2)
-            self.play(Create(scanning_dot_1), Create(scanning_dot_x_axis_1))
-            # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(1), Create(amplitude_graph_1), run_time=max(tracker.time_until_bookmark('A'), 2))
-            self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), Create(amplitude_graph_1), run_time=2)
-            # # END INDENTATION
+        # with self.voiceover(
+        #         text="""If we measured the intensity of the field right after the sample. The
+        #         Intensity as a function of position would be our image.
+        #         <bookmark mark='A'/>  However, the sample is small, and so we can not probe the field at such
+        #         small scales.""") as tracker:
+        #     self.play(Create(ax_1), Write(labels_1), run_time=2)
+        #     self.play(Create(scanning_dot_1), Create(scanning_dot_x_axis_1))
+        #     # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(1), Create(amplitude_graph_1), run_time=max(tracker.time_until_bookmark('A'), 2))
+        #     self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), Create(amplitude_graph_1), run_time=2)
+        #     # # END INDENTATION
         # self.next_slide()
 
         ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2 = generate_scanning_axes(
@@ -484,26 +486,26 @@ class Microscope(MovingCameraScene, VoiceoverScene):
             axis_x_label="Position",
             axis_y_label="Intensity")
         camera_scanner_group = VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2)
-        with self.voiceover(
-                text="""Therefore, we use optics elements to take the field and magnify it as it is.
-                        The magnified field hits the camera which measures it's intensity.
-                        <bookmark mark='A'/> Since the optics copy the field exactly as it is, the intensity pattern
-                        on the camera equals exactly to the pattern right after the sample""") as tracker:
-            self.play(FadeIn(focus_arrow))
-            # self.next_slide()
-            self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT + HEIGHT_CAMERA / 2 * UP + 0.05 * UP - 0.15*RIGHT)))
-            # self.next_slide()
-            self.play(Create(ax_2), Write(labels_2),  run_time=2)
-            # self.next_slide()
-            self.play(Create(scanning_dot_2), Create(scanning_dot_x_axis_2))
-            self.wait_until_bookmark('A')
-            self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=tracker.get_remaining_duration())
-            # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=2)
-            # self.next_slide()
-            self.play(FadeOut(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2,
-                                     ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1, focus_arrow)))
+        # with self.voiceover(
+        #         text="""Therefore, we use optics elements to take the field and magnify it as it is.
+        #                 The magnified field hits the camera which measures it's intensity.
+        #                 <bookmark mark='A'/> Since the optics copy the field exactly as it is, the intensity pattern
+        #                 on the camera equals exactly to the pattern right after the sample""") as tracker:
+        #     self.play(FadeIn(focus_arrow))
+        #     # self.next_slide()
+        #     self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT + HEIGHT_CAMERA / 2 * UP + 0.05 * UP - 0.15*RIGHT)))
+        #     # self.next_slide()
+        #     self.play(Create(ax_2), Write(labels_2),  run_time=2)
+        #     # self.next_slide()
+        #     self.play(Create(scanning_dot_2), Create(scanning_dot_x_axis_2))
+        #     self.wait_until_bookmark('A')
+        #     self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=tracker.get_remaining_duration())
+        #     # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=2)
+        #     # self.next_slide()
+        #     self.play(FadeOut(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2,
+        #                              ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1, focus_arrow)))
 
-            TRACKER_SCANNING_SAMPLE.set_value(0)
+            # TRACKER_SCANNING_SAMPLE.set_value(0)
             # END INDENTATION
 
         # ################################################################################################################
@@ -557,30 +559,30 @@ class Microscope(MovingCameraScene, VoiceoverScene):
                                                                                     [0.07 * np.cos(8 * t), 0, 0],
                                                                                     [0, 0, 0]]))
 
-        with self.voiceover(
-                text="""It is not always that easy. Sometimes, objects we want to image do not scatter
-                or absorb the incoming wave, but only delay it a bit. you can think of imaging those objects like
-                taking a picture of a clear glass on a white background. The light travels slower in the glass, but the glass is transparent
-                and hard to see. Such objects are called phase objects and are common in electron microscopy.
-                Since the wave slows down in the object it acquires more phase when passing through it and the wavefronts are distorted.""") as tracker:
-
-            # self.next_slide()
-            self.play(FadeIn(phase_image))
-            self.play(sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises),
-                      second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
-                      gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
-                      rate_func=linear)
-            self.remove(sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
-                        gaussian_beam_waves_opacities)
-            self.add(sample_outgoing_waves_moises,
-                     second_lens_outgoing_waves_moises,
-                     gaussian_beam_waves_moises)
-            # self.next_slide(loop=True)
-            # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
-            #           run_time=tracker.get_remaining_duration(), rate_func=linear)
-            self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
-                      run_time=tracker.get_remaining_duration(), rate_func=linear)
-            # self.next_slide()
+        # with self.voiceover(
+        #         text="""It is not always that easy. Sometimes, objects we want to image do not scatter
+        #         or absorb the incoming wave, but only delay it a bit. you can think of imaging those objects like
+        #         taking a picture of a clear glass on a white background. The light travels slower in the glass, but the glass is transparent
+        #         and hard to see. Such objects are called phase objects and are common in electron microscopy.
+        #         Since the wave slows down in the object it acquires more phase when passing through it and the wavefronts are distorted.""") as tracker:
+        #
+        #     # self.next_slide()
+        #     self.play(FadeIn(phase_image))
+        #     self.play(sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises),
+        #               second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
+        #               gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
+        #               rate_func=linear)
+        #     self.remove(sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
+        #                 gaussian_beam_waves_opacities)
+        #     self.add(sample_outgoing_waves_moises,
+        #              second_lens_outgoing_waves_moises,
+        #              gaussian_beam_waves_moises)
+        #     # self.next_slide(loop=True)
+        #     # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
+        #     #           run_time=tracker.get_remaining_duration(), rate_func=linear)
+        #     self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
+        #               run_time=tracker.get_remaining_duration(), rate_func=linear)
+        #     # self.next_slide()
         microscope_VGroup.add(second_lens_outgoing_waves_moises,
                               sample_outgoing_waves_moises,
                               gaussian_beam_waves_moises)
@@ -1304,7 +1306,7 @@ import colorsys
 BACKGROUND_COLOR = "#29505B"
 TEXT_COLOR = "#D8E1E3"
 BACKGROUND_NOISE_PATH = "phd-project/hue_noise_background.png"
-SAMPLE_COLOR = PURPLE
+SAMPLE_COLOR = BLUE
 SVG_PATH = r"phd-project/sea horse.svg"
 SATURATION = 0.7
 BRIGHTNESS = 0.7
@@ -1347,8 +1349,8 @@ class DualImageScene(Scene):
         intensity_image.set_z_index(-1)
 
         # Generate hue-based image
-        h = np.clip(np.random.normal(loc=0.3, scale=0.1, size=(100, 100)), 0, 1)
-        s = np.full_like(h, SATURATION)
+        h = np.clip(np.random.normal(loc=0.076, scale=0.1, size=(100, 100)), 0, 1)
+        s = np.full_like(h, SATURATION) / 1.7
         v = np.full_like(h, BRIGHTNESS)
 
         hsv_pixels = np.stack([h, s, v], axis=-1)
@@ -1382,8 +1384,6 @@ class DualImageScene(Scene):
         self.add(intensity_image, hue_noise_image, phase_image)
         self.add(left_axes, right_axes, left_title, right_title, sup_title)
 
-        # all_mobjects = Group(
-        #     intensity_image, hue_noise_image, phase_image, left_axes, right_axes, left_title, right_title, sup_title)
 
 
 
@@ -1415,7 +1415,7 @@ class ParametricArcScene(Scene):
 
         # Labels
         label_dc = Tex("DC", font_size=35, color=TEXT_COLOR).next_to(legend_dc, RIGHT)
-        label_signal = Tex("signal", font_size=35, color=TEXT_COLOR).next_to(legend_signal, RIGHT)
+        label_signal = Tex("Signal", font_size=35, color=TEXT_COLOR).next_to(legend_signal, RIGHT)
         label_total = Tex("Total amplitude", font_size=35, color=TEXT_COLOR).next_to(legend_total, RIGHT)
 
         # Axes setup
@@ -1554,7 +1554,7 @@ class Cavity(Scene):
         self.camera.background_color = BACKGROUND_COLOR
         mm = 0.1
         global_shift = -6
-        global_vertical_shift = -1
+        global_vertical_shift = 0
 
         lens_R_right = 5.49 * mm
         lens_R_left = 24.21 * mm
@@ -1595,7 +1595,7 @@ class Cavity(Scene):
         ).move_to([small_mirror_location + global_shift, global_vertical_shift, 0])
 
         big_mirror_R = 200*mm
-        big_mirror_location = 120*mm
+        big_mirror_location = 81*mm
         big_mirror_D = 25.4*mm
         big_mirror_arc_angle = np.arcsin(big_mirror_D / (2 * big_mirror_R))
 
@@ -1606,7 +1606,7 @@ class Cavity(Scene):
             color=COLOR_MIRROR,
             stroke_width=WIDTH_LINES_THICK
         ).move_to([big_mirror_location + global_shift, global_vertical_shift, 0])
-        a = ValueTracker(0.6)
+        a = ValueTracker(0.4)
         b = ValueTracker(0.6)
         c = ValueTracker(0.5)
         WAVELENGTH = 0.2
@@ -1622,7 +1622,7 @@ class Cavity(Scene):
                                                                end_point=[big_mirror_location + global_shift+1*mm, global_vertical_shift, 0],
                                                                tracker=b,
                                                                wavelength=WAVELENGTH,
-                                                               x_R=X_R*5,
+                                                               x_R=X_R*2,
                                                                w_0=W_0/1.5,
                                                                center=None,
                                                                colors_generator=lambda t: COLOR_LASER)
@@ -1630,7 +1630,7 @@ class Cavity(Scene):
                                                                 end_point=[lens_right_location + global_shift, global_vertical_shift, 0],
                                                                 tracker=c,
                                                                 wavelength=WAVELENGTH,
-                                                                x_R=X_R * 2,
+                                                                x_R=X_R,
                                                                 w_0=W_0,
                                                                 center=[small_mirror_location + global_shift, global_vertical_shift, 0],
                                                                 colors_generator=lambda t: COLOR_LASER)
@@ -1654,7 +1654,7 @@ class Cavity(Scene):
         legend_lines = []
         legend_labels = []
 
-        legend_start = [-1.3, 3+global_vertical_shift, 0]  # Top-right relative position
+        legend_start = [3.5, 0.75, 0]  # Top-right relative position
 
         for i, item in enumerate(legend_items):
             line = item["type"](
@@ -1673,8 +1673,93 @@ class Cavity(Scene):
         self.add(*legend_lines, *legend_labels)
 
 
+from manim import config as global_config
+config["frame_width"] = 18
+# config = global_config.copy()
+
+class TiltToleranceGraph(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+        font_size = 66
+        GLOBAL_SHIFT_X = 1.5
+        GLOBAL_SHIFT_Y = 10
+        # Generate dummy data
+        NA = np.logspace(np.log10(0.03), np.log10(0.2), 5)
+        colors = [GOLD_B, BLUE, RED, ORANGE]  # Colors for each curve
+        log_NA = np.log10(NA)+GLOBAL_SHIFT_X
+
+        y1 = 1e-7 * (NA / 0.05)**-2
+        y2 = 2e-4 * (NA / 0.05)**-0.3
+        y3 = 3e-4 * (NA / 0.05)**-0.2
+        y4 = 1.5e-4 * (NA / 0.05)**-0.25
+
+        log_y1 = np.log10(y1)+GLOBAL_SHIFT_Y
+        log_y2 = np.log10(y2)+GLOBAL_SHIFT_Y
+        log_y3 = np.log10(y3)+GLOBAL_SHIFT_Y
+        log_y4 = np.log10(y4)+GLOBAL_SHIFT_Y
+
+        # Labels
+        y_label = Tex(r"Tolerance [rad]", color=TEXT_COLOR, font_size=font_size).rotate(PI / 2).to_edge(LEFT)
+
+        # Axes: log-log scale via manual log10 mapping
+        axes = Axes(
+            x_range=[np.log10(0.03), np.log10(0.2), 0.2],  # log10 scale for NA (approx 0.03 to 0.2)
+            y_range=[-10, -3, 1],  # log10 scale for tolerance
+            x_length=6,
+            y_length=5,
+            axis_config={"include_tip": False, "include_numbers": True},
+            y_axis_config={"scaling": LogBase(custom_labels=True)},
+            color=TEXT_COLOR,
+            x_axis_config={"scaling": LogBase(custom_labels=False), "decimal_number_config":{"num_decimal_places": 2}},
+        ).next_to(y_label)
+
+        x_label = Tex(r"Numerical Aperture", color=TEXT_COLOR, font_size=font_size).next_to(axes, DOWN)
+
+        self.add(axes, x_label, y_label)
+
+        # Plot each line
+        curve1 = axes.plot_line_graph(NA, y1,
+                                      line_color=colors[0], stroke_width=2,
+                                      vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
+
+        curve2 = axes.plot_line_graph(NA, y2, line_color=colors[1], stroke_width=2,
+                                      vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
+
+        # curve3 = axes.plot_line_graph(NA, y3, line_color=BLUE, stroke_width=2,
+        #                               vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
+        #
+        # curve4 = axes.plot_line_graph(NA, y4, line_color=ORANGE, stroke_width=2,
+        #                               vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
+
+        self.add(curve1, curve2)  # , curve3, curve4
+
+        # Add title
+        title = Tex("Tilt Tolerance", font_size=font_size, color=TEXT_COLOR).next_to(axes, UP)
+        self.add(title)
+
+        # Custom legend
+        legend_items = [
+            ("Fabry-Perot Mirror", curve1, colors[0]),
+            ("2-Arms Cavity Mirror", curve2, colors[1]),
+            # ("2-arms, lens", curve3, colors[2]),
+            # ("2-arms, left mirror", curve4, colors[3])
+        ]
+
+        legend = VGroup()
+        for label_text, curve, color in legend_items:
+            sample_line = Line(LEFT * 0.4, RIGHT * 0.4, color=color)
+            # sample_line.match_style(curve)
+            text = Tex(label_text, font_size=font_size, color=TEXT_COLOR)
+            item = VGroup(sample_line, text).arrange(RIGHT, buff=0.3)
+            legend.add(item)
+
+        legend.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        legend.next_to(axes, RIGHT, buff=0.1)
+        self.add(legend)
 
 
+a = TiltToleranceGraph()
+a.construct()
 
 
 # m = Microscope()

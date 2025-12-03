@@ -1681,29 +1681,28 @@ class TiltToleranceGraph(Scene):
     def construct(self):
         self.camera.background_color = BACKGROUND_COLOR
         font_size = 66
-        GLOBAL_SHIFT_X = 1.5
-        GLOBAL_SHIFT_Y = 10
         # Generate dummy data
         NA = np.logspace(np.log10(0.03), np.log10(0.2), 5)
         colors = [GOLD_B, BLUE, RED, ORANGE]  # Colors for each curve
-        log_NA = np.log10(NA)+GLOBAL_SHIFT_X
+
+        NA_real = np.fromfile(r'phd-project\tolerances comparison - NAs.npy')
+        tolerances_mirror_lens_mirror = np.fromfile(
+            r'phd-project\tolerances comparison - mirror lens mirror.npy').reshape((len(NA_real), 3, 5))
+        tolerances_fabry_perot = np.fromfile(r'phd-project\tolerances comparison - fabry perot.npy').reshape(
+            (len(NA_real), 2, 4))
+        NA_real = NA_real[::10]
+        tolerances_mirror_lens_mirror = tolerances_mirror_lens_mirror[::10, 0, 2]
+        tolerances_fabry_perot = tolerances_fabry_perot[::10, 0, 2]
 
         y1 = 1e-7 * (NA / 0.05)**-2
         y2 = 2e-4 * (NA / 0.05)**-0.3
-        y3 = 3e-4 * (NA / 0.05)**-0.2
-        y4 = 1.5e-4 * (NA / 0.05)**-0.25
-
-        log_y1 = np.log10(y1)+GLOBAL_SHIFT_Y
-        log_y2 = np.log10(y2)+GLOBAL_SHIFT_Y
-        log_y3 = np.log10(y3)+GLOBAL_SHIFT_Y
-        log_y4 = np.log10(y4)+GLOBAL_SHIFT_Y
 
         # Labels
         y_label = Tex(r"Tolerance [rad]", color=TEXT_COLOR, font_size=font_size).rotate(PI / 2).to_edge(LEFT)
 
         # Axes: log-log scale via manual log10 mapping
         axes = Axes(
-            x_range=[np.log10(0.03), np.log10(0.2), 0.2],  # log10 scale for NA (approx 0.03 to 0.2)
+            x_range=[np.log10(0.02), np.log10(0.2), 0.2],  # log10 scale for NA (approx 0.03 to 0.2)
             y_range=[-10, -3, 1],  # log10 scale for tolerance
             x_length=6,
             y_length=5,
@@ -1718,18 +1717,12 @@ class TiltToleranceGraph(Scene):
         self.add(axes, x_label, y_label)
 
         # Plot each line
-        curve1 = axes.plot_line_graph(NA, y1,
+        curve1 = axes.plot_line_graph(NA_real, tolerances_mirror_lens_mirror,
                                       line_color=colors[0], stroke_width=2,
                                       vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
 
-        curve2 = axes.plot_line_graph(NA, y2, line_color=colors[1], stroke_width=2,
+        curve2 = axes.plot_line_graph(NA_real, tolerances_fabry_perot, line_color=colors[1], stroke_width=2,
                                       vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
-
-        # curve3 = axes.plot_line_graph(NA, y3, line_color=BLUE, stroke_width=2,
-        #                               vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
-        #
-        # curve4 = axes.plot_line_graph(NA, y4, line_color=ORANGE, stroke_width=2,
-        #                               vertex_dot_style=dict(stroke_width=3,  fill_color=PURPLE))
 
         self.add(curve1, curve2)  # , curve3, curve4
 
@@ -1741,14 +1734,11 @@ class TiltToleranceGraph(Scene):
         legend_items = [
             ("Fabry-Perot Mirror", curve1, colors[0]),
             ("2-Arms Cavity Mirror", curve2, colors[1]),
-            # ("2-arms, lens", curve3, colors[2]),
-            # ("2-arms, left mirror", curve4, colors[3])
         ]
 
         legend = VGroup()
         for label_text, curve, color in legend_items:
             sample_line = Line(LEFT * 0.4, RIGHT * 0.4, color=color)
-            # sample_line.match_style(curve)
             text = Tex(label_text, font_size=font_size, color=TEXT_COLOR)
             item = VGroup(sample_line, text).arrange(RIGHT, buff=0.3)
             legend.add(item)
@@ -1760,10 +1750,6 @@ class TiltToleranceGraph(Scene):
 
 a = TiltToleranceGraph()
 a.construct()
-
-
-# m = Microscope()
-# m.construct()
 
 # manim -pql slides/scene.py Microscope
 # manim-slides convert Microscope slides/presentation.html

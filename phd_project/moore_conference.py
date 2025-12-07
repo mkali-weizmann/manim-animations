@@ -247,6 +247,8 @@ IMAGE_OPACITY = 1.0
 COLOR_UNPERTURBED_AMPLITUDE = GOLD_B
 COLOR_PERTURBED_AMPLITUDE = BLUE
 COLOR_OPTICAL_ELEMENTS = TEAL_E
+COLOR_PHASE_SHIFT_AMPLITUDE = PURPLE_B
+
 
 W_0 = 0.14
 X_R = (COORDINATE_COIL_TOP_Y - COORDINATE_COIL_BOTTOM_Y) / 9
@@ -263,15 +265,15 @@ def generate_coil(center_x, center_y, width, height, spacing, **kwargs):
     coil_1 = Ellipse(arc_center=[center_x, center_y + spacing, 0],
                      width=width, height=height,
                      stroke_width=1,
-                     **kwargs)
+                     **kwargs).set_z_index(40)
     coil_2 = Ellipse(arc_center=[center_x, center_y, 0],
                      width=width, height=height,
                      stroke_width=1,
-                     **kwargs)
+                     **kwargs).set_z_index(40)
     coil_3 = Ellipse(arc_center=[center_x, center_y - spacing, 0],
                      width=width, height=height,
                      stroke_width=1,
-                     **kwargs)
+                     **kwargs).set_z_index(40)
     coil = VGroup(coil_1, coil_2, coil_3)
     return coil
 
@@ -400,7 +402,7 @@ class SchematicScene(Slide, MovingCameraScene):
         second_lens_outgoing_waves_unperturbed = generate_wavefronts_start_to_end_flat(start_point=POSITION_COIL_BOTTOM,
                                                                                        end_point=POSITION_CAMERA,
                                                                                        wavelength=WAVELENGTH,
-                                                                                       width=BOTTOM_RECT_WIDTH,
+                                                                                       width=BOTTOM_RECT_WIDTH * 0.8,
                                                                                        tracker=TRACKER_TIME,
                                                                                        colors_generator=lambda
                                                                                            t: COLOR_UNPERTURBED_AMPLITUDE)
@@ -408,14 +410,14 @@ class SchematicScene(Slide, MovingCameraScene):
             start_point=POSITION_COIL_BOTTOM - 0.4 * RIGHT,
             end_point=POSITION_CAMERA + 0.4*RIGHT,
             wavelength=WAVELENGTH,
-            width=BOTTOM_RECT_WIDTH,
+            width=BOTTOM_RECT_WIDTH * 0.8,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
         second_lens_outgoing_waves_purterbed_2 = generate_wavefronts_start_to_end_flat(
             start_point=POSITION_COIL_BOTTOM + 0.4 * RIGHT,
             end_point=POSITION_CAMERA - 0.4*RIGHT,
             wavelength=WAVELENGTH,
-            width=BOTTOM_RECT_WIDTH,
+            width=BOTTOM_RECT_WIDTH * 0.8,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
 
@@ -458,34 +460,35 @@ class SchematicScene(Slide, MovingCameraScene):
                                        second_lens_outgoing_waves_purterbed_2,
                                        laser_waves)
         self.next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
-
-        self.next_slide()
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
 
         # Short pause so manim preview shows the static frame
         # self.wait(1)
 
         # zoom in on the center dot
         self.camera.frame.save_state()
-        self.play(self.camera.frame.animate.set(width=1.5).move_to(POSITION_WAIST + 0.2 * LEFT), run_time=2)
+        ZOOM_RATIO = 10
+        waves_vgroup = VGroup(incoming_waves,
+                              sample_outgoing_unperturbed_waves,
+                              sample_outgoing_perturbed_waves_1,
+                              sample_outgoing_perturbed_waves_2,
+                              gaussian_beam_waves_unperturbed,
+                              gaussian_beam_waves_perturbed_1,
+                              gaussian_beam_waves_perturbed_2,
+                              second_lens_outgoing_waves_unperturbed,
+                              second_lens_outgoing_waves_purterbed_1,
+                              second_lens_outgoing_waves_purterbed_2,
+                              laser_waves)
+        self.next_slide()
+        self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.set(width=14.222 / ZOOM_RATIO).move_to(POSITION_WAIST + 0.2 * LEFT)])
+
+        # self.play(self.camera.frame.animate.set(width=14.222 / ZOOM_RATIO).move_to(POSITION_WAIST + 0.2 * LEFT), run_time=2)
         # self.next_slide()
         # self.wait(1)
 
-        self.updated_object_animation([incoming_waves,
-                                         sample_outgoing_unperturbed_waves,
-                                       sample_outgoing_perturbed_waves_1,
-                                       sample_outgoing_perturbed_waves_2,
-                                       gaussian_beam_waves_unperturbed,
-                                       gaussian_beam_waves_perturbed_1,
-                                       gaussian_beam_waves_perturbed_2,
-                                       second_lens_outgoing_waves_unperturbed,
-                                       second_lens_outgoing_waves_purterbed_1,
-                                       second_lens_outgoing_waves_purterbed_2,
-                                       laser_waves
-                                       ], FadeOut)
         # Fade out everything else as well using regular animation:
-        self.play(FadeOut(coil_top), FadeOut(coil_bottom), FadeOut(phase_image),
-                  FadeOut(bottom_rect), FadeOut(tube_group), run_time=2)
+        # self.play(FadeOut(coil_top), FadeOut(coil_bottom), FadeOut(phase_image),
+        #           FadeOut(bottom_rect), FadeOut(tube_group), run_time=2)
 
         laser_tilt = np.pi / 6
         laser_spacing = 0.2
@@ -493,10 +496,10 @@ class SchematicScene(Slide, MovingCameraScene):
         dots_spacing = laser_spacing / np.sin(laser_tilt) / 2
         dots_velocity = laser_velocity / np.sin(laser_tilt) * 2
         laser_global_shift = laser_spacing * 2 * 1/8
-        dots_tracker = ValueTracker(0)
+        # dots_tracker = ValueTracker(0)
         laser_lines_1 = generate_wavefronts_start_to_end_flat(start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
                                           end_point = POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
-                                          tracker=dots_tracker,
+                                          tracker=TRACKER_TIME,
                                           wavelength=laser_spacing * 2,
                                           start_parameter = laser_global_shift,
                                           colors_generator= lambda t: RED,
@@ -507,7 +510,7 @@ class SchematicScene(Slide, MovingCameraScene):
             start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
             end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
             start_parameter=laser_spacing * 2 * 1/2 + laser_global_shift,
-            tracker=dots_tracker,
+            tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
             colors_generator=lambda t: RED,
             width=0.5, opacities_generator=lambda t: np.array([0, 0.2, 0.2, 0]))
@@ -516,7 +519,7 @@ class SchematicScene(Slide, MovingCameraScene):
             start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
             end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
             start_parameter=-laser_spacing * 2 * 1/4 + laser_global_shift,
-            tracker=dots_tracker,
+            tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
             colors_generator=lambda t: RED,
             width=0.5, opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]))
@@ -525,7 +528,7 @@ class SchematicScene(Slide, MovingCameraScene):
             start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
             end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
             start_parameter=laser_spacing * 2 * 1 / 4 + laser_global_shift,
-            tracker=dots_tracker,
+            tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
             colors_generator=lambda t: RED,
             width=0.5, opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]))
@@ -536,24 +539,101 @@ class SchematicScene(Slide, MovingCameraScene):
         # put the dots on the top layer:
         dots.set_z_index(100)
         dots.add_updater(
-            lambda m: m.move_to(POSITION_WAIST + (dots_tracker.get_value()) * DOWN * dots_velocity))
-        self.add(dots,
-                 laser_lines_1,
-                 laser_lines_2,
-                 laser_lines_3,
-                 laser_lines_4,
+            lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value()) * DOWN * dots_velocity))
+        self.play(FadeIn(dots),
+                 FadeIn(laser_lines_1),
+                 FadeIn(laser_lines_2),
+                 FadeIn(laser_lines_3),
+                 FadeIn(laser_lines_4),
                  )
-        self.play(dots_tracker.animate.increment_value(2), run_time=8, rate_func=linear)
+        self.next_slide(loop=True)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
 
+        # --- Add small axes with unit circle, moving dot and connecting line on the left third of the view ---
+        # Place axes on the left third of the current camera frame (camera was zoomed above).
+        frame_center = self.camera.frame.get_center()
+        frame_width = self.camera.frame.get_width()
+        # left third offset from frame center
+        axes_center = frame_center + (-frame_width / 3) * RIGHT + 0.05 * DOWN
 
+        axes_size = 5
+        axes = Axes(
+            x_range=[-1.5, 1.5, 1],
+            y_range=[-1.5, 1.5, 1],
+            x_length=axes_size,
+            y_length=axes_size,
+            axis_config={"include_ticks": True, "stroke_width": 0.1, "include_tip": False},
+        )
+        axes.move_to(axes_center).scale(1/ZOOM_RATIO)
+        bg_square = Square(side_length=axes_size, fill_color=BLACK, fill_opacity=1.0, stroke_width=0).scale(1/ZOOM_RATIO)
+        bg_square.move_to(axes_center)
+        # ensure background square sits above laser artifacts but behind axes and markers
+        bg_square.set_z_index(10)
+        axes.set_z_index(20)
+        # unit circle in axes coordinates (radius = 1 * axes unit)
+        unit_radius = axes.x_axis.unit_size
+        unit_circle = Circle(radius=unit_radius / ZOOM_RATIO, color=TEAL, stroke_width=0.5).move_to(axes.c2p(0, 0)).set_z_index(30)
 
+        # Use the same dots_tracker from above. Theta(t) = pi/2 + A * sin(w * t)
+        A = np.pi / 6
+        w = 2 * np.pi
+        phi = 0
+        def theta(t):
+            return np.pi / 2 + A * np.cos(w * t + phi)
 
+        # initial dot position
+        t0 = TRACKER_TIME.get_value()
+        dot_pos = axes.c2p(np.cos(theta(t0)), np.sin(theta(t0)))
+        moving_dot = Dot(point=dot_pos, radius=0.01, color=YELLOW).set_z_index(30).set_z_index(30)
+        # updater to follow (cos(theta(t)), sin(theta(t))) with t = dots_tracker.get_value()
+        moving_dot.add_updater(lambda m: m.move_to(axes.c2p(
+            np.cos(theta(TRACKER_TIME.get_value())),
+            np.sin(theta(TRACKER_TIME.get_value()))
+        )))
 
+        # line from origin (0,0) to the moving dot
+        line_to_dot = always_redraw(lambda: Line(axes.c2p(0, 0), moving_dot.get_center(), color=YELLOW, stroke_width=0.1)).set_z_index(30)
+
+        single_frequency_laser_tex = Tex(r"Constant laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(
+            0.5 / ZOOM_RATIO)
+        double_frequency_laser_tex = Tex(
+            r"Beating laser: $\psi\rightarrow\psi\cdot e^{i\left(\frac{\pi}{2}+A\sin\left(\omega_{\text{beating}}t\right)\right)}$",
+            r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$").scale(
+            0.5 / ZOOM_RATIO)
+        single_frequency_laser_tex[0][14].set_color(COLOR_UNPERTURBED_AMPLITUDE)
+        single_frequency_laser_tex[0][16:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
+        double_frequency_laser_tex[0][13].set_color(COLOR_UNPERTURBED_AMPLITUDE)
+        double_frequency_laser_tex[0][16:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
+        double_frequency_laser_tex[1][1:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
+        double_frequency_laser_tex.next_to(axes, 0.1 * UP).align_to(axes, LEFT).shift(0.05 * RIGHT)
+        single_frequency_laser_tex.next_to(double_frequency_laser_tex, 0.1 * UP).align_to(double_frequency_laser_tex,
+                                                                                          LEFT)
+        axes_vgroup = VGroup(axes, unit_circle, line_to_dot, moving_dot, single_frequency_laser_tex, double_frequency_laser_tex)
+        # Add to scene and play tracker increment so the dot moves
+        self.add(axes, unit_circle, line_to_dot, moving_dot)
+        # animate dots_tracker so the dot executes the motion; adjust increment/run_time as desired
+        self.next_slide(loop=True)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
+
+        self.next_slide()
+        self.play(FadeIn(single_frequency_laser_tex), run_time=2)
+        self.next_slide()
+        self.play(FadeIn(double_frequency_laser_tex[0]), run_time=2)
+        self.next_slide()
+        self.play(FadeIn(double_frequency_laser_tex[1]), run_time=2)
+        self.next_slide()
+        # zoom out:
+        # self.play(, run_time=2)
+        waves_vgroup.remove(laser_waves)
+        self.updated_object_animation(waves_vgroup, FadeIn, added_animation=[Restore(self.camera.frame), FadeOut(axes_vgroup), FadeOut(dots)])
+        self.next_slide(loop=True)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
 
     def updated_object_animation(self,
                                  objects: Union[Mobject, list[Mobject], VGroup],
-                                 animation: Union[Callable, list[Callable]]):
+                                 animation: Union[Callable, list[Callable]],
+                                 added_animation = None):
         # This function allows running an animation on objects that are locked by some updater to not perform this
         # animation. For example, if an updater determines an object's opacity, then this object is blocked from being
         # faded in, and this function allows it.
@@ -575,7 +655,10 @@ class SchematicScene(Slide, MovingCameraScene):
 
         object_updaters = [obj.get_updaters() for obj in decomposed_objects]
         [obj.clear_updaters() for obj in decomposed_objects]
-        self.play(*[a(o) for a, o in zip(animation, decomposed_objects)])
+        if added_animation is None:
+            self.play(*[a(o) for a, o in zip(animation, decomposed_objects)])
+        else:
+            self.play(*[a(o) for a, o in zip(animation, decomposed_objects)], *added_animation)
         for i, obj in enumerate(decomposed_objects):
             for updater in object_updaters[i]:
                 obj.add_updater(updater)

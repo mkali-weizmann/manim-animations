@@ -200,14 +200,14 @@ TRACKER_TIME = ValueTracker(0)
 TRACKER_TIME_LASER = ValueTracker(0)
 # Top image
 SAMPLE_PATH = "phd-project/dummy_image.png"  # change if your image is elsewhere
-SAMPLE_WIDTH = 1.2
-SAMPLE_HEIGHT = 0.8
+SAMPLE_WIDTH = 1
+SAMPLE_HEIGHT = 0.1
 COORDINATE_TOP_IMAGE_X = 0
 COORDINATE_TOP_IMAGE_Y = 3
 POSITION_SAMPLE = np.array([COORDINATE_TOP_IMAGE_X, COORDINATE_TOP_IMAGE_Y, 0])
 
 # Top coil (above center)
-COIL_WIDTH = 4
+COIL_WIDTH = 3
 COIL_SPACING = 0.05
 COIL_HEIGHT = 0.2
 COORDINATE_COIL_TOP_X = 0
@@ -221,22 +221,22 @@ DOT_RADIUS = 0.06
 
 # Bottom coil (below center)
 COORDINATE_COIL_BOTTOM_X = 0
-COORDINATE_COIL_BOTTOM_Y = -1.3
+COORDINATE_COIL_BOTTOM_Y = -0.8
 POSITION_COIL_BOTTOM = np.array([COORDINATE_COIL_BOTTOM_X, COORDINATE_COIL_BOTTOM_Y, 0])
 
 # 90-degree tube (vertical then horizontal to the right)
-TUBE_THICKNESS = 0.2
+TUBE_THICKNESS = COIL_WIDTH * 0.6
 TUBE_RADIUS_INNER = 0.5
 TUBE_RADIUS_OUTER = TUBE_RADIUS_INNER + TUBE_THICKNESS
 TUBE_CIRCLE_ORIGIN_X = (TUBE_RADIUS_INNER + TUBE_RADIUS_OUTER) / 2
-TUBE_CIRCLE_ORIGIN_Y = -2.0
+TUBE_CIRCLE_ORIGIN_Y = COORDINATE_COIL_BOTTOM_Y - 0.5
 WAVELENGTH = 0.5
 
 # Bottom rectangle
-COORDINATE_BOTTOM_RECT_X = 0
-COORDINATE_BOTTOM_RECT_Y = -3.2
-BOTTOM_RECT_WIDTH = 3.0
-BOTTOM_RECT_HEIGHT = 0.6
+COORDINATE_BOTTOM_RECT_X = 4
+COORDINATE_BOTTOM_RECT_Y = -3
+BOTTOM_RECT_WIDTH = 2.5
+BOTTOM_RECT_HEIGHT = 0.4
 POSITION_CAMERA = np.array([COORDINATE_BOTTOM_RECT_X, COORDINATE_BOTTOM_RECT_Y, 0])
 
 # Colors
@@ -257,7 +257,7 @@ X_R_LASER = 0.5
 POSITION_WAIST = np.array([0, (2 * COORDINATE_COIL_TOP_Y + COORDINATE_COIL_BOTTOM_Y) / 3, 0])
 WAVELENGTH_LASER = 0.3
 LENGTH_LASER_BEAM = WAVELENGTH_LASER * 6
-
+COMMON_TEXT_SCALE = 0.7
 
 
 def generate_coil(center_x, center_y, width, height, spacing, **kwargs):
@@ -312,6 +312,23 @@ class SchematicScene(Slide, MovingCameraScene):
     """A simple schematic: top image, two vertical coils, center dot, 90-degree tube, and bottom rectangle."""
 
     def construct(self):
+        self.wait(1)
+        self.next_slide()
+        title_1 = Tex("Current image acquisition rate of TEM is low").scale(COMMON_TEXT_SCALE).shift(2*UP)
+        title_2 = Tex("Extracting the same amount of information with less electrons reaching the camera").scale(COMMON_TEXT_SCALE).next_to(title_1, 2*DOWN)
+        equivalence_symbol = MathTex(r"\Updownarrow").next_to(title_2, 2*DOWN)
+        title_3 = Tex("Extracting more information per unit time (by increasing current back up)").scale(COMMON_TEXT_SCALE).next_to(equivalence_symbol, 2*DOWN)
+
+        self.play(FadeIn(title_1), shift=UP)
+        self.next_slide()
+        self.play(FadeIn(title_2), shift=UP)
+        self.next_slide()
+        self.play(FadeIn(equivalence_symbol), shift=UP)
+        self.next_slide()
+        self.play(FadeIn(title_3), shift=UP)
+        self.next_slide()
+        self.play(FadeOut(VGroup(title_1, title_2, equivalence_symbol, title_3)), shift=DOWN)
+
         # Top image
 
         # sample = Rectangle(height=SAMPLE_HEIGHT, width=SAMPLE_WIDTH, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_SAMPLE)
@@ -333,11 +350,11 @@ class SchematicScene(Slide, MovingCameraScene):
         tube_group = VGroup(quarter_circle_top, quarter_circle_bottom)
 
         # Bottom rectangle
-        bottom_rect = Rectangle(width=BOTTOM_RECT_WIDTH, height=BOTTOM_RECT_HEIGHT, fill_color=BOTTOM_RECT_COLOR, fill_opacity=1.0, stroke_width=1)
+        bottom_rect = Rectangle(width=BOTTOM_RECT_HEIGHT, height=BOTTOM_RECT_WIDTH, fill_color=BOTTOM_RECT_COLOR, fill_opacity=1.0, stroke_width=1)
         bottom_rect.move_to(np.array([COORDINATE_BOTTOM_RECT_X, COORDINATE_BOTTOM_RECT_Y, 0]))
 
         # Add everything to the scene in logical order (background -> foreground)
-        self.add(coil_top, coil_bottom, phase_image)
+        self.add(coil_top, coil_bottom, phase_image, sample)
         self.add(bottom_rect)
         # self.add(coil_bottom)
         self.add(tube_group)
@@ -400,24 +417,24 @@ class SchematicScene(Slide, MovingCameraScene):
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
 
         second_lens_outgoing_waves_unperturbed = generate_wavefronts_start_to_end_flat(start_point=POSITION_COIL_BOTTOM,
-                                                                                       end_point=POSITION_CAMERA,
+                                                                                       end_point=POSITION_COIL_BOTTOM + 1*DOWN,
                                                                                        wavelength=WAVELENGTH,
                                                                                        width=BOTTOM_RECT_WIDTH * 0.8,
                                                                                        tracker=TRACKER_TIME,
                                                                                        colors_generator=lambda
                                                                                            t: COLOR_UNPERTURBED_AMPLITUDE)
         second_lens_outgoing_waves_purterbed_1 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_COIL_BOTTOM - 0.4 * RIGHT,
-            end_point=POSITION_CAMERA + 0.4*RIGHT,
+            start_point=POSITION_COIL_BOTTOM - 0.1 * RIGHT,
+            end_point=POSITION_COIL_BOTTOM + 1*DOWN + 0.1*RIGHT,
             wavelength=WAVELENGTH,
-            width=BOTTOM_RECT_WIDTH * 0.8,
+            width=BOTTOM_RECT_WIDTH * 0.5,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
         second_lens_outgoing_waves_purterbed_2 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_COIL_BOTTOM + 0.4 * RIGHT,
-            end_point=POSITION_CAMERA - 0.4*RIGHT,
+            start_point=POSITION_COIL_BOTTOM + 0.1 * RIGHT,
+            end_point=POSITION_COIL_BOTTOM + 1*DOWN - 0.1*RIGHT,
             wavelength=WAVELENGTH,
-            width=BOTTOM_RECT_WIDTH * 0.8,
+            width=BOTTOM_RECT_WIDTH * 0.5,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
 
@@ -434,21 +451,7 @@ class SchematicScene(Slide, MovingCameraScene):
                 colors_generator=lambda t: RED)
 
         # focus_arrow = create_focus_arrow_object(point=POSITION_WAIST + 0.1 * RIGHT - 0.07 * RIGHT)
-        # self.updated_object_animation([incoming_waves,
-        #                                  sample_outgoing_unperturbed_waves,
-        #                                sample_outgoing_perturbed_waves_1,
-        #                                sample_outgoing_perturbed_waves_2,
-        #                                gaussian_beam_waves_unperturbed,
-        #                                gaussian_beam_waves_perturbed_1,
-        #                                gaussian_beam_waves_perturbed_2,
-        #                                second_lens_outgoing_waves_unperturbed,
-        #                                second_lens_outgoing_waves_purterbed_1,
-        #                                second_lens_outgoing_waves_purterbed_2,
-        #                                laser_waves
-        #                                ], FadeIn)
-        self.next_slide()
-        self.wait(1)
-        self.add(incoming_waves,
+        self.updated_object_animation([incoming_waves,
                                          sample_outgoing_unperturbed_waves,
                                        sample_outgoing_perturbed_waves_1,
                                        sample_outgoing_perturbed_waves_2,
@@ -458,7 +461,21 @@ class SchematicScene(Slide, MovingCameraScene):
                                        second_lens_outgoing_waves_unperturbed,
                                        second_lens_outgoing_waves_purterbed_1,
                                        second_lens_outgoing_waves_purterbed_2,
-                                       laser_waves)
+                                       laser_waves
+                                       ], FadeIn)
+
+        self.wait(1)
+        # self.add(incoming_waves,
+        #                                  sample_outgoing_unperturbed_waves,
+        #                                sample_outgoing_perturbed_waves_1,
+        #                                sample_outgoing_perturbed_waves_2,
+        #                                gaussian_beam_waves_unperturbed,
+        #                                gaussian_beam_waves_perturbed_1,
+        #                                gaussian_beam_waves_perturbed_2,
+        #                                second_lens_outgoing_waves_unperturbed,
+        #                                second_lens_outgoing_waves_purterbed_1,
+        #                                second_lens_outgoing_waves_purterbed_2,
+        #                                laser_waves)
         self.next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
 
@@ -481,14 +498,6 @@ class SchematicScene(Slide, MovingCameraScene):
                               laser_waves)
         self.next_slide()
         self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.set(width=14.222 / ZOOM_RATIO).move_to(POSITION_WAIST + 0.2 * LEFT)])
-
-        # self.play(self.camera.frame.animate.set(width=14.222 / ZOOM_RATIO).move_to(POSITION_WAIST + 0.2 * LEFT), run_time=2)
-        # self.next_slide()
-        # self.wait(1)
-
-        # Fade out everything else as well using regular animation:
-        # self.play(FadeOut(coil_top), FadeOut(coil_bottom), FadeOut(phase_image),
-        #           FadeOut(bottom_rect), FadeOut(tube_group), run_time=2)
 
         laser_tilt = np.pi / 6
         laser_spacing = 0.2
@@ -540,12 +549,7 @@ class SchematicScene(Slide, MovingCameraScene):
         dots.set_z_index(100)
         dots.add_updater(
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value()) * DOWN * dots_velocity))
-        self.play(FadeIn(dots),
-                 FadeIn(laser_lines_1),
-                 FadeIn(laser_lines_2),
-                 FadeIn(laser_lines_3),
-                 FadeIn(laser_lines_4),
-                 )
+        self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4], FadeIn, added_animation=[FadeIn(dots)])
         self.next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
@@ -667,3 +671,4 @@ class SchematicScene(Slide, MovingCameraScene):
 # a.construct()
 # %%
 # manim -pql phd_project/moore_conference.py SchematicScene
+# manim-slides convert SchematicScene slides/moore.pptx

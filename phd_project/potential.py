@@ -1,18 +1,20 @@
 from manim import *
 
-
-ARCS_RADIUS = 3
+MIRRORS_RADIUS = 3
 THETA_P_1 = PI / 8
 MIRRORS_NA = PI / 2
 KERNEL_QUADRATIC_COEFFICIENT = 50
-unconcentricity=0.01
-RIGHT_ARC_CENTER = np.array([-unconcentricity, 0, 0])
-MIRROR_2_CENTER = ORIGIN
+UNCONCENTRICITY=0.01
+ZOOMED_ANGLE_RANGE = 0.19
+
+MIRROR_LEFT_CENTER = np.array([-1, 0, 0])
+MIRROR_RIGHT_CENTER = MIRROR_LEFT_CENTER - np.array([UNCONCENTRICITY, 0, 0])
 
 ALGEBRAIC_EXPRESSIONS_SCALE = 0.8
 
 SCANNING_DOT_TRACKER = ValueTracker(PI - MIRRORS_NA / 2)
 SCANNING_DOT_RADIUS_TRACKER = ValueTracker(0.08)
+THETA_P_1_TRACKER = ValueTracker(PI / 8)
 
 COLOR_MIRRORS = WHITE
 COLOR_INTEGRAL = ORANGE
@@ -32,27 +34,26 @@ def frensel_ax2_integral(a, x_0, x_1):
 
 class Potential(ZoomedScene):
     def construct(self):
-        # TODO: choose the real point which is on mirror_1 and at angle theta_1
+        # TODO: choose the real point which is on mirror_right and at angle theta_1
         # Basic system generation:
-        p_1 = RIGHT_ARC_CENTER + ARCS_RADIUS * np.cos(THETA_P_1) * RIGHT + ARCS_RADIUS * np.sin(THETA_P_1) * UP
-        p_1_reflection = ARCS_RADIUS * np.cos(THETA_P_1 + PI) * RIGHT + ARCS_RADIUS * np.sin(THETA_P_1 + PI) * UP
-        mirror_1 = Arc(arc_center=RIGHT_ARC_CENTER, start_angle=-MIRRORS_NA / 2, angle=MIRRORS_NA, radius=ARCS_RADIUS, color=COLOR_MIRRORS)
-        mirror_2 = Arc(start_angle=PI - MIRRORS_NA / 2, angle=MIRRORS_NA, radius=ARCS_RADIUS, color=COLOR_MIRRORS)
+        p_1 = MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * np.cos(THETA_P_1) * RIGHT + MIRRORS_RADIUS * np.sin(THETA_P_1) * UP
+        p_1_reflection = MIRROR_LEFT_CENTER + MIRRORS_RADIUS * np.cos(THETA_P_1 + PI) * RIGHT + MIRRORS_RADIUS * np.sin(THETA_P_1 + PI) * UP
+        mirror_right = Arc(arc_center=MIRROR_RIGHT_CENTER, start_angle=-MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)
+        mirror_left = Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI - MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)
         p_1_dot = Dot(color=COLOR_P_1, point=p_1)
         p_1_reflection_dot = always_redraw(lambda: DashedVMobject(Dot(color=COLOR_P_1, point=p_1_reflection, radius=SCANNING_DOT_RADIUS_TRACKER.get_value(), stroke_width=1, fill_opacity=0)))
         p_0_dot = always_redraw(
             lambda: Dot(
                 color=RED,
                 radius=SCANNING_DOT_RADIUS_TRACKER.get_value(),
-                point=ARCS_RADIUS * np.cos(SCANNING_DOT_TRACKER.get_value()) * RIGHT
-                      + ARCS_RADIUS * np.sin(SCANNING_DOT_TRACKER.get_value()) * UP,
+                point=MIRROR_LEFT_CENTER + MIRRORS_RADIUS * np.cos(SCANNING_DOT_TRACKER.get_value()) * RIGHT
+                      + MIRRORS_RADIUS * np.sin(SCANNING_DOT_TRACKER.get_value()) * UP,
             )
         )
         p_0_to_p_1_line = always_redraw(lambda: Line(p_0_dot.get_center(), p_1, color=WHITE))
         line_length_label = always_redraw(lambda: Tex(f"$r_{{12}}={np.linalg.norm(p_0_dot.get_center() - p_1):.2f}$").next_to(p_0_to_p_1_line.get_center(), UP, buff=0.1).rotate(np.arctan2(*(p_1 - p_0_dot.get_center())[[1, 0]])))
         p_1_label = Tex(r"$p_{1}$").next_to(p_1, UR, buff=0.1)
         p_0_label = always_redraw(lambda: Tex(r"$p_{0}$").next_to(p_0_dot, LEFT, buff=0.1))
-
 
         # Integrand and integral representations' generation:
         box_integrand = self.SmallAxesBox(2.5).to_corner(DR)
@@ -73,36 +74,43 @@ class Potential(ZoomedScene):
 
         integral_representation = always_redraw(
             lambda: ParametricFunction(
-                lambda t: plane_integral.c2p(*(6 * self.integral_curve(t))),  # unpack (x,y)
+                lambda t: plane_integral.c2p(*(self.integral_curve(t))),  # unpack (x,y)
                 t_range=(0.0, SCANNING_DOT_TRACKER.get_value()),
                 color=COLOR_INTEGRAL,
                 stroke_width=1
             ),
         )
         integrand_approximation = Tex(
-            r"$r_{01}=r_{0}-\frac{r_{01,\max}-R}{2Rr_{01,\max}}s^{2}+\mathcal{O}\left(s_{0}^{4}\right)$").to_edge(LEFT).shift(UP)#next_to(
+            r"$r_{01,\max}=r_{0}-\frac{r_{01,\max}-R}{2Rr_{01,\max}}s^{2}+\mathcal{O}\left(s_{0}^{4}\right)$").to_edge(LEFT).shift(UP)#next_to( # This somewhy doesn't work.
             #self.zoomed_display, UP, buff=0.1)
 
-        # Distances helpers generation:
+        # p_1 Distances helpers generation:
         p_1_circle_radius = np.linalg.norm(p_1 - p_1_reflection)
-        p_1_circle = DashedVMobject(Circle(radius=p_1_circle_radius, color=DISTANCES_COLOR, stroke_width=0.5).move_to(p_1), num_dashes=200, dashed_ratio=0.7)
+        p_1_circle = DashedVMobject(Circle(arc_center=p_1, radius=p_1_circle_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7)
         radius_line_end_point = p_1_reflection # p_1 + p_1_circle_radius * np.array([np.cos(PI - 0.2), np.sin(PI - 0.2), 0])
         p_1_circle_radius_line = DashedLine(p_1, radius_line_end_point, color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * p_1_circle_radius / 200, dashed_ratio=0.7)
         p_1_circle_radius_label = Tex(r"$\left(r_{01,\max}\right)$", color=DISTANCES_COLOR).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1 - radius_line_end_point)[[1, 0]]))
         distances_group = VGroup(p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label, p_1_reflection_dot)
 
+        # mirror_left Distances helpers generation:
+        relevant_radius = MIRRORS_RADIUS - UNCONCENTRICITY
+        mirror_left_circle = DashedVMobject(Circle(arc_center=MIRROR_LEFT_CENTER, radius=relevant_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7)
+        mirror_left_radius_line = DashedLine(MIRROR_LEFT_CENTER, MIRROR_LEFT_CENTER + (MIRRORS_RADIUS - UNCONCENTRICITY) * RIGHT, color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * relevant_radius / 200, dashed_ratio=0.7)
+        mirror_left_radius_label = Tex(r"$\min\left(r_{01, max}\right)$", color=DISTANCES_COLOR).next_to(mirror_left_radius_line.get_center(), DOWN, buff=0.3)
+
+
         # Integral result label generation:
         integral_algebraic_label = Tex(r"$\frac{ke^{ikr_{01,\max}}}{4\pi ir_{01,\max}}\intop_{S}U\left(\boldsymbol{r}_{0}\right)e^{-ik\frac{r_{01,\max}-R}{2R\cdot r_{01,\max}}s^{2}}dS$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_algebraic_label.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
-        integral_algebraic_expression_as_convolution = Tex(r"$\frac{ke^{ikr_{01,\min}}}{4\pi ir_{01,\min}}\cdot\left[e^{-ik\frac{r_{01,\min}-R}{2R\cdot r_{01,\min}}s^{2}}\otimes U\left(\boldsymbol{p}_{0}\right)\right]$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_algebraic_expression_as_convolution = Tex(r"$\frac{ke^{ikr_{01,\max}}}{4\pi ir_{01,\max}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{01,\max}-R}{2R\cdot r_{01,\min}}s^{2}}\right]$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_algebraic_expression_as_convolution.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
-        integral_arrow_indicator = Arrow(integral_algebraic_label.get_bottom(), plane_integral.c2p(0, 0), color=COLOR_INTEGRAL)
+        integral_arrow_indicator = Arrow(integral_algebraic_label.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1 + PI + ZOOMED_ANGLE_RANGE))), color=COLOR_INTEGRAL)
         integral_result_group = VGroup(integral_algebraic_label, integral_arrow_indicator)
 
         # Huygens integral introduction
-        self.play(Create(mirror_1), Create(mirror_2))
+        self.play(Create(mirror_right), Create(mirror_left))
         self.play(Create(p_1_dot), Create(p_0_to_p_1_line), Create(p_0_dot), FadeIn(line_length_label), FadeIn(p_1_label), FadeIn(p_0_label))
-        self.add(mirror_1, mirror_2, p_1_dot, p_0_dot, p_0_to_p_1_line, box_integrand, box_integral, phase_representation, integral_representation, line_length_label)
+        self.add(mirror_right, mirror_left, p_1_dot, p_0_dot, p_0_to_p_1_line, box_integrand, box_integral, phase_representation, integral_representation, line_length_label)
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=2, rate_func=linear)
 
         # Zoomed display and move it to the right place generation:
@@ -112,15 +120,17 @@ class Potential(ZoomedScene):
         zf.set_width(1.0)
 
         # Repeat with zoom animation:
-        self.play(Create(distances_group), mirror_1.animate.set_stroke(width=0.5), mirror_2.animate.set_stroke(width=0.5), p_1_dot.animate.scale(0.5), SCANNING_DOT_RADIUS_TRACKER.animate.set_value(0.04))
-        self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1 + PI - 0.19), run_time=1.0)
+        self.play(Create(distances_group), mirror_right.animate.set_stroke(width=0.5), mirror_left.animate.set_stroke(width=0.5), p_1_dot.animate.scale(0.5), SCANNING_DOT_RADIUS_TRACKER.animate.set_value(0.04))
+        self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1 + PI - ZOOMED_ANGLE_RANGE), run_time=1.0)
         self.play(Write(integrand_approximation), run_time=1)
-        self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1 + PI + 0.19), run_time=2, rate_func=linear)
+        self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1 + PI + ZOOMED_ANGLE_RANGE), run_time=2, rate_func=linear)
 
         # Interpret algebraic expressions animation:
         self.play(FadeIn(integral_result_group), run_time=2)
-        self.play(FadeOut(integral_algebraic_label), FadeIn(integral_algebraic_expression_as_convolution), run_time=2)
-        # self.play(Uncreate())
+        self.play(FadeOut(integral_algebraic_label, shift=UP), FadeIn(integral_algebraic_expression_as_convolution, shift=UP), run_time=2)
+
+        # Change discussion to r_01:
+        self.play(Uncreate(distances_group))
 
     @staticmethod
     def integrand_phase_representation(theta) -> float:
@@ -128,7 +138,7 @@ class Potential(ZoomedScene):
 
     @staticmethod
     def integral_curve(theta) -> np.ndarray:
-        return frensel_ax2_integral(
+        return 6 * frensel_ax2_integral(
             a=KERNEL_QUADRATIC_COEFFICIENT, x_0=-(THETA_P_1 + MIRRORS_NA / 2), x_1=theta - (THETA_P_1 + PI)
         )
 

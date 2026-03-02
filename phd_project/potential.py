@@ -92,14 +92,14 @@ class Potential(ZoomedScene):
         distances_group_mirror_left = VGroup(mirror_left_circle, mirror_left_radius_line, mirror_left_radius_label)
 
         # Integral result label generation:
-        integral_algebraic_label = Tex(r"$\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_algebraic_label.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
-        integral_algebraic_expression_as_convolution = Tex(r"$\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_algebraic_expression_as_convolution.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
+        integral_label = Tex(r"$U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_label.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
+        integral_expression_as_convolution = Tex(r"$U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_expression_as_convolution.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
         integral_expression_substitute_r_11_prime = Tex(r"$=\frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{2R_{0}\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_expression_with_separated_potential = Tex(r"$U\left(\boldsymbol{p}_{1}\right)=\underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}}\cdot\underset{\text{Position dependent phase}}{\underbrace{e^{-iku\cos\left(\frac{s_{1}}{R}\right)}}}\cdot\underset{\text{Convolution}}{\underbrace{\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right]}}$")
-        integral_arrow_indicator = Arrow(integral_algebraic_label.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL)
-        integral_result_group = VGroup(integral_algebraic_label, integral_arrow_indicator)
+        integral_expression_with_separated_potential = Tex(r"$=\underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}}\cdot\underset{\text{Position dependent phase}}{\underbrace{e^{-iku\cos\left(\frac{s_{1}}{R}\right)}}}\cdot\underset{\text{Convolution}}{\underbrace{\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right]}}$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_arrow_indicator = Arrow(integral_label.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL)
+        integral_result_group = VGroup(integral_label, integral_arrow_indicator)
 
 
         # Huygens integral introduction
@@ -110,10 +110,8 @@ class Potential(ZoomedScene):
 
         # Zoomed display and move it to the right place generation:
         self.activate_zooming()
-        zoomed_camera = self.zoomed_camera
         zoomed_display = self.zoomed_display
-        zoomed_display_frame = zoomed_display.display_frame
-        self.zoomed_display.move_to(p_1_prime)
+        zoomed_display.move_to(p_1_prime)
         frame = self.zoomed_camera.frame
         frame.move_to(p_1_prime)
         frame.set_width(1.0)
@@ -126,20 +124,26 @@ class Potential(ZoomedScene):
 
         # Interpret algebraic expressions animation:
         self.play(FadeIn(integral_result_group), run_time=2)
-        self.play(FadeOut(integral_algebraic_label, shift=UP), FadeOut(r_01_approximation),
-                  FadeOut(p_0_to_p_1_line), FadeOut(line_length_label), FadeIn(integral_algebraic_expression_as_convolution, shift=UP), run_time=2)
+        self.play(FadeOut(integral_label, shift=UP), FadeOut(r_01_approximation),
+                  FadeOut(p_0_to_p_1_line), FadeOut(line_length_label), FadeIn(integral_expression_as_convolution, shift=UP), run_time=2)
 
         # Change discussion to r_01:
         self.play(Uncreate(distances_group_p_1))
         self.play(Create(distances_group_mirror_left), run_time=2)
         self.play(zoomed_display.animate.move_to(MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * RIGHT), frame.animate.move_to(MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * RIGHT))
         self.play(FadeIn(r_11_prime_approximation_label), run_time=2)
+
+        # Focus on the convolution and its interpretation animation:
         self.play(FadeOut(Group(mirror_right, mirror_left, p_1_dot, p_0_dot, box_integrand, box_integral,
                                 phase_representation, integral_representation, distances_group_mirror_left,
                                 integral_arrow_indicator, p_0_label, p_1_label)))
         self.play(FadeOut(frame), FadeOut(zoomed_display))
-        self.play(integral_algebraic_expression_as_convolution.animate.move_to(ORIGIN))
-        self.play(TransformMatchingTex(integral_algebraic_expression_as_convolution, integral_expression_with_separated_potential))
+        self.play(integral_expression_as_convolution.animate.move_to(ORIGIN))
+        self.play(integral_expression_as_convolution.animate.shift(1.5*UP),
+                  FadeIn(integral_expression_substitute_r_11_prime, shift=UP))
+        self.play(integral_expression_as_convolution.animate.shift(1.5*UP),
+                  integral_expression_substitute_r_11_prime.animate.shift(1.5*UP),
+                  FadeIn(integral_expression_with_separated_potential, shift=UP), run_time=2)
         self.wait(2)
 
     @staticmethod

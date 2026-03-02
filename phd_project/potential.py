@@ -1,6 +1,9 @@
 from manim import *
 from scipy.special import fresnel
 
+tex_template = TexTemplate()
+tex_template.add_to_preamble(r"\usepackage{dsfont}")
+
 MIRRORS_RADIUS = 3
 MIRRORS_NA = PI / 2
 KERNEL_QUADRATIC_COEFFICIENT = 50
@@ -92,21 +95,20 @@ class Potential(ZoomedScene):
         distances_group_mirror_left = VGroup(mirror_left_circle, mirror_left_radius_line, mirror_left_radius_label)
 
         # Integral result label generation:
-        integral_label = Tex(r"$U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_label.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
-        integral_expression_as_convolution = Tex(r"$U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_expression = MathTex(r"U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_expression.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
+        integral_expression_as_convolution = MathTex(r"U\left(\boldsymbol{p}_{1}\right) {{=}} \frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_expression_as_convolution.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
-        integral_expression_substitute_r_11_prime = Tex(r"$=\frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{2R_{0}\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_expression_with_separated_potential = Tex(r"$=\underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}}\cdot\underset{\text{Position dependent phase}}{\underbrace{e^{-iku\cos\left(\frac{s_{1}}{R}\right)}}}\cdot\underset{\text{Convolution}}{\underbrace{\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right]}}$").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_arrow_indicator = Arrow(integral_label.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL)
-        integral_result_group = VGroup(integral_label, integral_arrow_indicator)
-
+        integral_expression_substitute_r_11_prime = MathTex(r" {{=}} \frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{4R\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_expression_with_separated_potential = MathTex(r"U\left(\boldsymbol{p}_{1}\right) {{=}} \underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}}\cdot\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-iku\cos\left(\frac{s_{1}}{R}\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right] }} }} }} ").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_arrow_indicator = Arrow(integral_expression.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL)
+        integral_result_group = VGroup(integral_expression, integral_arrow_indicator)
 
         # Huygens integral introduction
         self.play(Create(mirror_right), Create(mirror_left))
         self.play(Create(p_1_dot), Create(p_0_to_p_1_line), Create(p_0_dot), FadeIn(line_length_label), FadeIn(p_1_label), FadeIn(p_0_label))
         self.add(mirror_right, mirror_left, p_1_dot, p_0_dot, p_0_to_p_1_line, box_integrand, box_integral, phase_representation, integral_representation, line_length_label)
-        self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=1, rate_func=linear)
+        self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=6, rate_func=linear)
 
         # Zoomed display and move it to the right place generation:
         self.activate_zooming()
@@ -118,13 +120,13 @@ class Potential(ZoomedScene):
 
         # Repeat with zoom animation:
         self.play(Create(distances_group_p_1), mirror_right.animate.set_stroke(width=0.5), mirror_left.animate.set_stroke(width=0.5), p_1_dot.animate.scale(0.5), SCANNING_DOT_RADIUS_TRACKER.animate.set_value(0.04))
-        self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1_TRACKER.get_value() + PI - ZOOMED_ANGLE_RANGE), run_time=1.0)
+        self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1_TRACKER.get_value() + PI - ZOOMED_ANGLE_RANGE), run_time=1)
         self.play(Write(r_01_approximation), run_time=1)
-        self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=1, rate_func=linear)
+        self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=6, rate_func=linear)
 
         # Interpret algebraic expressions animation:
         self.play(FadeIn(integral_result_group), run_time=2)
-        self.play(FadeOut(integral_label, shift=UP), FadeOut(r_01_approximation),
+        self.play(FadeOut(integral_expression, shift=UP), FadeOut(r_01_approximation),
                   FadeOut(p_0_to_p_1_line), FadeOut(line_length_label), FadeIn(integral_expression_as_convolution, shift=UP), run_time=2)
 
         # Change discussion to r_01:
@@ -133,18 +135,57 @@ class Potential(ZoomedScene):
         self.play(zoomed_display.animate.move_to(MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * RIGHT), frame.animate.move_to(MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * RIGHT))
         self.play(FadeIn(r_11_prime_approximation_label), run_time=2)
 
-        # Focus on the convolution and its interpretation animation:
+        # Focus on the explicit expression for the integral equation animation:
         self.play(FadeOut(Group(mirror_right, mirror_left, p_1_dot, p_0_dot, box_integrand, box_integral,
                                 phase_representation, integral_representation, distances_group_mirror_left,
                                 integral_arrow_indicator, p_0_label, p_1_label)))
         self.play(FadeOut(frame), FadeOut(zoomed_display))
-        self.play(integral_expression_as_convolution.animate.move_to(ORIGIN))
+        self.play(integral_expression_as_convolution.animate.move_to(ORIGIN).to_edge(LEFT))
+
+        eq1 = integral_expression_as_convolution[1]
+        eq2 = integral_expression_substitute_r_11_prime[1]
+        eq3 = integral_expression_with_separated_potential[1]  # parts are 3, 5
+        integral_expression_with_separated_potential[3].set_color(RED)
+        integral_expression_with_separated_potential[5].set_color(GREEN)
+
+        integral_expression_substitute_r_11_prime.shift(eq1.get_center() - eq2.get_center())
+        integral_expression_with_separated_potential.shift(eq1.get_center() - eq3.get_center())
+
         self.play(integral_expression_as_convolution.animate.shift(1.5*UP),
-                  FadeIn(integral_expression_substitute_r_11_prime, shift=UP))
+                  FadeIn(integral_expression_substitute_r_11_prime, shift=1.5*UP))
         self.play(integral_expression_as_convolution.animate.shift(1.5*UP),
                   integral_expression_substitute_r_11_prime.animate.shift(1.5*UP),
-                  FadeIn(integral_expression_with_separated_potential, shift=UP), run_time=2)
+                  FadeIn(integral_expression_with_separated_potential, shift=1.5*UP), run_time=2)
+        self.play(FadeOut(integral_expression_as_convolution, shift=3*UP),
+                  FadeOut(integral_expression_substitute_r_11_prime, shift=3*UP),
+                  FadeOut(r_11_prime_approximation_label),
+                  integral_expression_with_separated_potential.animate.to_edge(UP), run_time=2)
+        separating_line = Line(np.array([-7.111, 0, 0]), np.array([7.111, 0, 0]), stroke_width=1).next_to(integral_expression_with_separated_potential, DOWN, buff=0.5)
+        self.play(Create(separating_line))
+        # Schroedinger equations generation:
+        schrodinger_1 = MathTex(r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)+\partial_{t}\psi\left(x,t\right)\cdot dt+\mathcal{O}\left(dt^{2}\right)").to_corner(DL).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_2 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left(-\hbar^{2}\frac{\nabla^{2}}{2m}+V\left(x\right)\right)\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_3 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}V\left(x\right)\right)\left(\mathds{1}+idt\frac{\hbar}{2m}\nabla^{2}\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_4 = MathTex(r"\psi\left(x,t+dt\right) {{ \approx }}\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[\psi\left(x,t\right)\circledast e^{-i\frac{mx^{2}}{2\hbar dt}}\right] }} }}+\mathcal{O}\left(dt^{2}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+
+        schrodinger_2.shift(schrodinger_1[1].get_center() - schrodinger_2[0].get_center())
+        schrodinger_3.shift(schrodinger_1[1].get_center() - schrodinger_3[0].get_center())
+        schrodinger_4.shift(schrodinger_1[1].get_center() - schrodinger_4[1].get_center())
+        schrodinger_4[3].set_color(RED)
+        schrodinger_4[5].set_color(GREEN)
+
+        self.play(FadeIn(schrodinger_1), run_time=1)
+        self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_2, shift=UP), run_time=1)
+        self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP), FadeIn(schrodinger_3, shift=UP), run_time=1)
+        self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP), schrodinger_3.animate.shift(UP), FadeIn(schrodinger_4, shift=UP), run_time=1)
+        self.play(FadeOut(schrodinger_1, shift=UP), FadeOut(schrodinger_2, shift=UP), FadeOut(schrodinger_3, shift=UP), FadeOut(separating_line, shift=UP),
+                  integral_expression_with_separated_potential.animate.move_to(ORIGIN+1*UP),
+                  schrodinger_4.animate.move_to(ORIGIN+1*DOWN), run_time=2)
         self.wait(2)
+
+
+
+
 
     @staticmethod
     def integrand_phase_representation(theta, theta_p_1) -> float:
@@ -205,3 +246,27 @@ def find_intersection_with_ray(ray_origin, circle_origin, angle, circle_radius) 
         )
     intersection_point = ray_origin + length * k_vector
     return intersection_point
+
+# %% # Playground:
+if __name__ == "__main__":
+    from manim import *
+
+    tex_template = TexTemplate()
+    tex_template.add_to_preamble(r"\usepackage{dsfont}")
+
+    ALGEBRAIC_EXPRESSIONS_SCALE = 0.7
+    integral_expression = MathTex(
+        r"U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(
+        ALGEBRAIC_EXPRESSIONS_SCALE)
+    integral_expression_as_convolution = MathTex(
+        r"U\left(\boldsymbol{p}_{1}\right) {{=}} \frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(
+        ALGEBRAIC_EXPRESSIONS_SCALE)
+    integral_expression_substitute_r_11_prime = MathTex(
+        r" {{=}} \frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{4R\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(
+        ALGEBRAIC_EXPRESSIONS_SCALE)
+    integral_expression_with_separated_potential = MathTex(
+        r"U\left(\boldsymbol{p}_{1}\right) {{=}}  {{ \underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}} }} \cdot {{ \underset{\text{Position dependent phase}}{\underbrace{e^{-iku\cos\left(\frac{s_{1}}{R}\right)}}}\cdot\underset{\text{Convolution}}{\underbrace{\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right]}} }} ").scale(
+        ALGEBRAIC_EXPRESSIONS_SCALE)
+
+    # eq3 = integral_expression_with_separated_potential[0]
+

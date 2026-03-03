@@ -23,17 +23,28 @@ THETA_P_1_TRACKER = ValueTracker(PI / 9)
 COLOR_MIRRORS = WHITE
 COLOR_INTEGRAL = ORANGE
 COLOR_P_1 = RED
+COLOR_POTENTIAL = RED
+COLOR_KINETIC_TERM = GREEN
 DISTANCES_COLOR = BLUE
 
-
+# %%
 class Potential(ZoomedScene):
     def construct(self):
         # TODO: choose the real point which is on mirror_right and at angle theta_1
         # Basic system generation:
         mirror_right = Arc(arc_center=MIRROR_RIGHT_CENTER, start_angle=-MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)
         mirror_left = Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI - MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)
-        p_1_dot = always_redraw(lambda: Dot(color=COLOR_P_1, point=MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * np.cos(THETA_P_1_TRACKER.get_value()) * RIGHT + MIRRORS_RADIUS * np.sin(THETA_P_1_TRACKER.get_value()) * UP))
-        p_1_prime_dot = always_redraw(lambda: DashedVMobject(Dot(color=COLOR_P_1, point=MIRROR_LEFT_CENTER + MIRRORS_RADIUS * np.cos(THETA_P_1_TRACKER.get_value() + PI) * RIGHT + MIRRORS_RADIUS * np.sin(THETA_P_1_TRACKER.get_value() + PI) * UP, radius=SCANNING_DOT_RADIUS_TRACKER.get_value(), stroke_width=1, fill_opacity=0)))
+        p_1_prime_dot = always_redraw(lambda: DashedVMobject(Dot(color=COLOR_P_1,
+                                                                 point=MIRROR_LEFT_CENTER + MIRRORS_RADIUS * np.cos(
+                                                                     THETA_P_1_TRACKER.get_value() + PI) * RIGHT + MIRRORS_RADIUS * np.sin(
+                                                                     THETA_P_1_TRACKER.get_value() + PI) * UP,
+                                                                 radius=SCANNING_DOT_RADIUS_TRACKER.get_value(),
+                                                                 stroke_width=1, fill_opacity=0)))
+        p_1_dot = always_redraw(lambda: Dot(color=COLOR_P_1, point=find_intersection_with_ray(ray_origin=p_1_prime_dot.get_center(),
+                                                                                              circle_origin=MIRROR_RIGHT_CENTER,
+                                                                                              angle=THETA_P_1_TRACKER.get_value(),
+                                                                                              circle_radius=MIRRORS_RADIUS))
+                                )
         p_0_dot = always_redraw(
             lambda: Dot(
                 color=RED,
@@ -84,17 +95,17 @@ class Potential(ZoomedScene):
             #self.zoomed_display, UP, buff=0.1)
 
         # p_1 Distances helpers generation:
-        p_1_circle = always_redraw(lambda: DashedVMobject(Circle(arc_center=p_1_dot.get_center(), radius=np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()), color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7))
-        p_1_circle_radius_line = always_redraw(lambda: DashedLine(p_1_dot.get_center(), p_1_prime_dot.get_center(), color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()) / 200, dashed_ratio=0.7))
-        p_1_circle_radius_label = always_redraw(lambda: Tex(r"$r_{11^{\prime}}$", color=DISTANCES_COLOR).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])))
+        p_1_circle = always_redraw(lambda: DashedVMobject(Circle(arc_center=p_1_dot.get_center(), radius=np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()), color=COLOR_KINETIC_TERM, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7))
+        p_1_circle_radius_line = always_redraw(lambda: DashedLine(p_1_dot.get_center(), p_1_prime_dot.get_center(), color=COLOR_KINETIC_TERM, stroke_width=0.5, dash_length=2 * PI * np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()) / 200, dashed_ratio=0.7))
+        p_1_circle_radius_label = always_redraw(lambda: Tex(r"$r_{11^{\prime}}$", color=COLOR_KINETIC_TERM).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])))
         distances_group_p_1 = VGroup(p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label, p_1_prime_dot, p_1_prime_label)
         r_11_prime_approximation_label = Tex(r"$r_{11^{\prime}}=2R-u\cos\left(\frac{p_{1}}{R}\right)+\mathcal{O}\left(\left(\frac{u}{R}\right)^{2}\right)$").to_edge(DOWN).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
 
         # mirror_left Distances helpers generation:
         relevant_radius = MIRRORS_RADIUS - UNCONCENTRICITY
-        mirror_left_circle_right_arc = DashedVMobject(Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=-PI/2, angle=PI, radius=relevant_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
-        mirror_left_circle_left_arc = DashedVMobject(Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI / 2, angle=PI, radius=relevant_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
-        mirror_left_radius_line = DashedLine(MIRROR_LEFT_CENTER, MIRROR_LEFT_CENTER + (MIRRORS_RADIUS - UNCONCENTRICITY) * RIGHT, color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * relevant_radius / 200, dashed_ratio=0.7)
+        mirror_left_circle_right_arc = DashedVMobject(Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=-PI/2, angle=PI, radius=relevant_radius, color=COLOR_POTENTIAL, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
+        mirror_left_circle_left_arc = DashedVMobject(Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI / 2, angle=PI, radius=relevant_radius, color=COLOR_POTENTIAL, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
+        mirror_left_radius_line = DashedLine(MIRROR_LEFT_CENTER, MIRROR_LEFT_CENTER + (MIRRORS_RADIUS - UNCONCENTRICITY) * RIGHT, color=COLOR_POTENTIAL, stroke_width=0.5, dash_length=2 * PI * relevant_radius / 200, dashed_ratio=0.7)
         distances_group_mirror_left = VGroup(mirror_left_circle_right_arc, mirror_left_circle_left_arc, mirror_left_radius_line)  # mirror_left_radius_label
 
         # Integral result label generation:
@@ -104,7 +115,7 @@ class Potential(ZoomedScene):
         integral_expression_as_convolution.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
         integral_expression_substitute_r_11_prime = MathTex(r" {{=}} \frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{4R\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_expression_with_separated_potential = MathTex(r"U\left(\boldsymbol{p}_{1}\right) {{=}} \underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}}\cdot\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-iku\cos\left(\frac{s_{1}}{R}\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right] }} }} }} ").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_arrow_indicator = Arrow(integral_expression.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL)
+        integral_arrow_indicator = always_redraw(lambda: Arrow(integral_expression.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL))
         integral_result_group = VGroup(integral_expression, integral_arrow_indicator)
 
         # Huygens integral introduction
@@ -150,8 +161,8 @@ class Potential(ZoomedScene):
         eq1 = integral_expression_as_convolution[1]
         eq2 = integral_expression_substitute_r_11_prime[1]
         eq3 = integral_expression_with_separated_potential[1]  # parts are 3, 5
-        integral_expression_with_separated_potential[3].set_color(RED)
-        integral_expression_with_separated_potential[5].set_color(GREEN)
+        integral_expression_with_separated_potential[3].set_color(COLOR_POTENTIAL)
+        integral_expression_with_separated_potential[5].set_color(COLOR_KINETIC_TERM)
 
         integral_expression_substitute_r_11_prime.shift(eq1.get_center() - eq2.get_center())
         integral_expression_with_separated_potential.shift(eq1.get_center() - eq3.get_center())
@@ -166,18 +177,22 @@ class Potential(ZoomedScene):
                   FadeOut(r_11_prime_approximation_label),
                   integral_expression_with_separated_potential.animate.to_edge(UP), run_time=2)
         separating_line = Line(np.array([-7.111, 0, 0]), np.array([7.111, 0, 0]), stroke_width=1).next_to(integral_expression_with_separated_potential, DOWN, buff=0.5)
-        self.play(Create(separating_line))
+        # self.play(Create(separating_line))
         # Schroedinger equations generation:
         schrodinger_1 = MathTex(r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)+\partial_{t}\psi\left(x,t\right)\cdot dt+\mathcal{O}\left(dt^{2}\right)").to_corner(DL).shift(0.75*UP).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        schrodinger_2 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left(-\hbar^{2}\frac{\nabla^{2}}{2m}+V\left(x\right)\right)\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        schrodinger_3 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}V\left(x\right)\right)\left(\mathds{1}+idt\frac{\hbar}{2m}\nabla^{2}\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_2 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left( {{ V\left(x\right) }} - {{ \hbar^{2}\frac{\nabla^{2}}{2m} }}  \right)\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_3 = MathTex(r"{{ = }} \left( {{ \mathds{1}-\frac{i\cdot dt}{\hbar}V\left(x\right) }} \right)\left( {{ \mathds{1}+idt\frac{\hbar}{2m}\nabla^{2} }} \right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_4 = MathTex(r"\psi\left(x,t+dt\right) {{ \approx }}\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[\psi\left(x,t\right)\circledast e^{-i\frac{mx^{2}}{2\hbar dt}}\right] }} }}+\mathcal{O}\left(dt^{2}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
 
         schrodinger_2.shift(schrodinger_1[1].get_center() - schrodinger_2[0].get_center())
         schrodinger_3.shift(schrodinger_1[1].get_center() - schrodinger_3[0].get_center())
         schrodinger_4.shift(schrodinger_1[1].get_center() - schrodinger_4[1].get_center())
-        schrodinger_4[3].set_color(RED)
-        schrodinger_4[5].set_color(GREEN)
+        schrodinger_2[2].set_color(COLOR_POTENTIAL)
+        schrodinger_2[4].set_color(COLOR_KINETIC_TERM)
+        schrodinger_3[2].set_color(COLOR_POTENTIAL)
+        schrodinger_3[4].set_color(COLOR_KINETIC_TERM)
+        schrodinger_4[3].set_color(COLOR_POTENTIAL)
+        schrodinger_4[5].set_color(COLOR_KINETIC_TERM)
 
         # Schordinger equation analogy animation:
         self.play(FadeIn(schrodinger_1), run_time=1)
@@ -195,18 +210,19 @@ class Potential(ZoomedScene):
 
         # Interpret potential animation
         simplified_cavity = VGroup(mirror_left, mirror_right, mirror_left_circle_right_arc, mirror_left_circle_left_arc)
-        simplified_cavity.shift(2*DOWN).scale(0.8)
+        simplified_cavity.move_to(ORIGIN).shift(1.5*DOWN).scale(0.8)
         self.play(FadeIn(simplified_cavity))
         self.play(Wiggle(VGroup(mirror_left_circle_right_arc, mirror_left_circle_left_arc)))
 
         mirrors_length = MIRRORS_RADIUS * MIRRORS_NA
         flattened_mirror = Line(3*DOWN + LEFT * mirrors_length / 2, 3*DOWN + RIGHT * mirrors_length / 2, color=COLOR_MIRRORS, stroke_width=2)
         flattened_potential = DashedVMobject(ParametricFunction(lambda t: 3*DOWN + t * RIGHT + 1/10 * t**2 * UP,
-                                                 t_range=(-mirrors_length / 2, mirrors_length / 2), color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7,
+                                                 t_range=(-mirrors_length / 2, mirrors_length / 2), color=COLOR_POTENTIAL, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7,
                                                  )
         self.play(Transform(mirror_right, flattened_mirror),
                   Transform(mirror_left_circle_right_arc, flattened_potential),
                   FadeOut(mirror_left), FadeOut(mirror_left_circle_left_arc))
+        self.play(Wiggle(schrodinger_4[3]), Wiggle(flattened_potential), Wiggle(integral_expression_with_separated_potential[3]))
         self.wait(1)
 
 
@@ -283,17 +299,17 @@ if __name__ == "__main__":
     tex_template.add_to_preamble(r"\usepackage{dsfont}")
 
     ALGEBRAIC_EXPRESSIONS_SCALE = 0.7
-    integral_expression = MathTex(
-        r"U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(
-        ALGEBRAIC_EXPRESSIONS_SCALE)
-    integral_expression_as_convolution = MathTex(
-        r"U\left(\boldsymbol{p}_{1}\right) {{=}} \frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(
-        ALGEBRAIC_EXPRESSIONS_SCALE)
-    integral_expression_substitute_r_11_prime = MathTex(
-        r" {{=}} \frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{4R\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(
-        ALGEBRAIC_EXPRESSIONS_SCALE)
-    integral_expression_with_separated_potential = MathTex(
-        r"U\left(\boldsymbol{p}_{1}\right) {{=}}  {{ \underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}} }} \cdot {{ \underset{\text{Position dependent phase}}{\underbrace{e^{-iku\cos\left(\frac{s_{1}}{R}\right)}}}\cdot\underset{\text{Convolution}}{\underbrace{\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right]}} }} ").scale(
+    schrodinger_1 = MathTex(
+        r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)+\partial_{t}\psi\left(x,t\right)\cdot dt+\mathcal{O}\left(dt^{2}\right)").to_corner(
+        DL).shift(0.75 * UP).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+    schrodinger_2 = MathTex(
+        r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left( {{ V\left(x\right) }} - {{ \hbar^{2}\frac{\nabla^{2}}{2m} }}  \right)\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)",
+        tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+    schrodinger_3 = MathTex(
+        r"{{ = }} \left( {{ \mathds{1}-\frac{i\cdot dt}{\hbar}V\left(x\right) }} \right)\left( {{ \mathds{1}+idt\frac{\hbar}{2m}\nabla^{2} }} \right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)",
+        tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+    schrodinger_4 = MathTex(
+        r"\psi\left(x,t+dt\right) {{ \approx }}\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[\psi\left(x,t\right)\circledast e^{-i\frac{mx^{2}}{2\hbar dt}}\right] }} }}+\mathcal{O}\left(dt^{2}\right)").scale(
         ALGEBRAIC_EXPRESSIONS_SCALE)
 
     # eq3 = integral_expression_with_separated_potential[0]

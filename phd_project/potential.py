@@ -1,3 +1,4 @@
+import numpy as np
 from manim import *
 from scipy.special import fresnel
 
@@ -43,8 +44,8 @@ class Potential(ZoomedScene):
         )
         p_0_to_p_1_line = always_redraw(lambda: Line(p_0_dot.get_center(), p_1_dot.get_center(), color=WHITE))
         line_length_label = always_redraw(lambda: Tex(f"$r_{{01}}={np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}$").next_to(p_0_to_p_1_line.get_center(), UP, buff=0.1).rotate(np.arctan2(*(p_1_dot.get_center() - p_0_dot.get_center())[[1, 0]])))
-        p_1_label = Tex(r"$p_{1}$").next_to(p_1_dot.get_center(), UR, buff=0.1)
-        p_1_prime_label = Tex(r"$p^{\prime}_{1}$").next_to(p_1_prime_dot.get_center(), DL, buff=0.0).scale(0.3)
+        p_1_label = always_redraw(lambda: Tex(r"$p_{1}$").next_to(p_1_dot.get_center(), UR, buff=0.1))
+        p_1_prime_label = always_redraw(lambda: Tex(r"$p^{\prime}_{1}$").next_to(p_1_prime_dot.get_center(), DL, buff=0.0).scale(0.3))
         p_0_label = always_redraw(lambda: Tex(r"$p_{0}$").next_to(p_0_dot, LEFT, buff=0.1))
 
         # Integrand and integral representations' generation:
@@ -57,7 +58,7 @@ class Potential(ZoomedScene):
                 plane_integrand.c2p(0, 0),
                 plane_integrand.c2p(
                     np.cos(self.integrand_phase_representation(SCANNING_DOT_TRACKER.get_value(), THETA_P_1_TRACKER.get_value())),
-                    np.sin(self.integrand_phase_representation(SCANNING_DOT_TRACKER.get_value(), THETA_P_1_TRACKER.get_value())),
+                    -np.sin(self.integrand_phase_representation(SCANNING_DOT_TRACKER.get_value(), THETA_P_1_TRACKER.get_value())),
                 ),
                 color=COLOR_INTEGRAL,
                 stroke_width=1
@@ -83,20 +84,18 @@ class Potential(ZoomedScene):
             #self.zoomed_display, UP, buff=0.1)
 
         # p_1 Distances helpers generation:
-        p_1_circle_radius = np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center())
-        p_1_circle = DashedVMobject(Circle(arc_center=p_1_dot.get_center(), radius=p_1_circle_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7)
-        radius_line_end_point = p_1_prime_dot.get_center() # p_1 + p_1_circle_radius * np.array([np.cos(PI - 0.2), np.sin(PI - 0.2), 0])
-        p_1_circle_radius_line = DashedLine(p_1_dot.get_center(), radius_line_end_point, color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * p_1_circle_radius / 200, dashed_ratio=0.7)
-        p_1_circle_radius_label = Tex(r"$r_{11^{\prime}}$", color=DISTANCES_COLOR).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1_dot.get_center() - radius_line_end_point)[[1, 0]]))
+        p_1_circle = always_redraw(lambda: DashedVMobject(Circle(arc_center=p_1_dot.get_center(), radius=np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()), color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7))
+        p_1_circle_radius_line = always_redraw(lambda: DashedLine(p_1_dot.get_center(), p_1_prime_dot.get_center(), color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()) / 200, dashed_ratio=0.7))
+        p_1_circle_radius_label = always_redraw(lambda: Tex(r"$r_{11^{\prime}}$", color=DISTANCES_COLOR).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])))
         distances_group_p_1 = VGroup(p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label, p_1_prime_dot, p_1_prime_label)
         r_11_prime_approximation_label = Tex(r"$r_{11^{\prime}}=2R-u\cos\left(\frac{p_{1}}{R}\right)+\mathcal{O}\left(\left(\frac{u}{R}\right)^{2}\right)$").to_edge(DOWN).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
 
         # mirror_left Distances helpers generation:
         relevant_radius = MIRRORS_RADIUS - UNCONCENTRICITY
-        mirror_left_circle = DashedVMobject(Circle(arc_center=MIRROR_LEFT_CENTER, radius=relevant_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7)
+        mirror_left_circle_right_arc = DashedVMobject(Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=-PI/2, angle=PI, radius=relevant_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
+        mirror_left_circle_left_arc = DashedVMobject(Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI / 2, angle=PI, radius=relevant_radius, color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
         mirror_left_radius_line = DashedLine(MIRROR_LEFT_CENTER, MIRROR_LEFT_CENTER + (MIRRORS_RADIUS - UNCONCENTRICITY) * RIGHT, color=DISTANCES_COLOR, stroke_width=0.5, dash_length=2 * PI * relevant_radius / 200, dashed_ratio=0.7)
-        # mirror_left_radius_label = Tex(r"$\min_{p_{1}}\left(r_{11^{\prime}}\right)$", color=DISTANCES_COLOR).scale(ALGEBRAIC_EXPRESSIONS_SCALE).next_to(mirror_left_radius_line.get_center(), DOWN, buff=0.3)
-        distances_group_mirror_left = VGroup(mirror_left_circle, mirror_left_radius_line)  # mirror_left_radius_label
+        distances_group_mirror_left = VGroup(mirror_left_circle_right_arc, mirror_left_circle_left_arc, mirror_left_radius_line)  # mirror_left_radius_label
 
         # Integral result label generation:
         integral_expression = MathTex(r"U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
@@ -134,8 +133,8 @@ class Potential(ZoomedScene):
                   FadeOut(p_0_to_p_1_line), FadeOut(line_length_label), FadeIn(integral_expression_as_convolution, shift=UP), run_time=2)
 
         # Change discussion to r_01:
-        # self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6), rate_func=rate_functions.wiggle, run_time=6)
-        # self.wait(1)
+        self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6), rate_func=rate_functions.wiggle, run_time=6)
+        self.wait(1)
         self.play(Uncreate(distances_group_p_1))
         self.play(Create(distances_group_mirror_left), run_time=2)
         self.play(zoomed_display.animate.move_to(MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * RIGHT), frame.animate.move_to(MIRROR_RIGHT_CENTER + MIRRORS_RADIUS * RIGHT))
@@ -169,7 +168,7 @@ class Potential(ZoomedScene):
         separating_line = Line(np.array([-7.111, 0, 0]), np.array([7.111, 0, 0]), stroke_width=1).next_to(integral_expression_with_separated_potential, DOWN, buff=0.5)
         self.play(Create(separating_line))
         # Schroedinger equations generation:
-        schrodinger_1 = MathTex(r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)+\partial_{t}\psi\left(x,t\right)\cdot dt+\mathcal{O}\left(dt^{2}\right)").to_corner(DL).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_1 = MathTex(r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)+\partial_{t}\psi\left(x,t\right)\cdot dt+\mathcal{O}\left(dt^{2}\right)").to_corner(DL).shift(0.75*UP).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_2 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left(-\hbar^{2}\frac{\nabla^{2}}{2m}+V\left(x\right)\right)\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_3 = MathTex(r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}V\left(x\right)\right)\left(\mathds{1}+idt\frac{\hbar}{2m}\nabla^{2}\right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)", tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_4 = MathTex(r"\psi\left(x,t+dt\right) {{ \approx }}\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[\psi\left(x,t\right)\circledast e^{-i\frac{mx^{2}}{2\hbar dt}}\right] }} }}+\mathcal{O}\left(dt^{2}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
@@ -180,32 +179,50 @@ class Potential(ZoomedScene):
         schrodinger_4[3].set_color(RED)
         schrodinger_4[5].set_color(GREEN)
 
+        # Schordinger equation analogy animation:
         self.play(FadeIn(schrodinger_1), run_time=1)
         self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_2, shift=UP), run_time=1)
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP), FadeIn(schrodinger_3, shift=UP), run_time=1)
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP), schrodinger_3.animate.shift(UP), FadeIn(schrodinger_4, shift=UP), run_time=1)
         self.play(FadeOut(schrodinger_1, shift=UP), FadeOut(schrodinger_2, shift=UP), FadeOut(schrodinger_3, shift=UP), FadeOut(separating_line, shift=UP),
                   integral_expression_with_separated_potential.animate.move_to(ORIGIN+1*UP),
-                  schrodinger_4.animate.move_to(ORIGIN+1*DOWN), run_time=2)
+                  schrodinger_4.animate.move_to(ORIGIN+1*DOWN), run_time=1)
         self.wait(2)
+        final_equations = VGroup(integral_expression_with_separated_potential, schrodinger_4)
+        self.play(final_equations.animate.scale(0.7).to_corner(UL), run_time=1)
+        separating_line.next_to(final_equations, DOWN, buff=0.2)
+        self.play(Create(separating_line))
 
+        # Interpret potential animation
+        simplified_cavity = VGroup(mirror_left, mirror_right, mirror_left_circle_right_arc, mirror_left_circle_left_arc)
+        simplified_cavity.shift(2*DOWN).scale(0.8)
+        self.play(FadeIn(simplified_cavity))
+        self.play(Wiggle(VGroup(mirror_left_circle_right_arc, mirror_left_circle_left_arc)))
 
-
+        mirrors_length = MIRRORS_RADIUS * MIRRORS_NA
+        flattened_mirror = Line(3*DOWN + LEFT * mirrors_length / 2, 3*DOWN + RIGHT * mirrors_length / 2, color=COLOR_MIRRORS, stroke_width=2)
+        flattened_potential = DashedVMobject(ParametricFunction(lambda t: 3*DOWN + t * RIGHT + 1/10 * t**2 * UP,
+                                                 t_range=(-mirrors_length / 2, mirrors_length / 2), color=DISTANCES_COLOR, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7,
+                                                 )
+        self.play(Transform(mirror_right, flattened_mirror),
+                  Transform(mirror_left_circle_right_arc, flattened_potential),
+                  FadeOut(mirror_left), FadeOut(mirror_left_circle_left_arc))
+        self.wait(1)
 
 
     @staticmethod
     def integrand_phase_representation(theta, theta_p_1) -> float:
-        return KERNEL_QUADRATIC_COEFFICIENT * (theta - (theta_p_1 + PI)) ** 2
+        return KERNEL_QUADRATIC_COEFFICIENT * (theta - (theta_p_1 + PI)) ** 2 - UNCONCENTRICITY * np.cos(theta_p_1) * KERNEL_QUADRATIC_COEFFICIENT
 
     @staticmethod
     def integral_curve(theta, theta_p_1) -> np.ndarray:
         return 6 * frensel_ax2_integral(
-            a=KERNEL_QUADRATIC_COEFFICIENT, x_0=-(theta_p_1 + MIRRORS_NA / 2), x_1=theta - (theta_p_1 + PI)
+            a=KERNEL_QUADRATIC_COEFFICIENT, x_0=-(theta_p_1 + MIRRORS_NA / 2), x_1=theta - (theta_p_1 + PI), theta_p_1=theta_p_1
         )
 
     @staticmethod
     def SmallAxesBox(
-        side_length=3,
+        side_length=3.0,
         x_range=(-2, 2, 1),
         y_range=(-2, 2, 1),
     ) -> VGroup:
@@ -230,13 +247,18 @@ class Potential(ZoomedScene):
 
 # Command to run the scene:
 # manim -pql potential.py Potential
-def frensel_ax2_integral(a, x_0, x_1):
+def frensel_ax2_integral(a, x_0, x_1, theta_p_1):
     factor = np.sqrt(np.pi / (2 * a))
     u0 = np.sqrt(2 * a / np.pi) * x_0
     u1 = np.sqrt(2 * a / np.pi) * x_1
-    v0 = np.array(fresnel(u0))
-    v1 = np.array(fresnel(u1))
-    return factor * (v1 - v0)
+    v0 = fresnel(u0)
+    v1 = fresnel(u1)
+    v0_complex = v0[0] + 1j * v0[1]
+    v1_complex = v1[0] + 1j * v1[1]
+    integral_result_without_global_phase = factor * (v1_complex - v0_complex)
+    integral_result_complex = integral_result_without_global_phase * np.exp(-1j * UNCONCENTRICITY * np.cos(theta_p_1) * KERNEL_QUADRATIC_COEFFICIENT)
+    integral_result_array = np.array([np.real(integral_result_complex), np.imag(integral_result_complex)])
+    return integral_result_array
 
 
 def find_intersection_with_ray(ray_origin, circle_origin, angle, circle_radius) -> np.ndarray:

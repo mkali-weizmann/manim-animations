@@ -29,8 +29,57 @@ DISTANCES_COLOR = BLUE
 
 # %%
 class Potential(ZoomedScene):
-    def construct(self):
-        # TODO: choose the real point which is on mirror_right and at angle theta_1
+    def construct(self) -> None:
+        self.introduction()
+
+        self.explain_approach()
+
+        self.main()
+
+    def introduction(self):
+        bullets_scale = 0.8
+        title_1 = Tex("Solutions to resonators eigenmodes").scale(1.5)
+        title_2 = Tex("without paraxial approximation").scale(1.5).next_to(title_1, DOWN, buff=0.5)
+        self.play(FadeIn(VGroup(title_1, title_2), shift=UP))
+        self.play(FadeOut(VGroup(title_1, title_2), shift=UP))
+        bullet_1 = Tex("Resonators are used when a volume with high intensity EM field is required").scale(bullets_scale).to_edge(UP).shift(0.5*DOWN).to_edge(LEFT)
+        bullet_2 = Tex("Usually, the shape of the mode in the resonator can be obtained using the").scale(bullets_scale).next_to(bullet_1, DOWN, buff=0.5).align_to(bullet_1, LEFT)
+        bullet_2b = Tex("paraxial approximation:").scale(bullets_scale).next_to(bullet_2, DOWN, buff=0.5).align_to(bullet_2, LEFT)
+        bullet_2c = MathTex(r"E\left(\boldsymbol{r}\right)\equiv u\left(\boldsymbol{r}\right)e^{-ikz}").scale(bullets_scale).next_to(bullet_2b, DOWN, buff=0.5).set_x(0)
+        bullet_2d = MathTex(r"\nabla^{2}\boldsymbol{E}=-k^{2}\boldsymbol{E}\iff\frac{\partial^{2}u}{\partial x^{2}}+\frac{\partial^{2}u}{\partial y^{2}}-2ik\frac{\partial u}{\partial z}=0").scale(bullets_scale).next_to(bullet_2c, DOWN, buff=0.5).set_x(0)
+        bullet_3 = Tex("However, when a tight focus is needed, the paraxial approximation").scale(bullets_scale).next_to(bullet_2b, DOWN, buff=0.5).align_to(bullet_1, LEFT)
+        bullet_3b = Tex("breaks, and can not be used to get the mode shape").scale(bullets_scale).next_to(bullet_3, DOWN, buff=0.5).align_to(bullet_3, LEFT)
+        bullet_5 = Tex("Moreover, the paraxial approximation does not handles aberrated systems.").scale(bullets_scale).next_to(bullet_3b, DOWN, buff=0.5).align_to(bullet_3b, LEFT)
+        bullet_6 = Tex("This calls for a different approach").scale(bullets_scale).next_to(bullet_5, DOWN, buff=0.5).align_to(bullet_5, LEFT)
+        self.play(FadeIn(bullet_1, shift=UP))
+        self.play(FadeIn(VGroup(bullet_2, bullet_2b), shift=UP))
+        self.play(FadeIn(VGroup(bullet_2c, bullet_2d), shift=UP))
+        self.play(FadeOut(VGroup(bullet_2c, bullet_2d), shift=DOWN))
+        self.play(FadeIn(VGroup(bullet_3, bullet_3b), shift=UP))
+        self.play(FadeIn(bullet_5, shift=UP))
+        self.play(FadeIn(bullet_6, shift=UP))
+        self.play(FadeOut(VGroup(bullet_1, bullet_2, bullet_2b, bullet_3, bullet_3b, bullet_5, bullet_6)))
+
+    def explain_approach(self):
+        bullets_scale = 0.8
+        approach_title = Tex("Approach").to_corner(UL).shift(0.5*DOWN)
+        bullet_1 = Tex(r"The eigenmodes of the wave equations are 3D functions: $E\left(r\right):\mathbb{R}^{3}\rightarrow\mathbb{R}^{3}$").scale(bullets_scale).next_to(approach_title, DOWN, buff=0.5).align_to(approach_title, LEFT)
+        bullet_2 = Tex("Solving it directly without the paraxial approximation is difficult.").scale(bullets_scale).next_to(bullet_1, DOWN, buff=0.5).align_to(bullet_1, LEFT)
+        bullet_3 = Tex("An alternative approach is:").scale(bullets_scale).next_to(bullet_2, DOWN, buff=0.5).align_to(bullet_2, LEFT)
+        bullet_3b = Tex("Find the operator the propagate the field one round trip using Fourier optics").scale(bullets_scale).next_to(bullet_3, DOWN, buff=0.5).align_to(bullet_3, LEFT)
+        bullet_4 = Tex(r"Find the eigenmodes of this operator (Fields $E\left(r\right):\text{mirror}\rightarrow\mathbb{R}^{3}$)").scale(bullets_scale).next_to(bullet_3b, DOWN, buff=0.5).align_to(bullet_3b, LEFT)
+        bullet_4b = Tex(r"that reproduces themselves after one roundtrip").scale(bullets_scale).next_to(bullet_4, DOWN, buff=0.5).align_to(bullet_4, LEFT)
+        self.play(FadeIn(approach_title, shift=UP))
+        self.play(FadeIn(bullet_1, shift=UP))
+        self.play(FadeIn(bullet_2, shift=UP))
+        self.play(FadeIn(VGroup(bullet_3, bullet_3b), shift=UP))
+        self.play(FadeIn(VGroup(bullet_4, bullet_4b), shift=UP))
+        self.play(FadeOut(VGroup(approach_title, bullet_1, bullet_2, bullet_3, bullet_3b, bullet_4, bullet_4b), shift=UP))
+
+
+
+
+    def main(self):
         # Basic system generation:
         mirror_right = Arc(arc_center=MIRROR_RIGHT_CENTER, start_angle=-MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)
         mirror_left = Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI - MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)

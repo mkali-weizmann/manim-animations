@@ -145,8 +145,8 @@ class Potential(ZoomedScene):
 
         # p_1 Distances helpers generation:
         p_1_circle = always_redraw(lambda: DashedVMobject(Circle(arc_center=p_1_dot.get_center(), radius=np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()), color=COLOR_KINETIC_TERM, stroke_width=0.5), num_dashes=200, dashed_ratio=0.7))
-        p_1_circle_radius_line = always_redraw(lambda: DashedLine(p_1_dot.get_center(), p_1_prime_dot.get_center(), color=COLOR_KINETIC_TERM, stroke_width=0.5, dash_length=2 * PI * np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()) / 200, dashed_ratio=0.7))
-        p_1_circle_radius_label = always_redraw(lambda: Tex(r"$r_{11^{\prime}}$", color=COLOR_KINETIC_TERM).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])))
+        p_1_circle_radius_line = always_redraw(lambda: DashedLine(p_1_dot.get_center(), p_1_prime_dot.get_center(), color=COLOR_POTENTIAL, stroke_width=0.5, dash_length=2 * PI * np.linalg.norm(p_1_dot.get_center() - p_1_prime_dot.get_center()) / 200, dashed_ratio=0.7))
+        p_1_circle_radius_label = always_redraw(lambda: Tex(r"$r_{11^{\prime}}$", color=COLOR_POTENTIAL).next_to(p_1_circle_radius_line.get_center(), DOWN, buff=0.3).rotate(np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])))
         distances_group_p_1 = VGroup(p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label, p_1_prime_dot, p_1_prime_label)
         r_11_prime_approximation_label = Tex(r"$r_{11^{\prime}}=2R-u\cos\left(\frac{p_{1}}{R}\right)+\mathcal{O}\left(\left(\frac{u}{R}\right)^{2}\right)$").to_edge(DOWN).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
 
@@ -158,13 +158,14 @@ class Potential(ZoomedScene):
         distances_group_mirror_left = VGroup(mirror_left_circle_right_arc, mirror_left_circle_left_arc, mirror_left_radius_line)  # mirror_left_radius_label
 
         # Integral result label generation:
-        integral_expression = MathTex(r"U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_expression = MathTex(r"U\left(\boldsymbol{p}_{1}\right)=\frac{ke^{ik {{ r_{11^{\prime}} }} }}{4\pi i {{ r_{11^{\prime}} }} }\intop_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_expression.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
         integral_expression_as_convolution = MathTex(r"U\left(\boldsymbol{p}_{1}\right) {{=}} \frac{ke^{ikr_{11^{\prime}}}}{4\pi ir_{11^{\prime}}}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{r_{11^{\prime}}-R}{2R\cdot r_{11^{\prime}}}\boldsymbol{p}_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_expression_as_convolution.next_to(box_integral, UP, buff=0.1).to_edge(RIGHT)
         integral_expression_substitute_r_11_prime = MathTex(r" {{=}} \frac{ke^{ik\left(2R-u\cos\left(\frac{s_{1}}{R}\right)\right)}}{8\pi iR}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ik\frac{R}{4R\cdot}p_{0}^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_expression_with_separated_potential = MathTex(r"U\left(\boldsymbol{p}_{1}\right) {{=}} \underset{\text{Constant phase}}{\underbrace{\frac{ke^{2iR}}{8\pi iR}}}\cdot\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-iku\cos\left(\frac{s_{1}}{R}\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-\frac{ik}{4R}p_{0}^{2}}\right] }} }} }} ").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
-        integral_arrow_indicator = always_redraw(lambda: Arrow(integral_expression.get_bottom(), plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL))
+        integral_expression_bottom = integral_expression.get_bottom()
+        integral_arrow_indicator = always_redraw(lambda: Arrow(integral_expression_bottom, plane_integral.c2p(*(self.integral_curve(THETA_P_1_TRACKER.get_value() + PI + ZOOMED_ANGLE_RANGE, THETA_P_1_TRACKER.get_value()))), color=COLOR_INTEGRAL))
         integral_result_group = VGroup(integral_expression, integral_arrow_indicator)
 
         # Huygens integral introduction

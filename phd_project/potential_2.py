@@ -2,9 +2,9 @@ from manim import *
 
 class Potential(ZoomedScene):
     def construct(self) -> None:
-        # self.introduction_TOC()
+        self.introduction_TOC()
         self.resonators_overview()
-        # self.potential_overview()
+        self.potential_overview()
 
     def introduction_TOC(self):
         title = Text("Wave equation solutions in non-paraxial resonators").scale(0.8).to_edge(UP)
@@ -66,15 +66,19 @@ class Potential(ZoomedScene):
         mode = VGroup(mode_upper, mode_lower)
 
         helmholtz_equation = MathTex(r"\nabla^2 E + k^2 E = 0").to_edge(DOWN).shift(0.5*RIGHT)
+        paraxial_approximation_equation = MathTex(r"\sin \theta \approx \theta \approx \tan \theta").next_to(helmholtz_equation, RIGHT, buff=0.5)
+        diagonal_stroke_over_paraxial = Line(start=paraxial_approximation_equation.get_corner(DOWN + RIGHT), end=paraxial_approximation_equation.get_corner(UP + LEFT), color=RED)
         arrow = Arrow(start=helmholtz_equation.get_top(), end=mode.get_center() - 0.3*UP, buff=0.1)
         self.play(FadeIn(title))
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
         self.play(Create(arrow))
         self.play(FadeIn(helmholtz_equation))
+        self.play(Create(paraxial_approximation_equation))
         self.play(MODE_NA.animate.set_value(0.3), run_time=3)
+        self.play(Create(diagonal_stroke_over_paraxial))
         # Fade out everything:
-        self.play(FadeOut(title), FadeOut(mirror_left), FadeOut(mirror_right), FadeOut(mode), FadeOut(helmholtz_equation), FadeOut(arrow))
+        self.play(FadeOut(title), FadeOut(mirror_left), FadeOut(mirror_right), FadeOut(mode), FadeOut(helmholtz_equation), FadeOut(arrow), FadeOut(paraxial_approximation_equation), FadeOut(diagonal_stroke_over_paraxial))
 
     def potential_overview(self):
         wiggle_tracker = ValueTracker(0)

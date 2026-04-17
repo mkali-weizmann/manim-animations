@@ -66,9 +66,35 @@ class Potential(ZoomedScene):
 
         vertical_line_separator = Line(start=UP, end=DOWN)
 
-        hypothetical_quantum_system = Axes(x_range=[-3, 3], y_range=[0, 1.5], x_length=3, y_length=3).shift(2*RIGHT)
-        quantum_system_gaussian = hypothetical_quantum_system.plot(lambda x: np.exp(-x**2), color=RED)
-        self.add(title, mirror_left, mirror_right, mode, vertical_line_separator, hypothetical_quantum_system, quantum_system_gaussian)
+        hypothetical_quantum_system = Axes(x_range=[-3, 3], y_range=[0, 1.5], x_length=4, y_length=1.5,
+                                           axis_config={"include_tip": False}).shift(3*RIGHT)
+        quantum_system_gaussian = always_redraw(lambda: hypothetical_quantum_system.plot(
+            lambda x: np.exp(-x**2) + 0.05 * np.sin(0.4 * x - wiggle_tracker.get_value()),
+            color=RED,
+        ))
+
+        # Field intensity profile on the left mirror: I(y) = exp(-y²/2w²), rotated so domain is vertical
+        spot_size_left = 0.8
+        mirror_field_axes = Axes(
+            x_range=[-3, 3],
+            y_range=[0, 1.2],
+            x_length=2.4,
+            y_length=1.1,
+            axis_config={"include_tip": False},
+        )
+        mirror_field_axes.y_axis.set_stroke(opacity=0)
+        mirror_field_group = VGroup(mirror_field_axes)
+        mirror_field_group.rotate(-PI / 2)
+        mirror_field_group.next_to(mirror_left, LEFT, buff=0.3)
+        mirror_field_group.set_y(0)
+        mirror_field_gaussian = always_redraw(lambda: mirror_field_axes.plot(
+            lambda x, s=spot_size_left: np.exp(-x ** 2 / (2 * s ** 2)) + 0.05 * np.sin(0.4 * x - wiggle_tracker.get_value()),
+            color=RED,
+        ))
+        self.add(title, mirror_left, mirror_right, mode, vertical_line_separator,
+                 hypothetical_quantum_system, quantum_system_gaussian,
+                 mirror_field_group, mirror_field_gaussian)
+        self.play(wiggle_tracker.animate.set_value(3), run_time=3)
 
 
 

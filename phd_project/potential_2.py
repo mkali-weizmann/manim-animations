@@ -96,15 +96,22 @@ class Potential(ZoomedScene, Slide):
         mirror_left = Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI - MIRRORS_NA / 2, angle=MIRRORS_NA,
                           radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)
 
-        dx = MIRRORS_RADIUS / 15
-        x_left  = MIRROR_LEFT_CENTER[0]  - MIRRORS_RADIUS + dx   # left  mirror vertex
-        x_right = MIRROR_RIGHT_CENTER[0] + MIRRORS_RADIUS - dx   # right mirror vertex
-        x_waist = (x_left + x_right) / 2                    # beam waist at cavity midpoint
+        x_waist = (MIRROR_LEFT_CENTER[0] + MIRROR_RIGHT_CENTER[0]) / 2
+
+        def gaussian_mirror_intersection(z0, w0, z_r, z_s, R):
+            r = (w0 / z_r) ** 2
+            A = r + 1
+            B_half = r * z0 + z_s
+            C = w0 ** 2 + r * z0 ** 2 + z_s ** 2 - R ** 2
+            sqrt_disc = np.sqrt(max(B_half ** 2 - A * C, 0))
+            return (B_half - sqrt_disc) / A, (B_half + sqrt_disc) / A
 
         def make_mode_curve(sign):
             na = MODE_NA.get_value()
             w0 = 1 / na / 100
             z_r = w0 / np.tan(np.arcsin(na))
+            x_left, _ = gaussian_mirror_intersection(x_waist, w0, z_r, MIRROR_LEFT_CENTER[0], MIRRORS_RADIUS)
+            _, x_right = gaussian_mirror_intersection(x_waist, w0, z_r, MIRROR_RIGHT_CENTER[0], MIRRORS_RADIUS)
             return ParametricFunction(
                 lambda t, _w0=w0, _zr=z_r: np.array(
                     [t, sign * _w0 * np.sqrt(1 + ((t - x_waist) / _zr) ** 2) + VERTICAL_SHIFT, 0]
@@ -398,7 +405,7 @@ class Potential(ZoomedScene, Slide):
                   FadeIn(p_1_label), FadeIn(p_0_label), Create(planes_group))
         self.next_slide()
         self.play(FadeIn(line_length_label))
-        self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=8, rate_func=linear)
+        self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=30, rate_func=linear)
 
         # Zoomed display and move it to the right place generation:
         self.activate_zooming()
@@ -416,7 +423,6 @@ class Potential(ZoomedScene, Slide):
         self.next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1_TRACKER.get_value() + PI - ZOOMED_ANGLE_RANGE),
                   run_time=1)
-        self.next_slide()
         self.play(Write(r_01_approximation), run_time=1)
         self.next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=8, rate_func=linear)

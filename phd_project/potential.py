@@ -76,9 +76,6 @@ class Potential(ZoomedScene):
         self.play(FadeIn(VGroup(bullet_4, bullet_4b), shift=UP))
         self.play(FadeOut(VGroup(approach_title, bullet_1, bullet_2, bullet_3, bullet_3b, bullet_4, bullet_4b), shift=UP))
 
-
-
-
     def main(self):
         # Basic system generation:
         mirror_right = Arc(arc_center=MIRROR_RIGHT_CENTER, start_angle=-MIRRORS_NA / 2, angle=MIRRORS_NA, radius=MIRRORS_RADIUS, color=COLOR_MIRRORS)

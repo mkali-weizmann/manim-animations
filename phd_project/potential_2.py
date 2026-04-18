@@ -1,11 +1,12 @@
 from manim import *
 from scipy.special import fresnel
+from manim_slides import Slide
 
 tex_template = TexTemplate()
 tex_template.add_to_preamble(r"\usepackage{dsfont}")
 
 UNCONCENTRICITY = 0.7
-KERNEL_QUADRATIC_COEFFICIENT = 70
+KERNEL_QUADRATIC_COEFFICIENT = 120
 MIRRORS_NA = PI / 2
 
 def frensel_ax2_integral(a, x_0, x_1, theta_p_1):
@@ -35,15 +36,22 @@ def find_intersection_with_ray(ray_origin, circle_origin, angle, circle_radius) 
     intersection_point = ray_origin + length * k_vector
     return intersection_point
 
-class Potential(ZoomedScene):
+class Potential(ZoomedScene, Slide):
     def construct(self) -> None:
-        # self.introduction_TOC()
-        #
-        # self.resonators_overview()
-        #
-        # self.potential_overview()
+        self.wait(0.1)
+        self.next_slide()
+
+        self.introduction_TOC()
+
+        self.resonators_overview()
+
+        self.potential_overview()
+
+        self.lemma_intro()
 
         self.derivation()
+
+        self.conclusions()
 
     def introduction_TOC(self):
         title = Text("Wave equation solutions in non-paraxial resonators").scale(0.8).to_edge(UP)
@@ -55,12 +63,18 @@ class Potential(ZoomedScene):
             VGroup(Dot(), Text("Swag").scale(0.7)).arrange(RIGHT, buff=0.2),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.5).next_to(sub_title, DOWN, buff=0.5).to_edge(LEFT).shift(0.5*RIGHT)
 
-        self.play(FadeIn(title))
-        self.play(FadeIn(sub_title))
-        self.play(FadeIn(toc[0]))
-        self.play(FadeIn(toc[1]))
-        self.play(FadeIn(toc[2]))
-        self.play(FadeIn(toc[3]))
+        self.play(FadeIn(title, shift=UP))
+        self.next_slide()
+        self.play(FadeIn(sub_title, shift=UP))
+        self.next_slide()
+        self.play(FadeIn(toc[0], shift=UP))
+        self.next_slide()
+        self.play(FadeIn(toc[1], shift=UP))
+        self.next_slide()
+        self.play(FadeIn(toc[2], shift=UP))
+        self.next_slide()
+        self.play(FadeIn(toc[3], shift=UP))
+        self.next_slide()
         # Fade out everything:
         self.play(FadeOut(title), FadeOut(sub_title), FadeOut(toc))
 
@@ -105,16 +119,20 @@ class Potential(ZoomedScene):
 
         helmholtz_equation = MathTex(r"\nabla^2 E + k^2 E = 0").to_edge(DOWN).shift(0.5*RIGHT)
         paraxial_approximation_equation = MathTex(r"\sin \theta \approx \theta \approx \tan \theta").next_to(helmholtz_equation, RIGHT, buff=0.5)
-        diagonal_stroke_over_paraxial = Line(start=paraxial_approximation_equation.get_corner(DOWN + RIGHT), end=paraxial_approximation_equation.get_corner(UP + LEFT), color=RED)
+        diagonal_stroke_over_paraxial = Line(start=paraxial_approximation_equation.get_corner(DOWN + LEFT), end=paraxial_approximation_equation.get_corner(UP + RIGHT), color=RED)
         arrow = Arrow(start=helmholtz_equation.get_top(), end=mode.get_center() - 0.3*UP, buff=0.1)
-        self.play(FadeIn(title))
+        self.play(FadeIn(title, shift=UP))
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
+        self.next_slide()
         self.play(Create(arrow))
-        self.play(FadeIn(helmholtz_equation))
+        self.play(FadeIn(helmholtz_equation, shift=UP))
+        self.next_slide()
         self.play(Create(paraxial_approximation_equation))
+        self.next_slide()
         self.play(MODE_NA.animate.set_value(0.3), run_time=3)
         self.play(Create(diagonal_stroke_over_paraxial))
+        self.next_slide()
         # Fade out everything:
         self.play(FadeOut(title), FadeOut(mirror_left), FadeOut(mirror_right), FadeOut(mode), FadeOut(helmholtz_equation), FadeOut(arrow), FadeOut(paraxial_approximation_equation), FadeOut(diagonal_stroke_over_paraxial))
 
@@ -194,33 +212,39 @@ class Potential(ZoomedScene):
         # self.add(title, mirror_left, mirror_right, mode, vertical_line_separator,
         #          hypothetical_quantum_system, quantum_system_gaussian,
         #          mirror_field_group, mirror_field_gaussian)
-        self.play(FadeIn(title))
-        self.play(FadeIn(subtitle))
+        self.play(FadeIn(title, shift=UP))
+        self.next_slide()
+        self.play(FadeIn(subtitle, shift=UP))
+        self.next_slide()
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
         label_mirror = MathTex(r"E(y)").scale(0.8).next_to(mirror_field_group, UP, buff=0.2)
         label_quantum = MathTex(r"\psi(x)").scale(0.8).next_to(hypothetical_quantum_system, UP, buff=0.2)
 
+        self.next_slide()
         self.play(Create(mirror_field_group), Create(mirror_field_gaussian))
         self.play(FadeIn(label_mirror))
         self.play(wiggle_tracker.animate.set_value(30), run_time=5)
         wiggle_tracker.set_value(0)
+        self.next_slide()
         self.play(Create(vertical_line_separator))
         self.play(Create(hypothetical_quantum_system), Create(quantum_system_gaussian))
         self.play(FadeIn(label_quantum))
         self.play(wiggle_tracker.animate.set_value(30), run_time=5)
         # Fade out everything:
+        self.next_slide()
         self.play(FadeOut(title), FadeOut(subtitle), FadeOut(mirror_left), FadeOut(mirror_right), FadeOut(mode), FadeOut(vertical_line_separator),
                   FadeOut(hypothetical_quantum_system), FadeOut(quantum_system_gaussian), FadeOut(mirror_field_group), FadeOut(mirror_field_gaussian),
                   FadeOut(label_mirror), FadeOut(label_quantum))
 
-        def lemma_intro():
-            title = Text("Assumption").scale(0.8).to_edge(UP)
-            statement = Text("A field that returns to itself after one roundtrip in the resonator will be an eigenmode").scale(0.7).next_to(title, DOWN, buff=0.5)
-            self.play(FadeIn(title))
-            self.play(FadeIn(statement))
-            self.wait(3)
-            self.play(FadeOut(title), FadeOut(statement))
+    def lemma_intro(self):
+        title = Text("Assumption").scale(0.8).to_edge(UP)
+        statement = Text("A field that returns to itself after one roundtrip\nin the resonator will be an eigenmode").scale(0.7).next_to(title, DOWN, buff=0.5)
+        self.play(FadeIn(title, shift=UP))
+        self.next_slide()
+        self.play(FadeIn(statement, shift=UP))
+        self.next_slide()
+        self.play(FadeOut(title), FadeOut(statement))
 
     def derivation(self):
         ALGEBRAIC_EXPRESSIONS_SCALE = 0.8
@@ -242,16 +266,16 @@ class Potential(ZoomedScene):
         COLOR_P_1 = RED
         COLOR_POTENTIAL = RED
         COLOR_KINETIC_TERM = GREEN
-        DISTANCES_COLOR = BLUE
 
         title = Text("Derivation").scale(0.8).to_edge(UP)
         subtitle = Text("We use the Huygens integral:").scale(0.7).next_to(title, DOWN, buff=0.5)
         huygens_integral_equation = MathTex(r"U\left(\boldsymbol{r}_{1}\right)=\frac{1}{i\lambda}\iint_{S}U\left(\boldsymbol{r}_{0}\right)\frac{e^{ikr_{01}}}{r_{01}}\cos\theta d\boldsymbol{r}_{0}").scale(0.7).next_to(subtitle, DOWN, buff=0.5)
 
-        self.play(FadeIn(title))
-        self.play(FadeIn(subtitle))
-        self.play(Write(huygens_integral_equation))
-
+        self.play(FadeIn(title, shift=UP))
+        self.next_slide()
+        self.play(FadeIn(subtitle, shift=UP))
+        self.play(FadeIn(huygens_integral_equation, shift=UP))
+        self.next_slide()
         self.play(FadeOut(subtitle), title.animate.scale(0.8).to_corner(UL), huygens_integral_equation.animate.scale(0.8).to_corner(UL).shift(0.5*DOWN))
 
         # Basic system generation:
@@ -285,8 +309,7 @@ class Potential(ZoomedScene):
                 p_0_to_p_1_line.get_center(), UP, buff=0.1).rotate(
                 np.arctan2(*(p_1_dot.get_center() - p_0_dot.get_center())[[1, 0]])))
         p_1_label = always_redraw(lambda: Tex(r"$p_{1}$").next_to(p_1_dot.get_center(), UR, buff=0.1))
-        p_1_prime_label = always_redraw(
-            lambda: Tex(r"$p^{\prime}_{1}$").next_to(p_1_prime_dot.get_center(), DL, buff=0.0).scale(0.3))
+        p_1_prime_label = Tex(r"$p^{\prime}_{1}$").next_to(p_1_prime_dot.get_center(), DL, buff=0.0).scale(0.3)
         p_0_label = always_redraw(lambda: Tex(r"$p_{0}$").next_to(p_0_dot, LEFT, buff=0.1))
 
         # Integrand and integral representations' generation:
@@ -333,50 +356,37 @@ class Potential(ZoomedScene):
                         radius=0.03
                         )
         )
-        r_01_approximation = Tex(
-            r"$r_{01}\approx V\left(\boldsymbol{p}_{1}^{\prime}\right)+H\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}$").scale(ALGEBRAIC_EXPRESSIONS_SCALE).next_to(mirror_left, UP)
+        r_01_approximation = MathTex(
+            r"r_{01}\approx {{ V\left(\boldsymbol{p}_{1}^{\prime}\right) }} + {{ H\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2} }}").scale(ALGEBRAIC_EXPRESSIONS_SCALE).next_to(mirror_left, UP)
+        r_01_approximation[1].set_color(COLOR_POTENTIAL)
+        r_01_approximation[3].set_color(COLOR_KINETIC_TERM)
         planes_group = VGroup(box_integrand, box_integral, plane_integrand, plane_integral, box_integrand_label, box_integral_label, phase_representation, phase_representation_dot, integral_representation_path, integral_representation)
 
 
         # p_1 Distances helpers generation:
-        p_1_circle = always_redraw(lambda: DashedVMobject(Circle(arc_center=p_1_dot.get_center(), radius=float(np.linalg.norm(
-            p_1_dot.get_center() - p_1_prime_dot.get_center())), color=COLOR_KINETIC_TERM, stroke_width=0.5),
+        p_1_circle = always_redraw(lambda: DashedVMobject(Arc(arc_center=p_1_dot.get_center(), radius=float(np.linalg.norm(
+            p_1_dot.get_center() - p_1_prime_dot.get_center())), color=COLOR_KINETIC_TERM, stroke_width=0.5, start_angle=PI / 2, angle=PI),
                                                           num_dashes=200, dashed_ratio=0.7))
         p_1_circle_radius_line = always_redraw(
             lambda: DashedLine(p_1_dot.get_center(), p_1_prime_dot.get_center(), color=COLOR_POTENTIAL,
                                stroke_width=0.5, dash_length=2 * PI * float(np.linalg.norm(
                     p_1_dot.get_center() - p_1_prime_dot.get_center())) / 200, dashed_ratio=0.7))
         p_1_circle_radius_label = always_redraw(
-            lambda: Tex(r"$V\left(\boldsymbol{p}_{1}^{\prime}\right)$", color=COLOR_POTENTIAL).next_to(p_1_circle_radius_line.get_center(), DOWN,
+            lambda: Tex(r"$V\left(\boldsymbol{p}_{1}^{\prime}\right)$", color=COLOR_POTENTIAL).next_to(p_1_circle_radius_line.get_center(), UP,
                                                                              buff=0.3).rotate(
-                np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])))
+                np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])).set_opacity(0.8).set_z_index(-1))
         distances_group_p_1 = VGroup(p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label, p_1_prime_dot,
                                      p_1_prime_label)
 
-        # mirror_left Distances helpers generation:
-        # relevant_radius = MIRRORS_RADIUS - UNCONCENTRICITY
-        # mirror_left_circle_right_arc = DashedVMobject(
-        #     Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=-PI / 2, angle=PI, radius=relevant_radius,
-        #         color=COLOR_POTENTIAL, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
-        # mirror_left_circle_left_arc = DashedVMobject(
-        #     Arc(arc_center=MIRROR_LEFT_CENTER, start_angle=PI / 2, angle=PI, radius=relevant_radius,
-        #         color=COLOR_POTENTIAL, stroke_width=0.5), num_dashes=100, dashed_ratio=0.7)
-        # mirror_left_radius_line = DashedLine(MIRROR_LEFT_CENTER,
-        #                                      MIRROR_LEFT_CENTER + (MIRRORS_RADIUS - UNCONCENTRICITY) * RIGHT,
-        #                                      color=COLOR_POTENTIAL, stroke_width=0.5,
-        #                                      dash_length=2 * PI * relevant_radius / 200, dashed_ratio=0.7)
-        # distances_group_mirror_left = VGroup(mirror_left_circle_right_arc, mirror_left_circle_left_arc,
-        #                                      mirror_left_radius_line)  # mirror_left_radius_label
-
         # Integral result label generation:
         huygens_substituted_expansion = MathTex(
-            r"U\left(\boldsymbol{p}_{1}\right)\propto {{ e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)} }}\cdot {{ \iint_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ikH\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS }}").scale(
+            r"U\left(\boldsymbol{p}_{1}\right)\propto {{ e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)} }}\cdot\iint_{S}U\left(\boldsymbol{p}_{0}\right) {{ e^{-ikH\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}} }}dS").scale(
             ALGEBRAIC_EXPRESSIONS_SCALE)
         huygens_substituted_expansion.move_to(huygens_integral_equation.get_center()).align_to(huygens_integral_equation, LEFT)
         huygens_substituted_expansion[1].set_color(COLOR_POTENTIAL)
         huygens_substituted_expansion[3].set_color(COLOR_KINETIC_TERM)
         integral_expression_as_convolution = MathTex(
-            r"U\left(\boldsymbol{p}_{1}\right)\propto {{ e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)} }}\cdot {{ \left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ikH\left(\boldsymbol{p}_{0}\right)^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right) }}").scale(
+            r"U\left(\boldsymbol{p}_{1}\right)\propto {{ e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)} }}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast {{ e^{-ikH\left(\boldsymbol{p}_{0}\right)^{2}} }}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(
             ALGEBRAIC_EXPRESSIONS_SCALE)
         integral_expression_as_convolution.move_to(huygens_integral_equation.get_center()).align_to(huygens_integral_equation, LEFT)
         integral_expression_as_convolution[1].set_color(COLOR_POTENTIAL)
@@ -384,10 +394,10 @@ class Potential(ZoomedScene):
 
                 # Huygens integral introduction
         self.play(Create(mirror_right), Create(mirror_left))
-        self.play(Create(p_1_dot), Create(p_0_to_p_1_line), Create(p_0_dot), FadeIn(line_length_label),
-                  FadeIn(p_1_label), FadeIn(p_0_label))
-        self.add(mirror_right, mirror_left, p_1_dot, p_0_dot, p_0_to_p_1_line, box_integrand, box_integral, box_integral_label, box_integrand_label,
-                 phase_representation, integral_representation_path, integral_representation, line_length_label, phase_representation_dot)
+        self.play(Create(p_1_dot), Create(p_0_to_p_1_line), Create(p_0_dot),
+                  FadeIn(p_1_label), FadeIn(p_0_label), Create(planes_group))
+        self.next_slide()
+        self.play(FadeIn(line_length_label))
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=8, rate_func=linear)
 
         # Zoomed display and move it to the right place generation:
@@ -402,16 +412,20 @@ class Potential(ZoomedScene):
         self.play(Create(distances_group_p_1), mirror_right.animate.set_stroke(width=0.5),
                   mirror_left.animate.set_stroke(width=0.5), p_1_dot.animate.scale(0.5),
                   SCANNING_DOT_RADIUS_TRACKER.animate.set_value(0.04))
+        p_1_prime_label.add_updater(lambda m: m.become(Tex(r"$p^{\prime}_{1}$").next_to(p_1_prime_dot.get_center(), DL, buff=0.0).scale(0.3)))
+        self.next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(THETA_P_1_TRACKER.get_value() + PI - ZOOMED_ANGLE_RANGE),
                   run_time=1)
+        self.next_slide()
         self.play(Write(r_01_approximation), run_time=1)
+        self.next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + MIRRORS_NA / 2), run_time=8, rate_func=linear)
-
         self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6), rate_func=rate_functions.wiggle, run_time=6)
-
+        self.next_slide()
         self.play(FadeOut(huygens_integral_equation, shift=UP), FadeIn(huygens_substituted_expansion, shift=UP))
+        self.next_slide()
         self.play(FadeOut(huygens_substituted_expansion, shift=UP), FadeIn(integral_expression_as_convolution, shift=UP))
-        self.wait(1)
+        self.next_slide()
         self.play(FadeOut(distances_group_p_1, mirror_right, mirror_left,
                           p_1_dot, p_0_dot, p_0_to_p_1_line, line_length_label, planes_group, r_01_approximation, p_0_label, p_1_label),
                   FadeOut(frame), FadeOut(zoomed_display))
@@ -430,7 +444,7 @@ class Potential(ZoomedScene):
             r"{{ = }} \left( {{ \mathds{1}-\frac{i\cdot dt}{\hbar}V\left(x\right) }} \right)\left( {{ \mathds{1}+idt\frac{\hbar}{2m}\nabla^{2} }} \right)\psi\left(x,t\right)+\mathcal{O}\left(dt^{2}\right)",
             tex_template=tex_template).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_4 = MathTex(
-            r"\psi\left(x,t+dt\right) {{ \approx }}\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{ {{ \left[\psi\left(x,t\right)\circledast e^{-i\frac{mx^{2}}{2\hbar dt}}\right] }} }}+\mathcal{O}\left(dt^{2}\right)").scale(
+            r"\psi\left(x,t+dt\right) {{ \approx }}\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}\cdot\underset{\text{Convolution}}{\underbrace{\left[\psi\left(x,t\right)\circledast {{ e^{-i\frac{mx^{2}}{2\hbar dt}} }}\right]}}+\mathcal{O}\left(dt^{2}\right)").scale(
             ALGEBRAIC_EXPRESSIONS_SCALE)
 
         schrodinger_2.shift(schrodinger_1[1].get_center() - schrodinger_2[0].get_center())
@@ -444,16 +458,47 @@ class Potential(ZoomedScene):
         schrodinger_4[5].set_color(COLOR_KINETIC_TERM)
 
         # Schordinger equation analogy animation:
-        self.play(FadeIn(schrodinger_1), run_time=1)
+        self.play(FadeIn(schrodinger_1, shift=UP), run_time=1)
+        self.next_slide()
         self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_2, shift=UP), run_time=1)
+        self.next_slide()
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP), FadeIn(schrodinger_3, shift=UP),
                   run_time=1)
+        self.next_slide()
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP), schrodinger_3.animate.shift(UP),
                   FadeIn(schrodinger_4, shift=UP), run_time=1)
+        self.next_slide()
         self.play(FadeOut(schrodinger_1, shift=UP), FadeOut(schrodinger_2, shift=UP), FadeOut(schrodinger_3, shift=UP),
                   FadeOut(separating_line, shift=UP),
                   integral_expression_as_convolution.animate.move_to(ORIGIN + 1 * UP),
                   schrodinger_4.animate.move_to(ORIGIN + 1 * DOWN), run_time=1)
+        self.next_slide()
+        self.play(FadeOut(integral_expression_as_convolution), FadeOut(schrodinger_4), FadeOut(title))
+
+    def conclusions(self):
+        title = Text("Conclusions").scale(0.8).to_edge(UP)
+
+        conclusions_bullets = VGroup(
+            VGroup(Dot(stroke_color=BLUE), Tex("Aberrations $\iff$ Non-harmonic potential").scale(0.9)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(), Tex("Unstable resonators $\iff$ Non-confining potential").scale(0.9)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(), Tex("Thermal lensing $\iff$ Potential changes and distorts in time" ).scale(0.9)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(), Tex("Optical elements imperfections $\iff$ Also potential distortion").scale(0.9)).arrange(RIGHT, buff=0.2),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.6).next_to(title, DOWN, buff=0.5).to_edge(LEFT).shift(0.5 * RIGHT)
+
+        self.play(FadeIn(title, shift=UP))
+        self.next_slide()
+        self.play(FadeIn(conclusions_bullets[0]))
+        self.next_slide()
+        self.play(FadeIn(conclusions_bullets[1]))
+        self.next_slide()
+        self.play(FadeIn(conclusions_bullets[2]))
+        self.next_slide()
+        self.play(FadeIn(conclusions_bullets[3]))
+        self.next_slide()
+        # Fade out everything:
+        self.play(FadeOut(title), FadeOut(conclusions_bullets))
+
+
 
 
     @staticmethod

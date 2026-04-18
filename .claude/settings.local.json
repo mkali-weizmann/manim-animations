@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m manim -pql phd_project/potential_2.py Potential)"
+    ]
+  }
+}

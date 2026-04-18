@@ -37,5 +37,21 @@ With voiceover (requires to disable caching):
 manim -pql --disable_caching file_name.py scene_object_name
 ```
 
+Convert to slides using:
+1. Make the class of the scene inherit from, and possible other manim types of scenes `Slide` like so:
+```python
+from manim import *
+from manim_slides import Slide
+class Potential(ZoomedScene, Slide):
+```
+2. Then, run the following command in the terminal:
+```bash
+python -m manim_slides convert ClassName slides/presentation_name.html
+```
+or
+```bash
+python -m manim_slides convert ClassName slides/presentation_name.pptx
+```
+
 ## Note!
 Having the folder in Dropbox causes troubles - both in the generation of Tex files, and in making a slide show!

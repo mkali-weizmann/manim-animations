@@ -370,12 +370,17 @@ class Potential(ZoomedScene):
 
         # Integral result label generation:
         huygens_substituted_expansion = MathTex(
-            r"U\left(\boldsymbol{p}_{1}\right)\propto e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)}\cdot\iint_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ikH\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS").scale(
+            r"U\left(\boldsymbol{p}_{1}\right)\propto {{ e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)} }}\cdot {{ \iint_{S}U\left(\boldsymbol{p}_{0}\right)e^{-ikH\left(\boldsymbol{p}_{0}-\boldsymbol{p}_{1}^{\prime}\right)^{2}}dS }}").scale(
             ALGEBRAIC_EXPRESSIONS_SCALE)
         huygens_substituted_expansion.move_to(huygens_integral_equation.get_center()).align_to(huygens_integral_equation, LEFT)
+        huygens_substituted_expansion[1].set_color(COLOR_POTENTIAL)
+        huygens_substituted_expansion[3].set_color(COLOR_KINETIC_TERM)
         integral_expression_as_convolution = MathTex(
-            r"U\left(\boldsymbol{p}_{1}\right)\propto e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)}\cdot\left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ikH\left(\boldsymbol{p}_{0}\right)^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right)").scale(
-            ALGEBRAIC_EXPRESSIONS_SCALE).move_to(huygens_integral_equation.get_center()).align_to(huygens_integral_equation, LEFT)
+            r"U\left(\boldsymbol{p}_{1}\right)\propto {{ e^{ikV\left(\boldsymbol{p}_{1}^{\prime}\right)} }}\cdot {{ \left[U\left(\boldsymbol{p}_{0}\right)\circledast e^{-ikH\left(\boldsymbol{p}_{0}\right)^{2}}\right]\left(\boldsymbol{p}_{1}^{\prime}\right) }}").scale(
+            ALGEBRAIC_EXPRESSIONS_SCALE)
+        integral_expression_as_convolution.move_to(huygens_integral_equation.get_center()).align_to(huygens_integral_equation, LEFT)
+        integral_expression_as_convolution[1].set_color(COLOR_POTENTIAL)
+        integral_expression_as_convolution[3].set_color(COLOR_KINETIC_TERM)
 
                 # Huygens integral introduction
         self.play(Create(mirror_right), Create(mirror_left))

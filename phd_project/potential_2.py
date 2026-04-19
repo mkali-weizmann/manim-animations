@@ -10,21 +10,23 @@ KERNEL_QUADRATIC_COEFFICIENT = 120
 MIRRORS_NA = PI / 2
 
 # ── Global colour palette ───────────────────────────────────────────────────
-BACKGROUND_COLOR  = ManimColor("#F5F5F5")  # off-white canvas
-GRID_COLOR        = "#D2D2D2"             # light-grey grid lines
-GRID_SPACING      = 0.125                   # scene units between grid lines  (easy to tune)
+BACKGROUND_COLOR  = ManimColor("#F1F1F1")  # off-white canvas
+GRID_COLOR        = "#BFE0DE" #  "#D2D2D2"             # light-grey grid lines
+GRID_SPACING      = 0.11                   # scene units between grid lines  (easy to tune)
 GRID_STROKE_WIDTH = 0.5                   # thin so the grid stays in the background
 
 config.background_color = BACKGROUND_COLOR
 
 FONT_COLOR         = "#1E1E1E"  # near-black for all text / equations
-COLOR_POTENTIAL    = RED_E        # keep: potential term
+COLOR_POTENTIAL    = MAROON_D        # keep: potential term
 COLOR_KINETIC_TERM = GREEN_E     # keep: kinetic term
-COLOR_MIRRORS      = TEAL_E  # "#4466BB"  # steel-blue mirrors
-COLOR_MODE         = RED# "#D48000"  # amber beam envelope (visible on light bg)
+COLOR_MIRRORS      = "#60729e"  # steel-blue mirrors
+COLOR_MODE         = RED_E# "#D48000"  # amber beam envelope (visible on light bg)
 COLOR_INTEGRAL     = PURPLE_E     # keep: integral representation curves
 COLOR_P_1          = RED        # keep: scanning point marker
-COLOR_BULLETS_STROKE = BLUE_D
+COLOR_BULLETS_FILL   = "#E29578"
+COLOR_BULLETS_STROKE = "#006D77"
+
 # ────────────────────────────────────────────────────────────────────────────
 
 
@@ -56,15 +58,19 @@ def find_intersection_with_ray(ray_origin, circle_origin, angle, circle_radius) 
 class Potential(ZoomedScene, Slide):
     def construct(self) -> None:
         self.add(self.make_background_grid())
-
         self.wait(0.1)
         self.next_slide()
 
         self.introduction_TOC()
+
         self.resonators_overview()
+
         self.potential_overview()
+
         self.lemma_intro()
+
         self.derivation()
+
         self.conclusions()
 
     # ── Background grid ─────────────────────────────────────────────────────
@@ -86,13 +92,13 @@ class Potential(ZoomedScene, Slide):
         title = Tex("Wave equation solutions in non-paraxial resonators",
                      color=FONT_COLOR).scale(0.8).to_edge(UP)
         sub_title = Tex("What are we going to have?",
-                         color=FONT_COLOR).next_to(title, DOWN, buff=0.5).scale(0.7)
+                         color=FONT_COLOR).next_to(title, DOWN, buff=0.5).to_edge(LEFT).scale(0.7)
         toc = VGroup(
-            VGroup(Dot(color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE), Tex("Classical physics", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE), Tex("Not a quantum mechanical problem", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE), Tex("Geometry", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE), Tex("Swag", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.5).next_to(sub_title, DOWN, buff=0.5).to_edge(LEFT).shift(0.5*RIGHT)
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Classical physics", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Not a quantum mechanical problem", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Geometry", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Swag", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.5).next_to(sub_title, DOWN, buff=0.5).align_to(sub_title, LEFT)
 
         self.play(FadeIn(title, shift=UP))
         self.next_slide()
@@ -192,7 +198,7 @@ class Potential(ZoomedScene, Slide):
         MIRROR_RIGHT_CENTER = MIRROR_LEFT_CENTER - np.array([_UNCONCENTRICITY, 0, 0])
 
         title    = Tex("Our Claim", color=FONT_COLOR).scale(0.8).to_edge(UP)
-        subtitle = Tex("The eigenmodes on the end mirrors satisfy a schrodinger equation",
+        subtitle = Tex("The eigenmodes on the end mirrors satisfy a Schrödinger equation",
                         color=FONT_COLOR).scale(0.7).next_to(title, DOWN, buff=0.5)
 
         mirror_right = Arc(arc_center=MIRROR_RIGHT_CENTER, start_angle=-_MIRRORS_NA / 2, angle=_MIRRORS_NA,
@@ -470,11 +476,12 @@ class Potential(ZoomedScene, Slide):
         self.next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=8, rate_func=linear)
-        self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6),
-                  rate_func=rate_functions.wiggle, run_time=6)
         self.next_slide()
         self.play(FadeOut(huygens_integral_equation, shift=UP),
                   FadeIn(huygens_substituted_expansion, shift=UP))
+        self.next_slide()
+        self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6),
+                  rate_func=rate_functions.wiggle, run_time=6)
         self.next_slide()
         self.play(FadeOut(huygens_substituted_expansion, shift=UP),
                   FadeIn(integral_expression_as_convolution, shift=UP))
@@ -507,8 +514,8 @@ class Potential(ZoomedScene, Slide):
         ).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_4 = MathTex(
             r"\psi\left(x,t+dt\right) {{ \approx }}"
-            r"\underset{\Tex{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}"
-            r"\cdot\underset{\Tex{Convolution}}{\underbrace{\left[\psi\left(x,t\right)\circledast"
+            r"\underset{\text{Position dependent phase}}{\underbrace{ {{ e^{-\frac{i\cdot dt}{\hbar}V\left(x\right)} }} }}"
+            r"\cdot\underset{\text{Convolution}}{\underbrace{\left[\psi\left(x,t\right)\circledast"
             r" {{ e^{-i\frac{mx^{2}}{2\hbar dt}} }}\right]}}+\mathcal{O}\left(dt^{2}\right)",
             color=FONT_COLOR,
         ).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
@@ -544,18 +551,18 @@ class Potential(ZoomedScene, Slide):
     def conclusions(self):
         title = Tex("Conclusions", color=FONT_COLOR).scale(0.8).to_edge(UP)
         conclusions_bullets = VGroup(
-            VGroup(Dot(color=BLUE),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2),
                    Tex("Aberrations $\iff$ Non-harmonic potential",
-                       color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE).scale(0.9)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=FONT_COLOR),
+                       color=FONT_COLOR).scale(0.9)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2),
                    Tex("Unstable resonators $\iff$ Non-confining potential",
-                       color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE).scale(0.9)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=FONT_COLOR),
+                       color=FONT_COLOR).scale(0.9)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2),
                    Tex("Thermal lensing $\iff$ Potential changes and distorts in time",
-                       color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE).scale(0.9)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=FONT_COLOR),
+                       color=FONT_COLOR).scale(0.9)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2),
                    Tex("Optical elements imperfections $\iff$ Also potential distortion",
-                       color=FONT_COLOR, stroke_color=COLOR_BULLETS_STROKE).scale(0.9)).arrange(RIGHT, buff=0.2),
+                       color=FONT_COLOR).scale(0.9)).arrange(RIGHT, buff=0.2),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.6).next_to(title, DOWN, buff=0.5).to_edge(LEFT).shift(0.5 * RIGHT)
 
         self.play(FadeIn(title, shift=UP))

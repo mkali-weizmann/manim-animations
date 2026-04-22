@@ -27,6 +27,8 @@ COLOR_P_1          = RED        # keep: scanning point marker
 COLOR_BULLETS_FILL   = "#E29578"
 COLOR_BULLETS_STROKE = "#006D77"
 
+ADD_JOKES = False
+
 # ────────────────────────────────────────────────────────────────────────────
 
 
@@ -59,19 +61,19 @@ class Potential(ZoomedScene, Slide):
     def construct(self) -> None:
         self.add(self.make_background_grid())
         self.wait(0.1)
-        self.next_slide()
+        # self.smooth_next_slide()
 
-        self.introduction_TOC()
+        # self.introduction_TOC()
 
-        self.resonators_overview()
+        # self.resonators_overview()
 
-        self.potential_overview()
+        # self.potential_overview()
 
-        self.lemma_intro()
+        # self.lemma_intro()
 
         self.derivation()
 
-        self.conclusions()
+        # self.conclusions()
 
     # ── Background grid ─────────────────────────────────────────────────────
     def make_background_grid(self):
@@ -101,17 +103,18 @@ class Potential(ZoomedScene, Slide):
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.5).next_to(sub_title, DOWN, buff=0.5).align_to(sub_title, LEFT)
 
         self.play(FadeIn(title, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(sub_title, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(toc[0], shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(toc[1], shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(toc[2], shift=UP))
-        self.next_slide()
-        self.play(FadeIn(toc[3], shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
+        if ADD_JOKES:
+            self.play(FadeIn(toc[3], shift=UP))
+            self.smooth_next_slide()
         self.play(FadeOut(title), FadeOut(sub_title), FadeOut(toc))
 
     def resonators_overview(self):
@@ -173,15 +176,15 @@ class Potential(ZoomedScene, Slide):
         self.play(FadeIn(title, shift=UP))
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(Create(arrow))
         self.play(FadeIn(helmholtz_equation, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(Create(paraxial_approximation_equation))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(MODE_NA.animate.set_value(0.3), run_time=3)
         self.play(Create(diagonal_stroke_over_paraxial))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(title), FadeOut(mirror_left), FadeOut(mirror_right), FadeOut(mode),
                   FadeOut(helmholtz_equation), FadeOut(arrow),
                   FadeOut(paraxial_approximation_equation), FadeOut(diagonal_stroke_over_paraxial))
@@ -257,22 +260,22 @@ class Potential(ZoomedScene, Slide):
         label_quantum = MathTex(r"\psi(x)", color=FONT_COLOR).scale(0.8).next_to(hypothetical_quantum_system, UP, buff=0.2)
 
         self.play(FadeIn(title, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(subtitle, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(Create(mirror_field_group), Create(mirror_field_gaussian))
         self.play(FadeIn(label_mirror))
         self.play(wiggle_tracker.animate.set_value(30), run_time=5)
         wiggle_tracker.set_value(0)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(Create(vertical_line_separator))
         self.play(Create(hypothetical_quantum_system), Create(quantum_system_gaussian))
         self.play(FadeIn(label_quantum))
         self.play(wiggle_tracker.animate.set_value(30), run_time=5)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(
             FadeOut(title), FadeOut(subtitle), FadeOut(mirror_left), FadeOut(mirror_right),
             FadeOut(mode), FadeOut(vertical_line_separator),
@@ -286,9 +289,9 @@ class Potential(ZoomedScene, Slide):
             "A field that returns to itself after one roundtrip\nin the resonator will be an eigenmode",
             color=FONT_COLOR).scale(0.7).next_to(title, DOWN, buff=0.5)
         self.play(FadeIn(title, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(statement, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(title), FadeOut(statement))
 
     def derivation(self):
@@ -312,10 +315,27 @@ class Potential(ZoomedScene, Slide):
             color=FONT_COLOR).scale(0.7).next_to(subtitle, DOWN, buff=0.5)
 
         self.play(FadeIn(title, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
+
+        if ADD_JOKES:
+            # Multiplication table 1×1 to 8×8
+            mult_table_data = (
+                [[r"\times"] + [str(j) for j in range(1, 9)]]
+                + [[str(i)] + [str(i * j) for j in range(1, 9)] for i in range(1, 9)]
+            )
+            mult_table = MathTable(
+                mult_table_data,
+                include_outer_lines=True,
+                line_config={"stroke_width": 0.5, "color": FONT_COLOR},
+            ).scale(0.35).move_to(ORIGIN)
+            mult_table.set_color(FONT_COLOR)
+            self.play(FadeIn(mult_table), shift=UP)
+            self.smooth_next_slide()
+            self.play(FadeOut(mult_table), shift=DOWN)
+
         self.play(FadeIn(subtitle, shift=UP))
         self.play(FadeIn(huygens_integral_equation, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(subtitle),
                   title.animate.scale(0.8).to_corner(UL),
                   huygens_integral_equation.animate.scale(0.8).to_corner(UL).shift(0.5 * DOWN))
@@ -418,9 +438,15 @@ class Potential(ZoomedScene, Slide):
             dashed_ratio=0.7))
         p_1_circle_radius_label = always_redraw(lambda: Tex(
             r"$V\left(\boldsymbol{p}_{1}^{\prime}\right)$", color=COLOR_POTENTIAL,
-        ).next_to(p_1_circle_radius_line.get_center(), UP, buff=0.3).rotate(
-            np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])
-        ).set_opacity(0.8).set_z_index(-1))
+        ).move_to(MIRROR_LEFT_CENTER + 0.5*MIRRORS_RADIUS*UP).set_z_index(-1))  # .next_to(p_1_circle_radius_line.get_center(), UP, buff=0.3).rotate(
+            # np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])
+        # ).set_opacity(0.8)
+
+        p_1_circle_radius_label_arrow = always_redraw(lambda: Arrow(
+            start=p_1_circle_radius_label.get_bottom(),
+            end=p_1_circle_radius_line.get_center(),
+            color=COLOR_POTENTIAL, stroke_width=1, buff=0.1).set_opacity(0.8))
+
         distances_group_p_1 = VGroup(
             p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label,
             p_1_prime_dot, p_1_prime_label)
@@ -449,7 +475,7 @@ class Potential(ZoomedScene, Slide):
         self.play(Create(mirror_right), Create(mirror_left))
         self.play(Create(p_1_dot), Create(p_0_to_p_1_line), Create(p_0_dot),
                   FadeIn(p_1_label), FadeIn(p_0_label), Create(planes_group))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(line_length_label))
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=30, rate_func=linear)
@@ -469,23 +495,23 @@ class Potential(ZoomedScene, Slide):
         p_1_prime_label.add_updater(lambda m: m.become(
             Tex(r"$p^{\prime}_{1}$", color=FONT_COLOR).next_to(
                 p_1_prime_dot.get_center(), DL, buff=0.0).scale(0.3)))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(
             THETA_P_1_TRACKER.get_value() + PI - ZOOMED_ANGLE_RANGE), run_time=1)
         self.play(Write(r_01_approximation), run_time=1)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=8, rate_func=linear)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(huygens_integral_equation, shift=UP),
                   FadeIn(huygens_substituted_expansion, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6),
                   rate_func=rate_functions.wiggle, run_time=6)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(huygens_substituted_expansion, shift=UP),
                   FadeIn(integral_expression_as_convolution, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(distances_group_p_1, mirror_right, mirror_left,
                           p_1_dot, p_0_dot, p_0_to_p_1_line, line_length_label,
                           planes_group, r_01_approximation, p_0_label, p_1_label),
@@ -531,20 +557,20 @@ class Potential(ZoomedScene, Slide):
         schrodinger_4[5].set_color(COLOR_KINETIC_TERM)
 
         self.play(FadeIn(schrodinger_1, shift=UP), run_time=1)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_2, shift=UP), run_time=1)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP),
                   FadeIn(schrodinger_3, shift=UP), run_time=1)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP),
                   schrodinger_3.animate.shift(UP), FadeIn(schrodinger_4, shift=UP), run_time=1)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(schrodinger_1, shift=UP), FadeOut(schrodinger_2, shift=UP),
                   FadeOut(schrodinger_3, shift=UP), FadeOut(separating_line, shift=UP),
                   integral_expression_as_convolution.animate.move_to(ORIGIN + 1 * UP),
                   schrodinger_4.animate.move_to(ORIGIN + 1 * DOWN), run_time=1)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(integral_expression_as_convolution), FadeOut(schrodinger_4),
                   FadeOut(title))
 
@@ -566,15 +592,15 @@ class Potential(ZoomedScene, Slide):
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.6).next_to(title, DOWN, buff=0.5).to_edge(LEFT).shift(0.5 * RIGHT)
 
         self.play(FadeIn(title, shift=UP))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(conclusions_bullets[0]))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(conclusions_bullets[1]))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(conclusions_bullets[2]))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(conclusions_bullets[3]))
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(title), FadeOut(conclusions_bullets))
 
     # ── Static helpers ───────────────────────────────────────────────────────
@@ -605,3 +631,7 @@ class Potential(ZoomedScene, Slide):
             pass
         border = SurroundingRectangle(plane, buff=0, color=FONT_COLOR)
         return VGroup(plane, border)
+    
+    def smooth_next_slide(self, delay=0.1):
+        self.wait(delay)
+        self.next_slide()

@@ -68,19 +68,19 @@ class Potential(ZoomedScene, Slide):
     def construct(self) -> None:
         self.add(self.make_background_grid())
         self.wait(0.1)
-        # self.smooth_next_slide()
-        #
-        # self.introduction_TOC()
-        #
-        # self.resonators_overview()
-        #
-        # self.potential_overview()
-        #
-        # self.lemma_intro()
+        self.smooth_next_slide()
+
+        self.introduction_TOC()
+
+        self.resonators_overview()
+
+        self.potential_overview()
+
+        self.lemma_intro()
 
         self.derivation()
 
-        # self.conclusions()
+        self.conclusions()
 
     # ── Background grid ─────────────────────────────────────────────────────
     def make_background_grid(self):
@@ -389,19 +389,19 @@ class Potential(ZoomedScene, Slide):
             lambda: Tex(r"$p_{0}$", color=FONT_COLOR).next_to(p_0_dot, LEFT, buff=0.1))
 
         box_integrand = self.SmallAxesBox(2.5).to_corner(DR)
-        box_integrand_label = Tex(r"$e^{ikr_{01}}$").next_to(box_integrand, UP, buff=0.1)
+        box_integrand_label = Tex(r"$e^{ikr_{01}}$", color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)
         box_integral       = self.SmallAxesBox(2.5).next_to(box_integrand, UP, buff=1)
         box_integral_label = Tex(r"$\iint_{S}\ldots d\boldsymbol{r}_{0}$",
                                  color=FONT_COLOR).next_to(box_integral, UP, buff=0.1)
         plane_integrand = box_integrand[0]
         plane_integral  = box_integral[0]
-        integrand_labels = plane_integrand.get_axis_labels(
-            x_label=MathTex(r"\Re", color=FONT_COLOR).scale(0.5),
-            y_label=MathTex(r"\Im", color=FONT_COLOR).scale(0.5),
+        integrand_labels = VGroup(
+            MathTex(r"\Re", color=FONT_COLOR).scale(0.5).move_to(plane_integrand.c2p(1.7, -0.25)),
+            MathTex(r"\Im", color=FONT_COLOR).scale(0.5).move_to(plane_integrand.c2p(0.25, 1.7)),
         )
-        integral_labels = plane_integral.get_axis_labels(
-            x_label=MathTex(r"\Re", color=FONT_COLOR).scale(0.5),
-            y_label=MathTex(r"\Im", color=FONT_COLOR).scale(0.5),
+        integral_labels = VGroup(
+            MathTex(r"\Re", color=FONT_COLOR).scale(0.5).move_to(plane_integral.c2p(1.7, -0.25)),
+            MathTex(r"\Im", color=FONT_COLOR).scale(0.5).move_to(plane_integral.c2p(0.25, 1.7)),
         )
 
         phase_representation = always_redraw(lambda: Line(
@@ -492,8 +492,11 @@ class Potential(ZoomedScene, Slide):
                   FadeIn(p_1_label), FadeIn(p_0_label), Create(planes_group))
         self.smooth_next_slide()
         self.play(FadeIn(line_length_label))
+        self.play(box_integrand_label.animate.become(box_integrand_label.add_updater(lambda m: m.become(Tex(
+            f"$e^{{ikr_{{01}}}}=e^{{ik\cdot{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}$",
+            color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)))))
         box_integrand_label.add_updater(lambda m: m.become(Tex(
-            f"$e^{{ik\cdot{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}$",
+            f"$e^{{ikr_{{01}}}}=e^{{ik\cdot{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}$",
             color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)))
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=INTEGRATION_ANIMATION_TIME, rate_func=linear)
@@ -518,6 +521,7 @@ class Potential(ZoomedScene, Slide):
             THETA_P_1_TRACKER.get_value() + PI - ZOOMED_ANGLE_RANGE), run_time=1)
         self.play(Write(r_01_approximation), run_time=1)
         self.smooth_next_slide()
+        # Reintegrate again with zoomed screen
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=8, rate_func=linear)
         self.smooth_next_slide()
@@ -525,6 +529,9 @@ class Potential(ZoomedScene, Slide):
                   FadeIn(huygens_substituted_expansion, shift=UP),
                   FadeOut(p_0_to_p_1_line), FadeOut(line_length_label))
         self.smooth_next_slide()
+        # Change point p_1 and see how the integral changes
+        box_integrand_label.clear_updaters()
+        self.play(FadeOut(box_integrand, plane_integrand, box_integrand_label, integrand_labels, phase_representation, phase_representation_dot))
         self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6),
                   rate_func=rate_functions.wiggle, run_time=10)
         self.smooth_next_slide()
@@ -533,22 +540,24 @@ class Potential(ZoomedScene, Slide):
         self.smooth_next_slide()
         p_1_prime_label.clear_updaters()
         self.play(FadeOut(distances_group_p_1, mirror_right, mirror_left,
-                          p_1_dot, p_0_dot, planes_group, r_01_approximation, p_0_label, p_1_label),
+                          p_1_dot, p_0_dot, box_integral, plane_integral, box_integral_label, integral_labels,
+            integral_representation_path, integral_representation, r_01_approximation, p_0_label, p_1_label),
                   FadeOut(frame), FadeOut(zoomed_display))
 
         separating_line = Line(np.array([-7.111, 0, 0]), np.array([7.111, 0, 0]),
                                stroke_width=1, color=FONT_COLOR).next_to(
             integral_expression_as_convolution, DOWN, buff=0.5)
+        self.play(Create(separating_line))
 
         schrodinger_1 = MathTex(
             r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)"
             r"+ {{ \partial_{t}\psi\left(x,t\right) }} \cdot dt+\mathcal{O}\left(dt^{2}\right)",
             color=FONT_COLOR,
-        ).to_corner(DL).shift(0.75 * UP).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        ).to_corner(DL).shift(0.75 * UP).scale(ALGEBRAIC_EXPRESSIONS_SCALE).align_to(integral_expression_as_convolution, LEFT)
         schrodinger_1_b = MathTex(r"{{ \partial_{t}\psi\left(x,t\right) }} =-\frac{i}{\hbar}\mathcal{H}\psi\left(x,t\right)=-\frac{i}{\hbar}\left(-\hbar^{2}\frac{\nabla^{2}}{2m}+V\left(x\right)\right)\psi\left(x,t\right)", color=FONT_COLOR).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_2 = MathTex(
-            r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left( {{ V\left(x\right) }} "
-            r"- {{ \hbar^{2}\frac{\nabla^{2}}{2m} }}  \right)\right)\psi\left(x,t\right)"
+            r"{{ = }} \left(\mathds{1}- {{ \frac{i\cdot dt}{\hbar}\left( }} {{ V\left(x\right) }} "
+            r"- {{ \hbar^{2}\frac{\nabla^{2}}{2m} }} {{ \right) }} \right)\psi\left(x,t\right)"
             r"+\mathcal{O}\left(dt^{2}\right)",
             tex_template=tex_template, color=FONT_COLOR,
         ).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
@@ -572,10 +581,9 @@ class Potential(ZoomedScene, Slide):
         schrodinger_4.shift(schrodinger_1[1].get_center() - schrodinger_4[1].get_center())
         schrodinger_1[3].set_color(COLOR_HAMILTONIAN)
         schrodinger_1_b[0].set_color(COLOR_HAMILTONIAN)
-        schrodinger_2[2].set_color(COLOR_POTENTIAL)
-        schrodinger_2[2].set_color(COLOR_POTENTIAL)
-        schrodinger_2[2].set_color(COLOR_POTENTIAL)
-        schrodinger_2[4].set_color(COLOR_KINETIC_TERM)
+        schrodinger_2[3].set_color(COLOR_POTENTIAL)
+        schrodinger_2[5].set_color(COLOR_KINETIC_TERM)
+        schrodinger_2[6].set_color(COLOR_HAMILTONIAN)
         schrodinger_3[2].set_color(COLOR_POTENTIAL)
         schrodinger_3[4].set_color(COLOR_KINETIC_TERM)
         schrodinger_4[3].set_color(COLOR_POTENTIAL)
@@ -594,7 +602,7 @@ class Potential(ZoomedScene, Slide):
                   schrodinger_3.animate.shift(UP), FadeIn(schrodinger_4, shift=UP), run_time=1)
         self.smooth_next_slide()
         self.play(FadeOut(schrodinger_1, shift=UP), FadeOut(schrodinger_2, shift=UP),
-                  FadeOut(schrodinger_3, shift=UP), FadeOut(separating_line, shift=UP),
+                  FadeOut(schrodinger_3, shift=UP), FadeOut(separating_line),
                   integral_expression_as_convolution.animate.move_to(ORIGIN + 1 * UP),
                   schrodinger_4.animate.move_to(ORIGIN + 1 * DOWN), run_time=1)
         self.smooth_next_slide()

@@ -676,9 +676,9 @@ class Potential(ZoomedScene, Slide):
         title = Tex("Conclusions", color=FONT_COLOR).scale(0.8).to_edge(UP)
 
         # Table geometry: one center divider and no outer borders.
-        divider = Line(UP * 2.95, DOWN * 3.65, color=FONT_COLOR, stroke_width=2)
-        left_col_x = -4.4
-        right_col_x = 2.25
+        divider = Line(np.array([-2.35, 2.95, 0]), np.array([-2.35, -3.65, 0]), color=FONT_COLOR, stroke_width=2)
+        left_col_x = -4.95
+        right_col_x = 1.85
         row_ys = [2.15, 0.85, -1.0, -2.85]  # header, row1, row2, row3
 
         header_left = Tex("physics", color=FONT_COLOR).scale(0.75).move_to((left_col_x, row_ys[0], 0))
@@ -689,14 +689,14 @@ class Potential(ZoomedScene, Slide):
         axes_1 = Axes(
             x_range=[-2.5, 2.5, 1],
             y_range=[0, 4.2, 1],
-            x_length=5.1,
-            y_length=1.7,
+            x_length=4.4,
+            y_length=1.45,
             axis_config={"include_tip": False, "color": FONT_COLOR, "stroke_width": 1.5},
         )
         pot_1 = axes_1.plot(lambda x: 0.55 * x**2 + 0.4, color=COLOR_POTENTIAL, x_range=[-2.3, 2.3])
         gauss_1 = axes_1.plot(lambda x: 2.2 * np.exp(-x**2 / 0.8) + 0.45, color=COLOR_MODE, x_range=[-2.3, 2.3])
-        row1_right_label = Tex("Harmonic potential", color=FONT_COLOR).scale(0.65)
-        row1_right = VGroup(row1_right_label, VGroup(axes_1, pot_1, gauss_1)).arrange(DOWN, buff=0.12)
+        row1_right_label = Tex("Harmonic potential", color=FONT_COLOR).scale(0.6)
+        row1_right = VGroup(row1_right_label, VGroup(axes_1, pot_1, gauss_1)).arrange(RIGHT, buff=0.35)
         row1_right.move_to((right_col_x, row_ys[1], 0))
 
         # Row 2: non-harmonic perturbation on top of x^2.
@@ -705,8 +705,8 @@ class Potential(ZoomedScene, Slide):
         axes_2 = Axes(
             x_range=[-2.5, 2.5, 1],
             y_range=[0, 4.2, 1],
-            x_length=5.1,
-            y_length=1.7,
+            x_length=4.4,
+            y_length=1.45,
             axis_config={"include_tip": False, "color": FONT_COLOR, "stroke_width": 1.5},
         )
         A, B, C = 0.12, 0.08, 0.06
@@ -715,8 +715,8 @@ class Potential(ZoomedScene, Slide):
             color=COLOR_KINETIC_TERM,
             x_range=[-2.3, 2.3],
         )
-        row2_right_label = Tex("Non harmonic potentials", color=FONT_COLOR).scale(0.65)
-        row2_right = VGroup(row2_right_label, VGroup(axes_2, non_harmonic_curve)).arrange(DOWN, buff=0.12)
+        row2_right_label = Tex("Non harmonic\npotentials", color=FONT_COLOR).scale(0.58)
+        row2_right = VGroup(row2_right_label, VGroup(axes_2, non_harmonic_curve)).arrange(RIGHT, buff=0.35)
         row2_right.move_to((right_col_x, row_ys[2], 0))
 
         # Row 3: meta-stable landscape.
@@ -724,13 +724,13 @@ class Potential(ZoomedScene, Slide):
         axes_3 = Axes(
             x_range=[-2.1, 2.1, 1],
             y_range=[-13, 2.5, 4],
-            x_length=5.1,
-            y_length=1.7,
+            x_length=4.4,
+            y_length=1.45,
             axis_config={"include_tip": False, "color": FONT_COLOR, "stroke_width": 1.5},
         )
-        metastable_curve = axes_3.plot(lambda x: x**2 - x**4, color=COLOR_INTEGRAL, x_range=[-2, 2])
-        row3_right_label = Tex("meta stable states", color=FONT_COLOR).scale(0.65)
-        row3_right = VGroup(row3_right_label, VGroup(axes_3, metastable_curve)).arrange(DOWN, buff=0.12)
+        metastable_curve = axes_3.plot(lambda x: x**2 - x**4, color=COLOR_INTEGRAL, x_range=[-1.2, 1.2])
+        row3_right_label = Tex("meta stable\nstates", color=FONT_COLOR).scale(0.58)
+        row3_right = VGroup(row3_right_label, VGroup(axes_3, metastable_curve)).arrange(RIGHT, buff=0.35)
         row3_right.move_to((right_col_x, row_ys[3], 0))
 
         table_group = VGroup(

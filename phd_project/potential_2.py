@@ -15,6 +15,16 @@ GRID_COLOR        = "#BFE0DE" #  "#D2D2D2"             # light-grey grid lines
 GRID_SPACING      = 0.11                   # scene units between grid lines  (easy to tune)
 GRID_STROKE_WIDTH = 0.5                   # thin so the grid stays in the background
 
+# ---------- Global colors ----------
+NUCLEUS_COLOR = RED
+ELECTRON_COLOR = BLUE
+ORBIT_COLOR = GRAY_B
+
+# ---------- Global sizing ----------
+ATOM_WIDTH = 0.2
+NUCLEUS_RADIUS = 0.025
+ELECTRON_RADIUS = 0.012
+
 config.background_color = BACKGROUND_COLOR
 
 FONT_COLOR         = "#1E1E1E"  # near-black for all text / equations
@@ -68,19 +78,19 @@ class Potential(ZoomedScene, Slide):
     def construct(self) -> None:
         self.add(self.make_background_grid())
         self.wait(0.1)
-        self.smooth_next_slide()
-
-        self.introduction_TOC()
-
+        # self.smooth_next_slide()
+        #
+        # self.introduction_TOC()
+        #
         self.resonators_overview()
+        #
+        # self.potential_overview()
+        #
+        # self.lemma_intro()
 
-        self.potential_overview()
+        # self.derivation()
 
-        self.lemma_intro()
-
-        self.derivation()
-
-        self.conclusions()
+        # self.conclusions()
 
     # ── Background grid ─────────────────────────────────────────────────────
     def make_background_grid(self):
@@ -98,7 +108,7 @@ class Potential(ZoomedScene, Slide):
 
     # ── Slides ───────────────────────────────────────────────────────────────
     def introduction_TOC(self):
-        title = Tex("Wave equation solutions in non-paraxial resonators",
+        title = Tex("Diffraction theory of focusing resonators",
                      color=FONT_COLOR).scale(0.8).to_edge(UP)
         sub_title = Tex("What are we going to have?",
                          color=FONT_COLOR).next_to(title, DOWN, buff=0.5).to_edge(LEFT).scale(0.7)
@@ -181,9 +191,55 @@ class Potential(ZoomedScene, Slide):
         arrow = Arrow(start=helmholtz_equation.get_top(), end=mode.get_center() - 0.3 * UP,
                       buff=0.1, color=FONT_COLOR)
 
+        nucleus = Dot(point=np.array([x_waist, VERTICAL_SHIFT, 0]), radius=NUCLEUS_RADIUS, color=NUCLEUS_COLOR)
+
+        orbit_1 = Ellipse(
+            width=ATOM_WIDTH,
+            height=ATOM_WIDTH * 0.45,
+            color=ORBIT_COLOR,
+            stroke_width=0.5,
+            arc_center=np.array([x_waist, VERTICAL_SHIFT, 0]),
+
+        )
+
+        orbit_2 = Ellipse(
+            width=ATOM_WIDTH,
+            height=ATOM_WIDTH * 0.45,
+            color=ORBIT_COLOR,
+            stroke_width=0.5,
+            arc_center=np.array([x_waist, VERTICAL_SHIFT, 0]),
+        ).rotate(PI / 2)
+
+        electron_1 = Dot(
+            orbit_1.point_from_proportion(0),
+            radius=ELECTRON_RADIUS,
+            color=ELECTRON_COLOR,
+        )
+
+        electron_2 = Dot(
+            orbit_2.point_from_proportion(0.5),
+            radius=ELECTRON_RADIUS,
+            color=ELECTRON_COLOR,
+        )
+
+        atom = VGroup(orbit_1, orbit_2, nucleus, electron_1, electron_2)
+        atom.set_width(ATOM_WIDTH)
+
         self.play(FadeIn(title, shift=UP))
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
+        self.play(FadeIn(atom, shift=UP))
+
+        self.next_slide(loop=True)
+
+        electron_1.add_updater(
+            lambda m: m.move_to(orbit_1.point_from_proportion(self.time % 1))
+        )
+
+        electron_2.add_updater(
+            lambda m: m.move_to(orbit_2.point_from_proportion((self.time + 0.5) % 1))
+        )
+        self.wait(1)
         self.smooth_next_slide()
         self.play(Create(arrow))
         self.play(FadeIn(helmholtz_equation, shift=UP))
@@ -492,9 +548,14 @@ class Potential(ZoomedScene, Slide):
                   FadeIn(p_1_label), FadeIn(p_0_label), Create(planes_group))
         self.smooth_next_slide()
         self.play(FadeIn(line_length_label))
-        self.play(box_integrand_label.animate.become(box_integrand_label.add_updater(lambda m: m.become(Tex(
-            f"$e^{{ikr_{{01}}}}=e^{{ik\cdot{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}$",
-            color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)))))
+
+        val = np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center())
+        new_label = Tex(
+            "$e^{ikr_{01}}=e^{ik\\cdot" + f"{val:.2f}" + "}$",
+            color=FONT_COLOR,
+        ).next_to(box_integrand, UP, buff=0.1)
+        # animate replacing the old label with the new one
+        self.play(box_integrand_label.animate.become(new_label))
         box_integrand_label.add_updater(lambda m: m.become(Tex(
             f"$e^{{ikr_{{01}}}}=e^{{ik\cdot{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}$",
             color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)))
@@ -544,7 +605,7 @@ class Potential(ZoomedScene, Slide):
             integral_representation_path, integral_representation, r_01_approximation, p_0_label, p_1_label),
                   FadeOut(frame), FadeOut(zoomed_display))
 
-        separating_line = Line(np.array([-7.111, 0, 0]), np.array([7.111, 0, 0]),
+        separating_line = Line(np.array([-7.111, 0, 0]), np.array([15, 0, 0]),
                                stroke_width=1, color=FONT_COLOR).next_to(
             integral_expression_as_convolution, DOWN, buff=0.5)
         self.play(Create(separating_line))
@@ -581,9 +642,11 @@ class Potential(ZoomedScene, Slide):
         schrodinger_4.shift(schrodinger_1[1].get_center() - schrodinger_4[1].get_center())
         schrodinger_1[3].set_color(COLOR_HAMILTONIAN)
         schrodinger_1_b[0].set_color(COLOR_HAMILTONIAN)
-        schrodinger_2[3].set_color(COLOR_POTENTIAL)
-        schrodinger_2[5].set_color(COLOR_KINETIC_TERM)
-        schrodinger_2[6].set_color(COLOR_HAMILTONIAN)
+        schrodinger_2[2].set_color(COLOR_HAMILTONIAN)
+        schrodinger_2[4].set_color(COLOR_POTENTIAL)
+        schrodinger_2[5].set_color(COLOR_HAMILTONIAN)
+        schrodinger_2[6].set_color(COLOR_KINETIC_TERM)
+        schrodinger_2[8].set_color(COLOR_HAMILTONIAN)
         schrodinger_3[2].set_color(COLOR_POTENTIAL)
         schrodinger_3[4].set_color(COLOR_KINETIC_TERM)
         schrodinger_4[3].set_color(COLOR_POTENTIAL)

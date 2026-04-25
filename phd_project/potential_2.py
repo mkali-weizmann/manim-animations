@@ -28,6 +28,12 @@ COLOR_BULLETS_FILL   = "#E29578"
 COLOR_BULLETS_STROKE = "#006D77"
 
 ADD_JOKES = False
+FAST_MODE = True
+
+if FAST_MODE:
+    INTEGRATION_ANIMATION_TIME = 3
+else:
+    INTEGRATION_ANIMATION_TIME = 30
 
 # ────────────────────────────────────────────────────────────────────────────
 
@@ -62,13 +68,13 @@ class Potential(ZoomedScene, Slide):
         self.add(self.make_background_grid())
         self.wait(0.1)
         # self.smooth_next_slide()
-
+        #
         # self.introduction_TOC()
-
+        #
         # self.resonators_overview()
-
+        #
         # self.potential_overview()
-
+        #
         # self.lemma_intro()
 
         self.derivation()
@@ -95,11 +101,12 @@ class Potential(ZoomedScene, Slide):
                      color=FONT_COLOR).scale(0.8).to_edge(UP)
         sub_title = Tex("What are we going to have?",
                          color=FONT_COLOR).next_to(title, DOWN, buff=0.5).to_edge(LEFT).scale(0.7)
+        swag_txt = "Swag" if ADD_JOKES else ""
         toc = VGroup(
             VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Classical physics", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
             VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Not a quantum mechanical problem", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
             VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Geometry", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
-            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex("Swag", color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
+            VGroup(Dot(color=COLOR_BULLETS_FILL, stroke_color=COLOR_BULLETS_STROKE, stroke_width=2), Tex(swag_txt, color=FONT_COLOR).scale(0.7)).arrange(RIGHT, buff=0.2),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.5).next_to(sub_title, DOWN, buff=0.5).align_to(sub_title, LEFT)
 
         self.play(FadeIn(title, shift=UP))
@@ -438,7 +445,7 @@ class Potential(ZoomedScene, Slide):
             dashed_ratio=0.7))
         p_1_circle_radius_label = always_redraw(lambda: Tex(
             r"$V\left(\boldsymbol{p}_{1}^{\prime}\right)$", color=COLOR_POTENTIAL,
-        ).move_to(MIRROR_LEFT_CENTER + 0.5*MIRRORS_RADIUS*UP).set_z_index(-1))  # .next_to(p_1_circle_radius_line.get_center(), UP, buff=0.3).rotate(
+        ).move_to(MIRROR_LEFT_CENTER + 0.4*MIRRORS_RADIUS*UP).set_z_index(-1))  # .next_to(p_1_circle_radius_line.get_center(), UP, buff=0.3).rotate(
             # np.arctan2(*(p_1_dot.get_center() - p_1_prime_dot.get_center())[[1, 0]])
         # ).set_opacity(0.8)
 
@@ -448,7 +455,7 @@ class Potential(ZoomedScene, Slide):
             color=COLOR_POTENTIAL, stroke_width=1, buff=0.1).set_opacity(0.8))
 
         distances_group_p_1 = VGroup(
-            p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label,
+            p_1_circle, p_1_circle_radius_line, p_1_circle_radius_label, p_1_circle_radius_label_arrow,
             p_1_prime_dot, p_1_prime_label)
 
         huygens_substituted_expansion = MathTex(
@@ -478,7 +485,7 @@ class Potential(ZoomedScene, Slide):
         self.smooth_next_slide()
         self.play(FadeIn(line_length_label))
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
-                  run_time=30, rate_func=linear)
+                  run_time=INTEGRATION_ANIMATION_TIME, rate_func=linear)
 
         self.activate_zooming()
         zoomed_display = self.zoomed_display
@@ -504,16 +511,18 @@ class Potential(ZoomedScene, Slide):
                   run_time=8, rate_func=linear)
         self.smooth_next_slide()
         self.play(FadeOut(huygens_integral_equation, shift=UP),
-                  FadeIn(huygens_substituted_expansion, shift=UP))
+                  FadeIn(huygens_substituted_expansion, shift=UP),
+                  FadeOut(p_0_to_p_1_line), FadeOut(line_length_label))
         self.smooth_next_slide()
         self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6),
-                  rate_func=rate_functions.wiggle, run_time=6)
+                  rate_func=rate_functions.wiggle, run_time=10)
         self.smooth_next_slide()
         self.play(FadeOut(huygens_substituted_expansion, shift=UP),
                   FadeIn(integral_expression_as_convolution, shift=UP))
         self.smooth_next_slide()
+        p_1_prime_label.clear_updaters()
         self.play(FadeOut(distances_group_p_1, mirror_right, mirror_left,
-                          p_1_dot, p_0_dot, p_0_to_p_1_line, line_length_label,
+                          p_1_dot, p_0_dot, line_length_label,
                           planes_group, r_01_approximation, p_0_label, p_1_label),
                   FadeOut(frame), FadeOut(zoomed_display))
 
@@ -523,9 +532,10 @@ class Potential(ZoomedScene, Slide):
 
         schrodinger_1 = MathTex(
             r"\psi\left(x,t+dt\right) {{ = }} \psi\left(x,t\right)"
-            r"+\partial_{t}\psi\left(x,t\right)\cdot dt+\mathcal{O}\left(dt^{2}\right)",
+            r"+ {{ \partial_{t}\psi\left(x,t\right) }} \cdot dt+\mathcal{O}\left(dt^{2}\right)",
             color=FONT_COLOR,
         ).to_corner(DL).shift(0.75 * UP).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
+        schrodinger_1_b = MathTex(r"{{ \partial_{t}\psi\left(x,t\right) }} =-\frac{i}{\hbar}\mathcal{H}\psi\left(x,t\right)=-\frac{i}{\hbar}\left(-\hbar^{2}\frac{\nabla^{2}}{2m}+V\left(x\right)\right)\psi\left(x,t\right)").scale(ALGEBRAIC_EXPRESSIONS_SCALE)
         schrodinger_2 = MathTex(
             r"{{ = }} \left(\mathds{1}-\frac{i\cdot dt}{\hbar}\left( {{ V\left(x\right) }} "
             r"- {{ \hbar^{2}\frac{\nabla^{2}}{2m} }}  \right)\right)\psi\left(x,t\right)"
@@ -546,9 +556,14 @@ class Potential(ZoomedScene, Slide):
             color=FONT_COLOR,
         ).scale(ALGEBRAIC_EXPRESSIONS_SCALE)
 
+        schrodinger_1_b.shift(schrodinger_1[1].get_center() - schrodinger_2[0].get_center())
         schrodinger_2.shift(schrodinger_1[1].get_center() - schrodinger_2[0].get_center())
         schrodinger_3.shift(schrodinger_1[1].get_center() - schrodinger_3[0].get_center())
         schrodinger_4.shift(schrodinger_1[1].get_center() - schrodinger_4[1].get_center())
+        schrodinger_1[3].set_color(PURPLE)
+        schrodinger_1_b[0].set_color(PURPLE)
+        schrodinger_2[2].set_color(COLOR_POTENTIAL)
+        schrodinger_2[2].set_color(COLOR_POTENTIAL)
         schrodinger_2[2].set_color(COLOR_POTENTIAL)
         schrodinger_2[4].set_color(COLOR_KINETIC_TERM)
         schrodinger_3[2].set_color(COLOR_POTENTIAL)
@@ -558,7 +573,9 @@ class Potential(ZoomedScene, Slide):
 
         self.play(FadeIn(schrodinger_1, shift=UP), run_time=1)
         self.smooth_next_slide()
-        self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_2, shift=UP), run_time=1)
+        self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_1_b, shift=UP), run_time=1)
+        self.play(FadeOut(schrodinger_1_b, shift=DOWN), run_time=1)
+        self.play(FadeIn(schrodinger_2, shift=UP), run_time=1)
         self.smooth_next_slide()
         self.play(schrodinger_1.animate.shift(UP), schrodinger_2.animate.shift(UP),
                   FadeIn(schrodinger_3, shift=UP), run_time=1)

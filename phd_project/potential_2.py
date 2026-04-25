@@ -38,8 +38,8 @@ COLOR_BULLETS_FILL   = "#E29578"
 COLOR_BULLETS_STROKE = "#006D77"
 COLOR_HAMILTONIAN = PURPLE
 
-ADD_JOKES = False
-FAST_MODE = True
+ADD_JOKES = True
+FAST_MODE = False
 
 if FAST_MODE:
     INTEGRATION_ANIMATION_TIME = 3
@@ -80,17 +80,17 @@ class Potential(ZoomedScene, Slide):
         self.skip_reversing = True
         self.add(self.make_background_grid())
         self.wait(0.1)
-        # self.smooth_next_slide()
-        #
-        # self.introduction_TOC()
-        #
-        # self.resonators_overview()
-        #
-        # self.potential_overview()
-        #
-        # self.lemma_intro()
+        self.smooth_next_slide()
 
-        # self.derivation()
+        self.introduction_TOC()
+
+        self.resonators_overview()
+
+        self.potential_overview()
+
+        self.lemma_intro()
+
+        self.derivation()
 
         self.conclusions()
 
@@ -447,6 +447,8 @@ class Potential(ZoomedScene, Slide):
         box_integrand = self.SmallAxesBox(2.5).to_corner(DR)
         box_integrand_label = Tex(r"$e^{ikr_{01}}$", color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)
         box_integral       = self.SmallAxesBox(2.5).next_to(box_integrand, UP, buff=1)
+        box_integral_default_label = Tex(r"$\iint_{S}\ldots d\boldsymbol{r}_{0}$",
+                                 color=FONT_COLOR).next_to(box_integral, UP, buff=0.1)
         box_integral_label = Tex(r"$\iint_{S}\ldots d\boldsymbol{r}_{0}$",
                                  color=FONT_COLOR).next_to(box_integral, UP, buff=0.1)
         plane_integrand = box_integrand[0]
@@ -559,6 +561,8 @@ class Potential(ZoomedScene, Slide):
         box_integrand_label.add_updater(lambda m: m.become(Tex(
             f"$e^{{ikr_{{01}}}}=e^{{ik\cdot{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}$",
             color=FONT_COLOR).next_to(box_integrand, UP, buff=0.1)))
+        box_integral_label.add_updater(lambda m: m.become(Tex(f"$\iint^{{{np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}}}_{{S}}\ldots d\\boldsymbol{{r}}_{{0}}$",
+                                 color=FONT_COLOR).next_to(box_integral, UP, buff=0.1)))
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=INTEGRATION_ANIMATION_TIME, rate_func=linear)
 
@@ -592,7 +596,9 @@ class Potential(ZoomedScene, Slide):
         self.smooth_next_slide()
         # Change point p_1 and see how the integral changes
         box_integrand_label.clear_updaters()
-        self.play(FadeOut(box_integrand, plane_integrand, box_integrand_label, integrand_labels, phase_representation, phase_representation_dot))
+        box_integral_label.clear_updaters()
+
+        self.play(FadeOut(box_integrand, plane_integrand, box_integrand_label, integrand_labels, phase_representation, phase_representation_dot), Transform(box_integral_label, box_integral_default_label))
         self.play(THETA_P_1_TRACKER.animate.set_value(PI / 6),
                   rate_func=rate_functions.wiggle, run_time=10)
         self.smooth_next_slide()
@@ -676,16 +682,17 @@ class Potential(ZoomedScene, Slide):
         title = Tex("Conclusions", color=FONT_COLOR).scale(0.8).to_edge(UP)
 
         # Table geometry: one center divider and no outer borders.
+        table_font_size = 30
         divider = Line(np.array([-2.35, 2.95, 0]), np.array([-2.35, -3.65, 0]), color=FONT_COLOR, stroke_width=2)
         left_col_x = -4.95
         right_col_x = 1.85
         row_ys = [2.15, 0.85, -1.0, -2.85]  # header, row1, row2, row3
 
-        header_left = Tex("physics", color=FONT_COLOR).scale(0.75).move_to((left_col_x, row_ys[0], 0))
-        header_right = Tex("Model's representation", color=FONT_COLOR).scale(0.75).move_to((right_col_x, row_ys[0], 0))
+        header_left = Tex("physics", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[0], 0))
+        header_right = Tex("Model's representation", color=FONT_COLOR, font_size=table_font_size).move_to((right_col_x, row_ys[0], 0))
 
         # Row 1: paraxial resonator <-> harmonic potential + Gaussian state.
-        row1_left = Tex("paraxial resonator", color=FONT_COLOR).scale(0.72).move_to((left_col_x, row_ys[1], 0))
+        row1_left = Tex("paraxial resonator", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[1], 0))
         axes_1 = Axes(
             x_range=[-2.5, 2.5, 1],
             y_range=[0, 4.2, 1],
@@ -695,12 +702,12 @@ class Potential(ZoomedScene, Slide):
         )
         pot_1 = axes_1.plot(lambda x: 0.55 * x**2 + 0.4, color=COLOR_POTENTIAL, x_range=[-2.3, 2.3])
         gauss_1 = axes_1.plot(lambda x: 2.2 * np.exp(-x**2 / 0.8) + 0.45, color=COLOR_MODE, x_range=[-2.3, 2.3])
-        row1_right_label = Tex("Harmonic potential", color=FONT_COLOR).scale(0.6)
+        row1_right_label = Tex("Harmonic potential", color=FONT_COLOR, font_size=table_font_size)
         row1_right = VGroup(row1_right_label, VGroup(axes_1, pot_1, gauss_1)).arrange(RIGHT, buff=0.35)
         row1_right.move_to((right_col_x, row_ys[1], 0))
 
         # Row 2: non-harmonic perturbation on top of x^2.
-        row2_left = Tex("Aberrations\\\\deformations\\\\thermal lensing", color=FONT_COLOR).scale(0.64)
+        row2_left = Tex("Aberrations\\\\deformations\\\\thermal lensing", color=FONT_COLOR, font_size=table_font_size)
         row2_left.move_to((left_col_x, row_ys[2], 0))
         axes_2 = Axes(
             x_range=[-2.5, 2.5, 1],
@@ -709,29 +716,48 @@ class Potential(ZoomedScene, Slide):
             y_length=1.45,
             axis_config={"include_tip": False, "color": FONT_COLOR, "stroke_width": 1.5},
         )
-        A, B, C = 0.12, 0.08, 0.06
+        A, B, C = 0.12, 0.09, 0.07
         non_harmonic_curve = axes_2.plot(
-            lambda x: 0.55 * x**2 + A * np.sin(3 * x) + B * np.sin(4 * x) + C * np.sin(5 * x) + 0.45,
-            color=COLOR_KINETIC_TERM,
+            lambda x: 0.55 * x**2 + A * np.sin(3 * x) + B * np.sin(5 * x) + C * np.sin(7 * x) + 0.45,
+            color=COLOR_POTENTIAL,
             x_range=[-2.3, 2.3],
         )
-        row2_right_label = Tex("Non harmonic\npotentials", color=FONT_COLOR).scale(0.58)
-        row2_right = VGroup(row2_right_label, VGroup(axes_2, non_harmonic_curve)).arrange(RIGHT, buff=0.35)
+        distorted_gauss_2 = axes_2.plot(
+            lambda x: (2.05 * np.exp(-x**2 / 0.85)) * (1 - 0.20 * np.sin(5 * x) + 0.08 * np.sin(7 * x)) + 0.45,
+            color=COLOR_MODE,
+            x_range=[-2.3, 2.3],
+        )
+        row2_right_label = Tex("Non harmonic\npotentials", color=FONT_COLOR, font_size=table_font_size)
+        row2_right = VGroup(row2_right_label, VGroup(axes_2, non_harmonic_curve, distorted_gauss_2)).arrange(RIGHT, buff=0.35)
         row2_right.move_to((right_col_x, row_ys[2], 0))
 
         # Row 3: meta-stable landscape.
-        row3_left = Tex("meta-stable resonators", color=FONT_COLOR).scale(0.72).move_to((left_col_x, row_ys[3], 0))
+        row3_left = Tex("meta-stable resonators", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[3], 0))
         axes_3 = Axes(
-            x_range=[-2.1, 2.1, 1],
-            y_range=[-13, 2.5, 4],
+            x_range=[-2.5, 2.5, 1],
+            y_range=[-4, 4.2, 2],
             x_length=4.4,
             y_length=1.45,
             axis_config={"include_tip": False, "color": FONT_COLOR, "stroke_width": 1.5},
         )
-        metastable_curve = axes_3.plot(lambda x: x**2 - x**4, color=COLOR_INTEGRAL, x_range=[-1.2, 1.2])
-        row3_right_label = Tex("meta stable\nstates", color=FONT_COLOR).scale(0.58)
+        metastable_curve = axes_3.plot(lambda x: 2*x**2 - 0.4 * x**4, color=COLOR_POTENTIAL, x_range=[-2.5, 2.5])
+        row3_right_label = Tex("meta stable\nstates", color=FONT_COLOR, font_size=table_font_size)
         row3_right = VGroup(row3_right_label, VGroup(axes_3, metastable_curve)).arrange(RIGHT, buff=0.35)
         row3_right.move_to((right_col_x, row_ys[3], 0))
+
+        # Align all plots together and pin each plot to the left edge.
+        for row_right in (row1_right, row2_right, row3_right):
+            row_right[1].to_edge(RIGHT)
+        row2_right[1].align_to(row1_right[1], LEFT)
+        row3_right[1].align_to(row1_right[1], LEFT)
+
+        # Keep the manual row heights and label-to-plot spacing.
+        row1_right[1].set_y(row_ys[1])
+        row2_right[1].set_y(row_ys[2])
+        row3_right[1].set_y(row_ys[3])
+        row1_right[0].next_to(row1_right[1], LEFT, buff=0.35).set_y(row_ys[1]).shift(0.5*LEFT)
+        row2_right[0].set_y(row_ys[2]).set_x(row1_right[0].get_x())
+        row3_right[0].set_y(row_ys[3]).set_x(row1_right[0].get_x())
 
         table_group = VGroup(
             divider,

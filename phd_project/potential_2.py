@@ -77,7 +77,6 @@ def find_intersection_with_ray(ray_origin, circle_origin, angle, circle_radius) 
 class Potential(ZoomedScene, Slide):
     def construct(self) -> None:
         # Avoid manim-slides reverse-video post-processing errors on Windows paths.
-        self.skip_reversing = True
         self.add(self.make_background_grid())
         self.wait(0.1)
         self.smooth_next_slide()
@@ -223,6 +222,20 @@ class Potential(ZoomedScene, Slide):
             radius=ELECTRON_RADIUS,
             color=ELECTRON_COLOR,
         )
+        electron_orbit_tracker = ValueTracker(0)
+        electron_1.add_updater(
+            lambda m: m.move_to(
+                orbit_1.point_from_proportion(electron_orbit_tracker.get_value() % 1)
+            )
+        )
+
+        electron_2.add_updater(
+            lambda m: m.move_to(
+                orbit_2.point_from_proportion(
+                    (electron_orbit_tracker.get_value() + 0.5) % 1
+                )
+            )
+        )
 
         atom = VGroup(orbit_1, orbit_2, nucleus, electron_1, electron_2)
         atom.set_width(ATOM_WIDTH)
@@ -230,19 +243,15 @@ class Potential(ZoomedScene, Slide):
         self.play(FadeIn(title, shift=UP))
         self.play(Create(mirror_left), Create(mirror_right))
         self.play(Create(mode))
+        self.smooth_next_slide(auto_next=True)
         self.play(FadeIn(atom, shift=UP))
 
         self.next_slide(loop=True)
-
-        electron_1.add_updater(
-            lambda m: m.move_to(orbit_1.point_from_proportion(self.time % 1))
-        )
-
-        electron_2.add_updater(
-            lambda m: m.move_to(orbit_2.point_from_proportion((self.time + 0.5) % 1))
-        )
-        self.wait(1)
-        self.smooth_next_slide()
+        self.play(electron_orbit_tracker.animate.set_value(1), run_time=1, rate_func=linear)
+        self.next_slide()
+        electron_1.clear_updaters()
+        electron_2.clear_updaters()
+        self.play(FadeOut(atom, shift=DOWN))
         self.play(Create(arrow))
         self.play(FadeIn(helmholtz_equation, shift=UP))
         self.smooth_next_slide()
@@ -430,13 +439,18 @@ class Potential(ZoomedScene, Slide):
                   + MIRRORS_RADIUS * np.cos(SCANNING_DOT_TRACKER.get_value()) * RIGHT
                   + MIRRORS_RADIUS * np.sin(SCANNING_DOT_TRACKER.get_value()) * UP))
 
-        p_0_to_p_1_line = always_redraw(
-            lambda: Line(p_0_dot.get_center(), p_1_dot.get_center(), color=FONT_COLOR))
-        line_length_label = always_redraw(lambda: Tex(
+        p_0_to_p_1_line = Line(p_0_dot.get_center(), p_1_dot.get_center(), color=FONT_COLOR)
+        line_length_label = Tex(
             f"$r_{{01}}={np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}$",
             color=FONT_COLOR,
         ).next_to(p_0_to_p_1_line.get_center(), UP, buff=0.1).rotate(
-            np.arctan2(*(p_1_dot.get_center() - p_0_dot.get_center())[[1, 0]])))
+            np.arctan2(*(p_1_dot.get_center() - p_0_dot.get_center())[[1, 0]]))
+        p_0_to_p_1_line.add_updater(lambda m: m.become(Line(p_0_dot.get_center(), p_1_dot.get_center(), color=FONT_COLOR)))
+        line_length_label.add_updater(lambda m:  m.become(Tex(
+            f"$r_{{01}}={np.linalg.norm(p_0_dot.get_center() - p_1_dot.get_center()):.2f}$",
+            color=FONT_COLOR,
+        ).next_to(p_0_to_p_1_line.get_center(), UP, buff=0.1).rotate(
+            np.arctan2(*(p_1_dot.get_center() - p_0_dot.get_center())[[1, 0]]))))
         p_1_label = always_redraw(
             lambda: Tex(r"$p_{1}$", color=FONT_COLOR).next_to(p_1_dot.get_center(), UR, buff=0.1))
         p_1_prime_label = Tex(r"$p^{\prime}_{1}$", color=FONT_COLOR).next_to(
@@ -590,6 +604,8 @@ class Potential(ZoomedScene, Slide):
         self.play(SCANNING_DOT_TRACKER.animate.set_value(PI + _MIRRORS_NA / 2),
                   run_time=8, rate_func=linear)
         self.smooth_next_slide()
+        # p_0_to_p_1_line.clear_updaters()
+        # line_length_label.clear_updaters()
         self.play(FadeOut(huygens_integral_equation, shift=UP),
                   FadeIn(huygens_substituted_expansion, shift=UP),
                   FadeOut(p_0_to_p_1_line), FadeOut(line_length_label))
@@ -661,6 +677,7 @@ class Potential(ZoomedScene, Slide):
         self.play(FadeIn(schrodinger_1, shift=UP), run_time=1)
         self.smooth_next_slide()
         self.play(schrodinger_1.animate.shift(UP), FadeIn(schrodinger_1_b, shift=UP), run_time=1)
+        self.smooth_next_slide()
         self.play(FadeOut(schrodinger_1_b, shift=DOWN), run_time=1)
         self.play(FadeIn(schrodinger_2, shift=UP), run_time=1)
         self.smooth_next_slide()
@@ -688,11 +705,11 @@ class Potential(ZoomedScene, Slide):
         right_col_x = 1.85
         row_ys = [2.15, 0.85, -1.0, -2.85]  # header, row1, row2, row3
 
-        header_left = Tex("physics", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[0], 0))
+        header_left = Tex("Physics", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[0], 0))
         header_right = Tex("Model's representation", color=FONT_COLOR, font_size=table_font_size).move_to((right_col_x, row_ys[0], 0))
 
         # Row 1: paraxial resonator <-> harmonic potential + Gaussian state.
-        row1_left = Tex("paraxial resonator", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[1], 0))
+        row1_left = Tex("Paraxial resonator", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[1], 0))
         axes_1 = Axes(
             x_range=[-2.5, 2.5, 1],
             y_range=[0, 4.2, 1],
@@ -732,7 +749,7 @@ class Potential(ZoomedScene, Slide):
         row2_right.move_to((right_col_x, row_ys[2], 0))
 
         # Row 3: meta-stable landscape.
-        row3_left = Tex("meta-stable resonators", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[3], 0))
+        row3_left = Tex("Meta-stable resonators", color=FONT_COLOR, font_size=table_font_size).move_to((left_col_x, row_ys[3], 0))
         axes_3 = Axes(
             x_range=[-2.5, 2.5, 1],
             y_range=[-4, 4.2, 2],
@@ -741,7 +758,7 @@ class Potential(ZoomedScene, Slide):
             axis_config={"include_tip": False, "color": FONT_COLOR, "stroke_width": 1.5},
         )
         metastable_curve = axes_3.plot(lambda x: 2*x**2 - 0.4 * x**4, color=COLOR_POTENTIAL, x_range=[-2.5, 2.5])
-        row3_right_label = Tex("meta stable\nstates", color=FONT_COLOR, font_size=table_font_size)
+        row3_right_label = Tex("Meta stable\nstates", color=FONT_COLOR, font_size=table_font_size)
         row3_right = VGroup(row3_right_label, VGroup(axes_3, metastable_curve)).arrange(RIGHT, buff=0.35)
         row3_right.move_to((right_col_x, row_ys[3], 0))
 
@@ -813,6 +830,6 @@ class Potential(ZoomedScene, Slide):
         border = SurroundingRectangle(plane, buff=0, color=FONT_COLOR)
         return VGroup(plane, border)
     
-    def smooth_next_slide(self, delay=0.1):
+    def smooth_next_slide(self, delay=0.1, **kwargs):
         self.wait(delay)
-        self.next_slide()
+        self.next_slide(**kwargs)

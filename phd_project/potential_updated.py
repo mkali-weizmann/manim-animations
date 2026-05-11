@@ -181,10 +181,12 @@ class Potential(ZoomedScene, Slide):
         mode_lower = always_redraw(lambda: make_mode_curve(-1))
         mode = VGroup(mode_upper, mode_lower)
 
-        helmholtz_equation = MathTex(r"\nabla^2 E + k^2 E = 0",
-                                     color=FONT_COLOR).to_edge(DOWN).shift(0.5 * RIGHT)
-        paraxial_approximation_equation = MathTex(r"\sin \theta \approx \theta \approx \tan \theta",
-                                                   color=FONT_COLOR).next_to(helmholtz_equation, RIGHT, buff=0.5)
+        helmholtz_equation = MathTex(r"\nabla^2 E + k^2 E = 0", color=FONT_COLOR)
+        paraxial_approximation_equation = MathTex(
+            r"\sin \theta \approx \theta \approx \tan \theta", color=FONT_COLOR
+        )
+        equations_group = VGroup(helmholtz_equation, paraxial_approximation_equation).arrange(RIGHT, buff=0.5)
+        equations_group.to_edge(DOWN)
         diagonal_stroke_over_paraxial = Line(
             start=paraxial_approximation_equation.get_corner(DOWN + LEFT),
             end=paraxial_approximation_equation.get_corner(UP + RIGHT),
@@ -260,7 +262,7 @@ class Potential(ZoomedScene, Slide):
         self.play(MODE_NA.animate.set_value(0.3), run_time=3)
         self.play(Create(diagonal_stroke_over_paraxial))
         self.smooth_next_slide()
-        self.play(FadeOut(title, mirror_left, mirror_right, mode, helmholtz_equation, arrow, paraxial_approximation_equation, diagonal_stroke_over_paraxial, atom))
+        self.play(FadeOut(title, mirror_left, mirror_right, mode, helmholtz_equation, arrow, paraxial_approximation_equation, diagonal_stroke_over_paraxial))
 
     def potential_overview(self):
         wiggle_tracker   = ValueTracker(0)

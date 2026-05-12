@@ -53,6 +53,7 @@ COLOR_PERTURBED_AMPLITUDE = BLUE
 COLOR_PHASE_SHIFT_AMPLITUDE = PURPLE_B
 COLOR_SCANNING_DOT = GREEN
 COLOR_OPTICAL_ELEMENTS = TEAL_E
+COLOR_BACKGROUND = BLACK
 ZOOM_RATIO = 0.3
 POSITION_TITLE = np.array([-6, 2.5, 0])
 POSITION_ENERGY_FILTER = (POSITION_CAMERA - WIDTH_CAMERA/2*RIGHT + POSITION_LENS_2 + 0.25 * RIGHT) / 2
@@ -311,12 +312,12 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
 def create_focus_arrow_object(point: np.ndarray):
     return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
 
-BACKGROUND_COLOR = "#29505B"
+
 
 # class Microscope(MovingCameraScene, VoiceoverScene):
 class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
-        self.camera.background_color = BACKGROUND_COLOR
+        self.camera.background_color = COLOR_BACKGROUND
         # self.set_speech_service(GTTSService(transcription_model='base'))
         # # self.set_speech_service(
         # #     AzureService(
@@ -330,7 +331,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #
         self.wait(1)
         self.next_slide()
-        title_0 = Tex("kasdasd", color=BLACK).to_corner(UL).scale(0.5)
+        title_0 = Tex("", color=BLACK).to_corner(UL).scale(0.5)
         title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
         title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
         title_3 = Tex("3) Waves Decomposition").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
@@ -1033,26 +1034,26 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                   run_time=1, rate_func=linear)
         # # END INDENTATION
 
-        with self.voiceover(
-                text="""Let's see what happens when we rotate the laser slightly and put two different wavelengths of light.
-                The red lines of the laser represent nodes of high intensity.""") as tracker:
-            # self.next_slide()
-            self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
-            # self.next_slide()
-            self.remove(laser_waves)
-            self.add(rotated_laser_waves)
+        # with self.voiceover(
+        #         text="""Let's see what happens when we rotate the laser slightly and put two different wavelengths of light.
+        #         The red lines of the laser represent nodes of high intensity.""") as tracker:
+        self.next_slide()
+        self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
+        self.next_slide()
+        self.remove(laser_waves)
+        self.add(rotated_laser_waves)
         # # END INDENTATION
+
         # with self.voiceover(
         #         text="""Since there are now two different wavelengths,
         #                 the intensity beats, and the intensity nodes propagate in space.""") as tracker:
-
         self.next_slide(loop=True)
-        self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
-                  TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
-                  run_time=tracker.get_remaining_duration(), rate_func=linear)
+        # self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
+        #           TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
+        #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
                   TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
-                  run_time=4, rate_func=linear)
+                  run_time=4, rate_func=linear)  # SLIDES
         self.next_slide()
         # END INDENTATION
 

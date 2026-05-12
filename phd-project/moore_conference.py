@@ -527,6 +527,7 @@ class SchematicScene(Slide, MovingCameraScene):
         ZOOM_RATIO = 10
 
         self.next_slide()
+        # START OF IMPORTANT PART:
         self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.set(width=14.222 / ZOOM_RATIO).move_to(POSITION_WAIST + 0.2 * LEFT)])
 
         laser_tilt = np.pi / 6

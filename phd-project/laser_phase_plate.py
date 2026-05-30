@@ -7,7 +7,7 @@ from typing import Union, Optional, Callable
 from manim_voiceover.services.gtts import GTTSService
 from manim_voiceover.services.azure import AzureService
 
-# manim -pql slides/scene.py Microscope --disable_caching
+# manim -pql phd-project/laser_phase_plate.py LaserPhasePlate
 # manim-slides convert Microscope slides/presentation.html
 
 
@@ -312,9 +312,9 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
 def create_focus_arrow_object(point: np.ndarray):
     return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
 
-
-# class Microscope(MovingCameraScene, VoiceoverScene):
-class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
+BOOKMARK = 20
+# class LaserPhasePlate(MovingCameraScene, VoiceoverScene):
+class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
         self.camera.background_color = COLOR_BACKGROUND
         # self.set_speech_service(GTTSService(transcription_model='base'))
@@ -330,7 +330,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #
         self.wait(1)
         self.next_slide()
-        title_0 = Tex("", color=BLACK).to_corner(UL).scale(0.5)
+        title_0 = Tex("asd", color=BLACK, opacity=0).scale(0.5).to_corner(UL)
         title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
         title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
         title_3 = Tex("3) Waves Decomposition").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
@@ -349,14 +349,16 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #         text="Today we are going to talk about Transmission Electron Microscope image enhancement, using free electron-photon ponderomotive interaction.") as tracker:  #
         self.wait(1)
         self.play(FadeIn(bad_title, shift=DOWN))
-        # self.next_slide()
+        self.next_slide()
         # with self.voiceover(
         #         text="This name is not very catchy. Simply speaking, we are going to see how <bookmark mark='A'/> Shooting laser on electrons makes images good.<bookmark mark='B'/>") as tracker:  #
         #     self.wait_until_bookmark("A")
         self.play(FadeOut(bad_title, shift=DOWN), FadeIn(good_title, shift=DOWN))
-        self.next_slide()
+        self.next_slide(auto_next=True)
             # self.wait_until_bookmark("B")
         self.play(FadeOut(good_title, shift=DOWN))
+        if BOOKMARK < 1:
+            return
         # END INDENTATION
 
         ###############################################################################################################
@@ -431,21 +433,21 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
-                  TRACKER_TIME.animate.increment_value(1),
+                  TRACKER_TIME.animate.increment_value(1/2),
                   run_time=1, rate_func=linear)
         self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
         #           run_time=tracker.time_until_bookmark('B'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide()
+        self.next_slide(auto_next=True)
         self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
-                  TRACKER_TIME.animate.increment_value(1),
+                  TRACKER_TIME.animate.increment_value(1/2),
                   run_time=1, rate_func=linear)
         self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
         #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide()
+        self.next_slide(auto_next=True)
         self.play(focus_arrow.animate.become(
             create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
                   TRACKER_TIME.animate.increment_value(1),
@@ -495,11 +497,9 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #                 <bookmark mark='A'/> Since the optics copy the field exactly as it is, the intensity pattern
         #                 on the camera equals exactly to the pattern right after the sample""") as tracker:
         self.play(FadeIn(focus_arrow))
-        self.next_slide()
         self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT + HEIGHT_CAMERA / 2 * UP + 0.05 * UP - 0.15*RIGHT)))
         self.next_slide()
         self.play(Create(ax_2), Write(labels_2),  run_time=2)
-        self.next_slide()
         self.play(Create(scanning_dot_2), Create(scanning_dot_x_axis_2))
         # self.wait_until_bookmark('A')
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=tracker.get_remaining_duration())  # VOICEOVER
@@ -509,13 +509,13 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                                  ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1, focus_arrow)))
         TRACKER_SCANNING_SAMPLE.set_value(0)
         # END INDENTATION
-
+        if BOOKMARK < 2:
+            return
         # ################################################################################################################
         # # Phase object explanation:
         phase_image = ImageMobject(np.uint8([[2, 100], [40, 5], [170, 50]])).move_to(POSITION_SAMPLE)
         phase_image.width = WIDTH_SAMPLE
         phase_image.set_z_index(sample.get_z_index() - 1)
-        self.next_slide()
         self.play(FadeOut(title_0, shift=dy * UP),
                   title_1.animate.move_to([title_1.get_center()[0], y_0, 0]),
                   title_2.animate.move_to([title_2.get_center()[0], y_1, 0]),
@@ -583,7 +583,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1),
-                  run_time=1, rate_func=linear)  # SLIDES
+                  run_time=2, rate_func=linear)  # SLIDES
         self.next_slide()
         # END INDENTATION
 
@@ -626,7 +626,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                 AMPLITUDE_SIZE * np.sin(
                     PHASE_SHIFT_AMPLITUDE * np.sin(PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_SAMPLE.get_value())))).set_z_index(
             line_complex_amplitude.z_index + 1))
-        self.wait(1)
         # with self.voiceover(
         #         text="""Let's observe the effect of the phase object on the wave in the complex plane of amplitude.
         #         If we could scan the field right after the object we would see the phase delay induced by the sample <bookmark mark='A'/> as a rotation in the complex plane.
@@ -641,7 +640,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         complex_amplitude_ax_group = VGroup(ax_complex_amplitude, labels_complex_amplitude)
         complex_amplitude_graph_group = VGroup(complex_amplitude_ax_group, circ_complex_amplitude,
                                                line_complex_amplitude, dot_complex_amplitude)
-        self.next_slide()
         # self.wait_until_bookmark('A')
         # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(tracker.time_until_bookmark('B')), run_time=4)  # VOICEOVER
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)  # SLIDES
@@ -653,7 +651,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         constant_intensity_function = ax_2.plot(lambda x: 0.3, color=COLOR_INTENSITIES)
         camera_scanner_group.add(constant_intensity_function)
         camera_scanner_group.remove(amplitude_graph_2)
-        self.next_slide()
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(constant_intensity_function), run_time=max(tracker.get_remaining_duration() - 2, 1))  # VOICEOVER
         self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(constant_intensity_function), run_time=2)  # SLIDES
         self.play(focus_arrow.animate.become(Arrow(start=ax_2.c2p(-0.05, 0.3) - np.array([np.sqrt(2)*0.9, 0, 0]), end=ax_2.c2p(-0.05, 0.3), color=RED)))
@@ -664,7 +661,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                                       FadeOut)
         TRACKER_SCANNING_CAMERA.set_value(0)
         # END INDENTATION
-
+        if BOOKMARK < 3:
+            return
         # ################################################################################################################
         # # Magnified complex plane and presenting the perturbance approach:
         # with self.voiceover(
@@ -681,7 +679,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                   titles_square.animate.set_width(title_3.width + 0.1).move_to([title_3.get_center()[0], y_1, 0])
                   )  # ,
         # self.wait_until_bookmark('A')
-        self.next_slide()
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)
         # self.wait(tracker.time_until_bookmark('B'))
         self.next_slide()
@@ -711,7 +708,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(FadeIn(tex), FadeIn(line_amplitude_perturbation))
         # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(2), run_time=max(4, tracker.get_remaining_duration()))  # VOICEOVER
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)  # SLIDES
-        self.wait(0.3)
+        # self.wait(0.3)
         self.next_slide()
         # # END INDENTATION
 
@@ -726,7 +723,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                   FadeOut(tex))
         line_complex_amplitude.clear_updaters()
         # Fourier decomposition of the outgoing wave:
-        self.next_slide()
         self.play(FadeIn(microscope_VGroup), FadeIn(phase_image), FadeOut(complex_amplitude_graph_group))
 
         sample_outgoing_unperturbed_waves = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
@@ -801,7 +797,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
             width=HEIGHT_CAMERA,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
-        self.next_slide()
         self.updated_object_animation([sample_outgoing_waves_moises,
                                        gaussian_beam_waves_moises,
                                        second_lens_outgoing_waves_moises], FadeOut)
@@ -816,15 +811,18 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                                        second_lens_outgoing_waves_purterbed_1,
                                        second_lens_outgoing_waves_purterbed_2
                                        ], FadeIn)
-        self.next_slide()
+        self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.play(TRACKER_TIME.animate.increment_value(2), FadeIn(focus_arrow, shift=0.2*DOWN), run_time=2, rate_func=linear)
+        self.next_slide(auto_next=True)
+        self.play(TRACKER_TIME.animate.increment_value(1), FadeIn(focus_arrow, shift=0.2*DOWN), run_time=2, rate_func=linear)
         self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         self.next_slide()
         # # END INDENTATION
+        if BOOKMARK < 4:
+            return
 
         # ################################################################################################################
         # # Add laser:
@@ -871,7 +869,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         # self.wait_until_bookmark('A')
         self.play(FadeOut(focus_arrow))
         self.updated_object_animation(laser_waves, FadeIn)
-        self.wait(0.3)
+        # self.wait(0.3)
         # # END INDENTATION
         # with self.voiceover(
         #         text="""By placing an intense laser right at the focal point of the lens, we can shine laser almost purely
@@ -884,7 +882,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         self.add(gaussian_beam_waves_phase_shifted, second_lens_outgoing_waves_shifted)
         self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1), run_time=1, rate_func=linear)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
         self.next_slide()
         # # END INDENTATION
 
@@ -900,7 +898,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                     gaussian_beam_waves_opacities], FadeOut)
         # # END INDENTATION
         ################################################################################################################
-
+        if BOOKMARK < 5:
+            return
         # Complex plane recap:
         complex_amplitude_graph_group.move_to(POSITION_LENS_1 + RIGHT).scale(2)
         dot_complex_amplitude.scale(0.5)
@@ -930,6 +929,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #         laser such that the rotation is exactly half pi. now - the unperturbed and perturbed components are
         #         parallel to first order!""") as tracker:
         #     self.wait_until_bookmark('A')
+        # CLAUDE: MAKE THE ROTATION OF THE LINE ROTATION AND NOT .BECOME. CURRENTLY THE HEAD OF THE LINE GOES IN STRAIGHT LINE FROM (1, 0) TO (0, 1) AND I WANT IT TO GO THER OVER THE CIRCLE
         self.play(line_complex_amplitude.animate.become(Line(start=ax_complex_amplitude.c2p(0, 0),
                                                              end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
                                                              color=COLOR_PHASE_SHIFT_AMPLITUDE,
@@ -937,7 +937,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
               dot_complex_amplitude.animate.move_to(ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE)))
         self.next_slide()
         # # END INDENTATION
-
+        if BOOKMARK < 6:
+            return
         line_amplitude_perturbation = Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
                                            end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
                                            color=COLOR_PERTURBED_AMPLITUDE,
@@ -948,17 +949,17 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         dot_complex_amplitude.add_updater(lambda m: m.move_to(
             ax_complex_amplitude.c2p(
                 AMPLITUDE_SIZE * (np.cos(PHASE_SHIFT_AMPLITUDE * np.sin(
-                    2 * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
+                    PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
                 AMPLITUDE_SIZE * (np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
-                    2 * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1))
+                    PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1))
         ))
         line_amplitude_perturbation.add_updater(lambda l: l.become(
             Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
                  end=ax_complex_amplitude.c2p(
                      AMPLITUDE_SIZE * (np.cos(PHASE_SHIFT_AMPLITUDE * np.sin(
-                         2 * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
+                         PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_CAMERA.get_value())) - 1),
                      AMPLITUDE_SIZE * (np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
-                         2 * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1)),
+                         PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_CAMERA.get_value())) + 1)),
                  color=COLOR_PERTURBED_AMPLITUDE,
                  z_index=ax_complex_amplitude.z_index + 1)))
         # with self.voiceover(
@@ -966,7 +967,7 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #         constructively, and so the absolute value of the amplitude is no longer constant.""") as tracker:
         self.add(line_amplitude_perturbation)
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())  # VOICEOVER
-        self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)  # SLIDES
+        self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=4)  # SLIDES
         self.next_slide()
         self.updated_object_animation([complex_amplitude_graph_group, scanning_dot_2], FadeOut)
         # # END INDENTATION
@@ -982,7 +983,6 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         #         text="""When the camera will measure the intensity - it will measure a photo which is no longer
         #         constant, and so we are finally able to see the phase object!""") as tracker:
         self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeIn)
-        self.next_slide()
         # self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())  # VOICEOVER
         self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)  # SLIDES
         self.next_slide()
@@ -991,11 +991,12 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         # END INDENTATION
 
         self.updated_object_animation(left_side_group, FadeIn)
-        self.next_slide()
         Dt_e = 3/2
         Dt_l = 1/2
         alpha = np.arcsin(Dt_l * WAVELENGTH_LASER / (Dt_e * WAVELENGTH))
         # ################################################################################################################
+        if BOOKMARK < 7:
+            return
         # Rotate the phase plate:
         rotated_laser_waves = generate_wavefronts_start_to_end_gaussian(
             start_point=POSITION_WAIST + LENGTH_LASER_BEAM * UP * np.cos(alpha) - LENGTH_LASER_BEAM * RIGHT * np.sin(
@@ -1027,10 +1028,11 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         microscope_VGroup += energy_filter
         self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
         self.play(FadeOut(focus_arrow))
+        self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1),
-                  run_time=1, rate_func=linear)
+                  run_time=2, rate_func=linear)
         # # END INDENTATION
 
         # with self.voiceover(
@@ -1055,7 +1057,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
                   run_time=4, rate_func=linear)  # SLIDES
         self.next_slide()
         # END INDENTATION
-
+        if BOOKMARK < 8:
+            return
         # ################################################################################################################
         # # Zoom in:
         # with self.voiceover(
@@ -1107,7 +1110,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         self.next_slide()
         self.play(FadeIn(single_frequency_laser_tex))
         # # END INDENTATION
-
+        if BOOKMARK < 9:
+            return
         # with self.voiceover(
         #         text="""Now, when the laser beats and each electron's wavefront experiences a different intensity, the
         #         phase shift itself is oscillating with time . We are left to show how this time dependent phase retardation, together with the energy
@@ -1144,6 +1148,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
 
         self.updated_object_animation(self.mobjects, FadeOut)
         ################################################################################################################
+        if BOOKMARK < 10:
+            return
         # # Zoom out:
         complex_amplitude_graph_group.scale(1 / ZOOM_RATIO).move_to([-3.5, 0, 0])
         dot_complex_amplitude.move_to(ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE))
@@ -1227,7 +1233,8 @@ class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
         [spectral_line.clear_updaters() for spectral_line in spectral_lines]
         self.play(TRACKER_PHASE_MODULATION_SECONDARY.animate.increment_value(2), run_time=5)
         # # END INDENTATION
-
+        if BOOKMARK < 11:
+            return
         self.next_slide()
         line_amplitude_perturbation.clear_updaters()
         line_amplitude_perturbation.add_updater(lambda l: l.become(

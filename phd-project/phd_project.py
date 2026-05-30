@@ -313,7 +313,6 @@ def create_focus_arrow_object(point: np.ndarray):
     return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
 
 
-
 # class Microscope(MovingCameraScene, VoiceoverScene):
 class Microscope(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):

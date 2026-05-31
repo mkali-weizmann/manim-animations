@@ -156,6 +156,8 @@ def generate_bazier_wavefront(points: np.ndarray,
     if isinstance(colors, (str, utils.color.core.ManimColor)):
         colors = color_to_rgb(colors)
     if colors is not None and opacities is not None:
+        if isinstance(colors, np.ndarray) and colors.ndim == 1:
+            colors = colors[np.newaxis, :]  # broadcast single colour across all control points
         colors = (colors.T * opacities).T
     elif colors is None and opacities is not None:
         colors = np.ones((opacities.size, 3))
@@ -249,7 +251,8 @@ def generate_wavefronts_start_to_end_flat(start_point: Union[np.ndarray, list],
                                           colors_generator: Callable = lambda t: None,
                                           opacities_generator: Callable = lambda t: None,
                                           noise_generator: Callable = lambda t: 0,
-                                          width=1, **kwargs):
+                                          width=1,
+                                          start_parameter: float = 0, **kwargs):
     if isinstance(start_point, list):
         start_point = np.array(start_point)
     if isinstance(end_point, list):
@@ -260,7 +263,6 @@ def generate_wavefronts_start_to_end_flat(start_point: Union[np.ndarray, list],
         width = length / 4
     k_vec = path / length
     center = start_point
-    start_parameter = 0
     end_parameter = length
     points_generator = lambda x: points_generator_plane_wave(x=x, center=center, k_vec=k_vec, width=width,
                                                              noise_generator=noise_generator)
@@ -1065,93 +1067,152 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         text="""Looking closely at the intersection point, we see that one can choose the angle of the
         #         laser tilt such that the electron's wavefronts surf on the intensity nodes. Each electron's wavefront
         #         experiences a constant intensity - which is different intensity than that of the following wavefront""") as tracker:
+        self.camera.frame.save_state()
         self.play(self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.4 * RIGHT))
-        self.next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
-        #           TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)
-        self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
-                  TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2), run_time=4, rate_func=linear)
-        self.next_slide()
-        # # END INDENTATION
 
-
-        self.updated_object_animation([lens_1, sample_outgoing_unperturbed_waves,
-                                       sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2], FadeOut)
-        complex_amplitude_graph_group.scale(ZOOM_RATIO).move_to(
-            self.camera.frame_center - self.camera.frame_width / 4 * RIGHT + ZOOM_RATIO * 0.3 * UP)
+        # --- Beating laser: tilt and interference fringes ---
         lines_original_width = line_complex_amplitude.stroke_width
-        line_complex_amplitude.set_stroke(width=lines_original_width * ZOOM_RATIO)
-        line_amplitude_perturbation.set_stroke(width=lines_original_width * ZOOM_RATIO)
-        circ_complex_amplitude.set_stroke(width=lines_original_width * ZOOM_RATIO)
-        ax_complex_amplitude.set_stroke(width=lines_original_width * ZOOM_RATIO)
-        dot_complex_amplitude.scale(1)
-        graph_background = Rectangle(width=complex_amplitude_graph_group.width + 0.1,
-                                     height=complex_amplitude_graph_group.height + 0.1,
-                                     fill_opacity=1, fill_color=BLACK, stroke_width=0.2).move_to(
-            complex_amplitude_graph_group.get_center())
-        waist_scanning_dot = Dot(color=COLOR_SCANNING_DOT, radius=0.05).move_to(POSITION_WAIST)
-        # with self.voiceover(
-        #     text="""Let's see how the beating affect the phase shift to the unperturbed wave."""):
-        self.next_slide()
-        self.updated_object_animation([complex_amplitude_graph_group, graph_background, waist_scanning_dot], FadeIn)
-        # # END INDENTATION
+        laser_tilt = np.pi / 6
+        laser_spacing = 0.2
+        dots_spacing = laser_spacing / np.sin(laser_tilt) / 2
+        dots_velocity = laser_spacing / np.sin(laser_tilt) * 2
+        laser_global_shift = laser_spacing * 2 / 8
 
-        single_frequency_laser_tex = Tex(r"Constant laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(0.5 * ZOOM_RATIO)
-        double_frequency_laser_tex = Tex(r"Beating laser: $\psi\rightarrow\psi\cdot e^{i\left(\frac{\pi}{2}+A\sin\left(\omega_{\text{beating}}t\right)\right)}$", r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$").scale(0.5 * ZOOM_RATIO)
-        single_frequency_laser_tex[0][14].set_color(COLOR_UNPERTURBED_AMPLITUDE)
-        single_frequency_laser_tex[0][16:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
-        double_frequency_laser_tex[0][13].set_color(COLOR_UNPERTURBED_AMPLITUDE)
-        double_frequency_laser_tex[0][16:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
-        double_frequency_laser_tex[1][1:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
-        single_frequency_laser_tex.next_to(ax_complex_amplitude, 0.3*DOWN).align_to(ax_complex_amplitude, LEFT)
-        double_frequency_laser_tex.next_to(single_frequency_laser_tex, 0.3*DOWN).align_to(single_frequency_laser_tex, LEFT)
-        # with self.voiceover(
-        #         text="""Earlier, we had a single frequency laser, which caused a constant phase shift to the unperturbed wave."""):
-        self.next_slide()
-        self.play(FadeIn(single_frequency_laser_tex))
-        # # END INDENTATION
-        if BOOKMARK < 9:
-            return
-        # with self.voiceover(
-        #         text="""Now, when the laser beats and each electron's wavefront experiences a different intensity, the
-        #         phase shift itself is oscillating with time . We are left to show how this time dependent phase retardation, together with the energy
-        #         filter will attenuate the intensity of the image.
-        #         Since now the electron's wave has a phase delay which oscillates in time, we can use Fourier Transform to decompose it
-        #         <bookmark mark='A'/> into a sum of different components, each one with a trivial well defined frequency.""") as tracker:
-        self.play(FadeIn(double_frequency_laser_tex[0]))
+        laser_lines_1 = generate_wavefronts_start_to_end_flat(
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            tracker=TRACKER_TIME,
+            wavelength=laser_spacing * 2,
+            start_parameter=laser_global_shift,
+            colors_generator=lambda t: RED,
+            opacities_generator=lambda t: np.array([0, 1, 1, 0]),
+            width=0.5,
+            z_index=0)
+        laser_lines_2 = generate_wavefronts_start_to_end_flat(
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_parameter=laser_spacing * 2 / 2 + laser_global_shift,
+            tracker=TRACKER_TIME,
+            wavelength=laser_spacing * 2,
+            colors_generator=lambda t: RED,
+            width=0.5,
+            opacities_generator=lambda t: np.array([0, 0.2, 0.2, 0]),
+            z_index=0)
+        laser_lines_3 = generate_wavefronts_start_to_end_flat(
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_parameter=-laser_spacing * 2 / 4 + laser_global_shift,
+            tracker=TRACKER_TIME,
+            wavelength=laser_spacing * 2,
+            colors_generator=lambda t: RED,
+            width=0.5,
+            opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]),
+            z_index=0)
+        laser_lines_4 = generate_wavefronts_start_to_end_flat(
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_parameter=laser_spacing * 2 / 4 + laser_global_shift,
+            tracker=TRACKER_TIME,
+            wavelength=laser_spacing * 2,
+            colors_generator=lambda t: RED,
+            width=0.5,
+            opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]),
+            z_index=0)
 
-        modulation_rate = 2 * PI
-        dot_complex_amplitude.add_updater(lambda m: m.move_to(
-            ax_complex_amplitude.c2p(AMPLITUDE_SIZE * np.sin(-np.cos(TRACKER_TIME_LASER.get_value() * modulation_rate)),
-                                     AMPLITUDE_SIZE * np.cos(
-                                         np.cos(TRACKER_TIME_LASER.get_value() * modulation_rate)))))
-        line_complex_amplitude.add_updater(lambda l: l.become(
-            Line(start=ax_complex_amplitude.c2p(0, 0),
-                 end=ax_complex_amplitude.c2p(
-                     AMPLITUDE_SIZE * np.sin(-np.cos(TRACKER_TIME_LASER.get_value() * modulation_rate)),
-                     AMPLITUDE_SIZE * np.cos(np.cos(TRACKER_TIME_LASER.get_value() * modulation_rate))),
-                 stroke_width=lines_original_width * ZOOM_RATIO,
-                 color=COLOR_PHASE_SHIFT_AMPLITUDE,
-                 z_index=line_complex_amplitude.z_index + 1)))
+        dots = VGroup(*[Dot(point=POSITION_WAIST + i * DOWN * dots_spacing, radius=0.02,
+                            color=COLOR_PHASE_SHIFT_AMPLITUDE) for i in range(32)])
+        dots.set_z_index(100)
+        dots.add_updater(
+            lambda m: m.move_to(POSITION_WAIST + TRACKER_TIME.get_value() * DOWN * dots_velocity))
+        self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4], FadeIn,
+                                      added_animation=[FadeIn(dots)])
         self.next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.time_until_bookmark('A')),
-        #           TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.time_until_bookmark('A')),
-        #           run_time=tracker.time_until_bookmark('A'), rate_func=linear)
-        self.play(TRACKER_TIME.animate.increment_value(Dt_e*2),
-                  TRACKER_TIME_LASER.animate.increment_value(Dt_l*2),
-                  run_time=4, rate_func=linear)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
-        self.play(FadeIn(double_frequency_laser_tex[1]))
-        self.wait(2)
-        self.next_slide()
-        # # END INDENTATION
 
-        self.updated_object_animation(self.mobjects, FadeOut)
+        # --- Complex plane axes with oscillating amplitude dot ---
+        frame_center = self.camera.frame.get_center()
+        frame_width = self.camera.frame.get_width()
+        axes_center = frame_center + (-frame_width / 3) * RIGHT + 0.05 * DOWN
+        axes_size = 5
+        axes = Axes(
+            x_range=[-1.5, 1.5, 1],
+            y_range=[-1.5, 1.5, 1],
+            x_length=axes_size,
+            y_length=axes_size,
+            axis_config={"include_ticks": True, "stroke_width": 0.1, "include_tip": False},
+        )
+        axes.move_to(axes_center).scale(1 / ZOOM_RATIO)
+        bg_square = Square(side_length=axes_size, fill_color=BLACK, fill_opacity=1.0,
+                           stroke_width=0).scale(1 / ZOOM_RATIO)
+        bg_square.move_to(axes_center)
+        bg_square.set_z_index(10)
+        axes.set_z_index(20)
+        unit_radius = axes.x_axis.unit_size
+        unit_circle = Circle(radius=unit_radius / ZOOM_RATIO, color=TEAL,
+                             stroke_width=0.5).move_to(axes.c2p(0, 0)).set_z_index(30)
+
+        A_mod = np.pi / 6
+        w_mod = 2 * np.pi
+        phi_mod = 0
+
+        def theta(t):
+            return np.pi / 2 + A_mod * np.cos(w_mod * t + phi_mod)
+
+        t0 = TRACKER_TIME.get_value()
+        moving_dot = Dot(point=axes.c2p(np.cos(theta(t0)), np.sin(theta(t0))), radius=0.01,
+                         color=COLOR_PHASE_SHIFT_AMPLITUDE).set_z_index(30)
+        moving_dot.add_updater(lambda m: m.move_to(axes.c2p(
+            np.cos(theta(TRACKER_TIME.get_value())),
+            np.sin(theta(TRACKER_TIME.get_value())))))
+
+        line_to_dot = always_redraw(
+            lambda: Line(axes.c2p(0, 0), moving_dot.get_center(), color=YELLOW,
+                         stroke_width=0.1)).set_z_index(30)
+
+        single_frequency_laser_tex = Tex(
+            r"Monochromatic laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(0.8 / ZOOM_RATIO)
+        double_frequency_laser_tex = Tex(
+            r"Bichromatic laser: $\psi\rightarrow\psi\cdot e^{i\left(\frac{\pi}{2}+A\sin\left(\omega_{\text{beating}}t\right)\right)}$",
+            r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$").scale(0.8 / ZOOM_RATIO)
+        single_frequency_laser_tex[0][21].set_color(COLOR_UNPERTURBED_AMPLITUDE)
+        single_frequency_laser_tex[0][23:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
+        double_frequency_laser_tex[0][18].set_color(COLOR_UNPERTURBED_AMPLITUDE)
+        double_frequency_laser_tex[0][21:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
+        double_frequency_laser_tex[1][1:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
+        double_frequency_laser_tex.next_to(axes, 0.1 * UP).align_to(axes, LEFT).shift(0.05 * RIGHT)
+        single_frequency_laser_tex.next_to(double_frequency_laser_tex, 0.1 * UP).align_to(
+            double_frequency_laser_tex, LEFT)
+
+        axes_vgroup = VGroup(axes, unit_circle, line_to_dot, moving_dot, single_frequency_laser_tex,
+                             double_frequency_laser_tex)
+        self.add(axes, unit_circle, line_to_dot, moving_dot)
+        self.next_slide(loop=True)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
+        self.next_slide()
+        self.play(FadeIn(single_frequency_laser_tex), run_time=2)
+        self.next_slide()
+        self.play(FadeIn(double_frequency_laser_tex[0]), run_time=2)
+        self.next_slide()
+
+        waves_vgroup = Group(
+            incoming_waves, sample, lens_1, lens_2, camera, energy_filter,
+            sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1,
+            sample_outgoing_perturbed_waves_2, gaussian_beam_waves_phase_shifted,
+            gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
+            second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purterbed_1,
+            second_lens_outgoing_waves_purterbed_2, rotated_laser_waves, phase_image)
+        self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4, dots], FadeOut,
+                                      added_animation=[FadeIn(double_frequency_laser_tex[1])])
+        self.next_slide()
+        waves_vgroup.remove(rotated_laser_waves)
+        self.updated_object_animation(waves_vgroup, FadeIn,
+                                      added_animation=[Restore(self.camera.frame), FadeOut(axes_vgroup)])
         ################################################################################################################
         if BOOKMARK < 10:
             return
-        # # Zoom out:
-        complex_amplitude_graph_group.scale(1 / ZOOM_RATIO).move_to([-3.5, 0, 0])
+        # # Zoom out: camera already restored; complex_amplitude_graph_group already at full scale
+        complex_amplitude_graph_group.move_to([-3.5, 0, 0])
         dot_complex_amplitude.move_to(ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE))
         line_complex_amplitude.become(
                       Line(start=ax_complex_amplitude.c2p(0, 0),
@@ -1191,7 +1252,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #                  in a single energy.
         #                  <bookmark mark='A'/> Now, as we turn up the laser, it decomposes into a sum of many energies. <bookmark mark='K'/> As the energy filter will filter out all the energies which are not the original one, we will
         #                  be left with attenuated amplitude of the original unperturbed wave""") as tracker:
-        self.play(self.camera.frame.animate.scale(1 / ZOOM_RATIO).move_to(ORIGIN))
         self.updated_object_animation([complex_amplitude_graph_group, energy_spectrum_axes, labels_complex_amplitude], FadeIn)
         self.updated_object_animation(spectral_lines, FadeIn)
         self.next_slide()
@@ -1279,7 +1339,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
     def updated_object_animation(self,
                                  objects: Union[Mobject, list[Mobject], VGroup],
-                                 animation: Union[Callable, list[Callable]]):
+                                 animation: Union[Callable, list[Callable]],
+                                 added_animation: Optional[list] = None):
         # This function allows running an animation on objects that are locked by some updater to not perform this
         # animation. For example, if an updater determines an object's opacity, then this object is blocked from being
         # faded in, and this function allows it.
@@ -1301,7 +1362,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
         object_updaters = [obj.get_updaters() for obj in decomposed_objects]
         [obj.clear_updaters() for obj in decomposed_objects]
-        self.play(*[a(o) for a, o in zip(animation, decomposed_objects)])
+        extra = added_animation or []
+        self.play(*[a(o) for a, o in zip(animation, decomposed_objects)], *extra)
         for i, obj in enumerate(decomposed_objects):
             for updater in object_updaters[i]:
                 obj.add_updater(updater)

@@ -57,7 +57,7 @@ AMPLITUDE_SIZE = 0.8
 PHASE_SHIFT_AMPLITUDE = 0.2
 COLOR_INTENSITIES = GREEN_E
 COLOR_UNPERTURBED_AMPLITUDE = GOLD_E
-COLOR_PERTURBED_AMPLITUDE = BLUE_E
+COLOR_PERTURBED_AMPLITUDE = BLUE_C
 COLOR_PHASE_SHIFT_AMPLITUDE = PURPLE_E
 COLOR_SCANNING_DOT = GREEN_E
 COLOR_OPTICAL_ELEMENTS = TEAL_E
@@ -165,13 +165,14 @@ def generate_bazier_wavefront(points: np.ndarray,
                               opacities: Optional[np.ndarray] = None, **kwargs):
     if isinstance(colors, (str, utils.color.core.ManimColor)):
         colors = color_to_rgb(colors)
+    bg = color_to_rgb(BACKGROUND_COLOR)
     if colors is not None and opacities is not None:
         if isinstance(colors, np.ndarray) and colors.ndim == 1:
             colors = colors[np.newaxis, :]  # broadcast single color across all control points
-        colors = (colors.T * opacities).T
+        colors = (colors.T * opacities).T + np.outer(1 - opacities, bg)
     elif colors is None and opacities is not None:
         colors = np.ones((opacities.size, 3))
-        colors = (colors.T * opacities).T
+        colors = (colors.T * opacities).T + np.outer(1 - opacities, bg)
     elif colors is None and opacities is None:
         colors = np.ones((1, 3))
     elif colors is not None and opacities is None:
@@ -470,7 +471,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.next_slide(auto_next=True)
         self.play(focus_arrow.animate.become(
             create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
-                  TRACKER_TIME.animate.increment_value(1),
+                  TRACKER_TIME.animate.increment_value(1/2),
                   run_time=1, rate_func=linear)
         self.next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),

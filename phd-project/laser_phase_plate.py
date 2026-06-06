@@ -11,6 +11,14 @@ from typing import Union, Optional, Callable
 # manim-slides convert Microscope slides/presentation.html
 
 
+# ── Global colour palette ───────────────────────────────────────────────────
+BACKGROUND_COLOR  = ManimColor("#F1F1F1")  # off-white canvas
+GRID_COLOR        = "#BFE0DE" #  "#D2D2D2"             # light-grey grid lines
+GRID_SPACING      = 0.11                   # scene units between grid lines  (easy to tune)
+GRID_STROKE_WIDTH = 0.5                   # thin so the grid stays in the background
+
+config.background_color = BACKGROUND_COLOR
+
 TRACKER_TIME = ValueTracker(0)
 TRACKER_SCANNING_SAMPLE = ValueTracker(0)
 TRACKER_SCANNING_CAMERA = ValueTracker(0)
@@ -47,13 +55,14 @@ LENGTH_LASER_BEAM = WAVELENGTH_LASER * 6
 AXES_RANGE = 1
 AMPLITUDE_SIZE = 0.8
 PHASE_SHIFT_AMPLITUDE = 0.2
-COLOR_INTENSITIES = GREEN
-COLOR_UNPERTURBED_AMPLITUDE = GOLD_B
-COLOR_PERTURBED_AMPLITUDE = BLUE
-COLOR_PHASE_SHIFT_AMPLITUDE = PURPLE_B
-COLOR_SCANNING_DOT = GREEN
+COLOR_INTENSITIES = GREEN_E
+COLOR_UNPERTURBED_AMPLITUDE = GOLD_E
+COLOR_PERTURBED_AMPLITUDE = BLUE_E
+COLOR_PHASE_SHIFT_AMPLITUDE = PURPLE_E
+COLOR_SCANNING_DOT = GREEN_E
 COLOR_OPTICAL_ELEMENTS = TEAL_E
-COLOR_BACKGROUND = BLACK
+COLOR_FOCUS_ARROW = RED_E
+FONT_COLOR         = "#1E1E1E"  # near-black for all text / equations
 ZOOM_RATIO = 0.1
 POSITION_TITLE = np.array([-6, 2.5, 0])
 POSITION_ENERGY_FILTER = (POSITION_CAMERA - WIDTH_CAMERA/2*RIGHT + POSITION_LENS_2 + 0.25 * RIGHT) / 2
@@ -101,7 +110,8 @@ def generate_waves(start_point: Union[np.ndarray, list],
     n_waves = int(path_length // wavelength)
     waves = [Line(
         start=start_point + np.mod(i * wavelength, path_length) * path_direction + width / 2 * orthogonal_direction,
-        end=start_point + np.mod(i * wavelength, path_length) * path_direction - width / 2 * orthogonal_direction)
+        end=start_point + np.mod(i * wavelength, path_length) * path_direction - width / 2 * orthogonal_direction,
+        color=FONT_COLOR)
         for i in range(n_waves)]
     waves = VGroup(*waves)
     for i, wave in enumerate(waves):
@@ -157,7 +167,7 @@ def generate_bazier_wavefront(points: np.ndarray,
         colors = color_to_rgb(colors)
     if colors is not None and opacities is not None:
         if isinstance(colors, np.ndarray) and colors.ndim == 1:
-            colors = colors[np.newaxis, :]  # broadcast single colour across all control points
+            colors = colors[np.newaxis, :]  # broadcast single color across all control points
         colors = (colors.T * opacities).T
     elif colors is None and opacities is not None:
         colors = np.ones((opacities.size, 3))
@@ -281,10 +291,11 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
                            axis_x_label: str,
                            axis_y_label: str):
     ax = Axes(x_range=[0, AXES_RANGE, AXES_RANGE / 4], y_range=[0, AXES_RANGE, AXES_RANGE / 4],
-              x_length=WIDTH_SCANNING_AXES, y_length=HEIGHT_SCANNING_AXES, tips=False).move_to(axes_position)
+              x_length=WIDTH_SCANNING_AXES, y_length=HEIGHT_SCANNING_AXES, tips=False,
+              axis_config={"color": FONT_COLOR}).move_to(axes_position)
 
     labels = ax.get_axis_labels(
-        Tex(axis_x_label).scale(0.5), Tex(axis_y_label).scale(0.5)
+        Tex(axis_x_label, color=FONT_COLOR).scale(0.5), Tex(axis_y_label, color=FONT_COLOR).scale(0.5)
     )
 
     def scanning_dot_generator():
@@ -312,13 +323,15 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
         return ax, labels, scanning_dot, scanning_dot_x_axis
 
 def create_focus_arrow_object(point: np.ndarray):
-    return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
+    return Arrow(start=point + [0.9, 0.9, 0], end=point, color=COLOR_FOCUS_ARROW)
 
 BOOKMARK = 20
 # class LaserPhasePlate(MovingCameraScene, VoiceoverScene):
 class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
-        self.camera.background_color = COLOR_BACKGROUND
+        self.add(self.make_background_grid())
+        self.wait(0.1)
+
         # self.set_speech_service(GTTSService(transcription_model='base'))
         # # self.set_speech_service(
         # #     AzureService(
@@ -332,21 +345,22 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #
         self.wait(1)
         self.next_slide()
-        title_0 = Tex("asd", color=BLACK, opacity=0).scale(0.5).to_corner(UL)
-        title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
-        title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
-        title_3 = Tex("3) Waves Decomposition").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
-        title_4 = Tex("4) Phase Mask").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
-        title_5 = Tex("5) Phase Mask + Attenuation").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_0 = Tex("asd", color=WHITE, opacity=0.01).scale(0.5).to_corner(UL)
+        title_1 = Tex("1) Microscope", color=FONT_COLOR).scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
+        title_2 = Tex("2) Phase Object", color=FONT_COLOR).scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_3 = Tex("3) Waves Decomposition", color=FONT_COLOR).scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_4 = Tex("4) Phase Mask", color=FONT_COLOR).scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_5 = Tex("5) Phase Mask + Attenuation", color=FONT_COLOR).scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
         titles_square = Rectangle(height=title_1.height + 0.1,
                                   width=title_1.width + 0.1,
+                                  color=FONT_COLOR,
                                   stroke_width=2).move_to(title_1.get_center()).set_fill(opacity=0)
         y_0 = title_0.get_center()[1]
         y_1 = title_1.get_center()[1]
         dy = 0.47
         focus_arrow = create_focus_arrow_object(point=POSITION_SAMPLE - WIDTH_SAMPLE / 2 * RIGHT + HEIGHT_SAMPLE / 2 * UP - 0.15*RIGHT + 0.05*UP)
-        bad_title = Tex("Transmission Electron Microscope image enhancement\nusing free electron-photon ponderomotive interaction",  color=WHITE).scale(0.75)
-        good_title = Tex("Shooting laser on electrons\nmakes images good", color=WHITE).scale(0.75)
+        bad_title = Tex("Transmission Electron Microscope image enhancement\nusing free electron-photon ponderomotive interaction", color=FONT_COLOR).scale(0.75)
+        good_title = Tex("Shooting laser on electrons\nmakes images good", color=FONT_COLOR).scale(0.75)
         # with self.voiceover(
         #         text="Today we are going to talk about Transmission Electron Microscope image enhancement, using free electron-photon ponderomotive interaction.") as tracker:  #
         self.wait(1)
@@ -369,7 +383,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                end_point=POSITION_SAMPLE,
                                                                tracker=TRACKER_TIME,
                                                                wavelength=WAVELENGTH,
-                                                               width=HEIGHT_SAMPLE
+                                                               width=HEIGHT_SAMPLE,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE
                                                                )
 
         sample_outgoing_waves_opacities = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
@@ -377,6 +392,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                 wavelength=WAVELENGTH,
                                                                                 width=HEIGHT_SAMPLE,
                                                                                 tracker=TRACKER_TIME,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE,
                                                                                 opacities_generator=lambda t: np.array(
                                                                                     [1, np.cos(2 * t) ** 2,
                                                                                      np.sin(2 * t) ** 2,
@@ -386,6 +402,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                      wavelength=WAVELENGTH,
                                                                                      width=HEIGHT_CAMERA,
                                                                                      tracker=TRACKER_TIME,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE,
                                                                                      opacities_generator=lambda
                                                                                          t: np.array(
                                                                                          [1 - 0.1 * np.cos(
@@ -400,6 +417,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                   x_R=X_R,
                                                                                   w_0=W_0,
                                                                                   center=POSITION_WAIST,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE,
                                                                                   opacities_generator=lambda
                                                                                       t: np.array([0,
                                                                                                    0.5 + 0.5 * np.cos(
@@ -531,6 +549,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                              wavelength=WAVELENGTH,
                                                                              width=HEIGHT_SAMPLE,
                                                                              tracker=TRACKER_TIME,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE,
                                                                              noise_generator=lambda t: np.array(
                                                                                  [[0, 0, 0],
                                                                                   [0.1 * np.sin(2 * np.pi * t), 0, 0],
@@ -541,6 +560,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                   wavelength=WAVELENGTH,
                                                                                   width=HEIGHT_CAMERA,
                                                                                   tracker=TRACKER_TIME,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE,
                                                                                   noise_generator=lambda
                                                                                       t: np.array(
                                                                                       [[0.1 * np.cos(t), 0, 0],
@@ -552,6 +572,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         gaussian_beam_waves_moises = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_LENS_1,
                                                                                end_point=POSITION_LENS_2,
                                                                                tracker=TRACKER_TIME,
+                                                               colors_generator=lambda t: COLOR_UNPERTURBED_AMPLITUDE,
                                                                                wavelength=WAVELENGTH,
                                                                                x_R=X_R,
                                                                                w_0=W_0,
@@ -597,15 +618,17 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                     y_range=[-AXES_RANGE, AXES_RANGE, 0.25],
                                     x_length=WIDTH_SCANNING_AXES,
                                     y_length=HEIGHT_SCANNING_AXES,
-                                    tips=False).move_to(POSITION_AXES_1)
+                                    tips=False,
+                                    axis_config={"color": FONT_COLOR}).move_to(POSITION_AXES_1)
         labels_complex_amplitude = ax_complex_amplitude.get_axis_labels(
-            Tex(r'$\text{Re}\left(\psi\right)$').scale(0.3), Tex(r'$\text{Im}\left(\psi\right)$').scale(0.3)
+            Tex(r'$\text{Re}\left(\psi\right)$', color=FONT_COLOR).scale(0.3),
+            Tex(r'$\text{Im}\left(\psi\right)$', color=FONT_COLOR).scale(0.3)
         )
 
         def circ_complex_amplitude_generator():
             return Circle(
                 radius=float(np.linalg.norm(ax_complex_amplitude.c2p((AMPLITUDE_SIZE, 0)) - ax_complex_amplitude.c2p((0, 0)))),
-                color=WHITE, stroke_opacity=0.3).move_to(ax_complex_amplitude.c2p(0, 0))
+                color=FONT_COLOR, stroke_opacity=0.3).move_to(ax_complex_amplitude.c2p(0, 0))
 
         circ_complex_amplitude = always_redraw(circ_complex_amplitude_generator)
 
@@ -616,7 +639,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                     PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_SAMPLE.get_value())),
                                              AMPLITUDE_SIZE * np.sin(PHASE_SHIFT_AMPLITUDE * np.sin(
                                                  PHASE_OBJECT_SPATIAL_FREQUENCY * PI * TRACKER_SCANNING_SAMPLE.get_value()))),
-                color=BLUE_B, z_index=ax_complex_amplitude.z_index + 1)
+                color=BLUE_E, z_index=ax_complex_amplitude.z_index + 1)
             return arrow_complex_amplitude
 
         line_complex_amplitude = always_redraw(arrow_complex_amplitude_generator)
@@ -656,7 +679,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(constant_intensity_function), run_time=max(tracker.get_remaining_duration() - 2, 1))  # VOICEOVER
         self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(constant_intensity_function), run_time=2)  # SLIDES
         self.play(focus_arrow.animate.become(Arrow(start=ax_2.c2p(-0.05, 0.3) - np.array([np.sqrt(2)*0.9, 0, 0]), end=ax_2.c2p(-0.05, 0.3), color=RED)))
-        problem_label = Tex(r'Problem!').scale(0.5).next_to(focus_arrow, LEFT)
+        problem_label = Tex(r'Problem!', color=FONT_COLOR).scale(0.5).next_to(focus_arrow, LEFT)
         self.play(FadeIn(problem_label, shift=0.5*DOWN))
         self.next_slide()
         self.updated_object_animation([microscope_VGroup, phase_image, camera_scanner_group, scanning_dot_1, focus_arrow, problem_label],
@@ -703,7 +726,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                    z_index=ax_complex_amplitude.z_index + 1)),
                                            )
         tex = MathTex(r"\psi_{\text{out}}\left(x\right)="
-                      r"\psi_{\text{unperturbed}}+i\psi_{\text{perturbation}}\left(x\right)").next_to(
+                      r"\psi_{\text{unperturbed}}+i\psi_{\text{perturbation}}\left(x\right)",
+                      color=FONT_COLOR).next_to(
             ax_complex_amplitude.get_bottom(), RIGHT + UP).scale(0.6)
         tex[0][8:20].set_color(COLOR_UNPERTURBED_AMPLITUDE)
         tex[0][22:].set_color(COLOR_PERTURBED_AMPLITUDE)
@@ -1163,10 +1187,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             y_range=[-1.5, 1.5, 1],
             x_length=axes_size,
             y_length=axes_size,
-            axis_config={"include_ticks": True, "stroke_width": 0.1, "include_tip": False},
+            axis_config={"include_ticks": True, "stroke_width": 0.1, "include_tip": False, "color": FONT_COLOR},
         )
         axes.move_to(axes_center).scale(ZOOM_RATIO)
-        bg_square = Square(side_length=axes_size * ZOOM_RATIO, fill_color=BLACK, fill_opacity=1.0,
+        bg_square = Square(side_length=axes_size * ZOOM_RATIO, fill_color=BACKGROUND_COLOR, fill_opacity=1.0,
                            stroke_width=0)
         bg_square.move_to(axes_center)
         bg_square.set_z_index(10)
@@ -1194,10 +1218,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                          stroke_width=0.1)).set_z_index(30)
 
         single_frequency_laser_tex = Tex(
-            r"Monochromatic laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(0.8 * ZOOM_RATIO)
+            r"Monochromatic laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$",
+            color=FONT_COLOR).scale(0.8 * ZOOM_RATIO)
         double_frequency_laser_tex = Tex(
             r"Bichromatic laser: $\psi\rightarrow\psi\cdot e^{i\left(\frac{\pi}{2}+A\sin\left(\omega_{\text{beating}}t\right)\right)}$",
-            r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$").scale(0.8 * ZOOM_RATIO)
+            r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$",
+            color=FONT_COLOR).scale(0.8 * ZOOM_RATIO)
         single_frequency_laser_tex[0][21].set_color(COLOR_UNPERTURBED_AMPLITUDE)
         single_frequency_laser_tex[0][23:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
         double_frequency_laser_tex[0][18].set_color(COLOR_UNPERTURBED_AMPLITUDE)
@@ -1249,10 +1275,11 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                     y_range=[-1, 1, 0.25],
                                     x_length=5,
                                     y_length=5,
-                                    tips=False).move_to([-complex_amplitude_graph_group.get_center()[0], 0, 0])
+                                    tips=False,
+                                    axis_config={"color": FONT_COLOR}).move_to([-complex_amplitude_graph_group.get_center()[0], 0, 0])
 
         labels_complex_amplitude = energy_spectrum_axes.get_axis_labels(
-            Tex(r'$\omega,E$'), Tex(r'$\psi$'))
+            Tex(r'$\omega,E$', color=FONT_COLOR), Tex(r'$\psi$', color=FONT_COLOR))
 
         DELTA_W = 0.2
         spectral_lines_generators = [lambda n=n: Line(start=energy_spectrum_axes.c2p(DELTA_W * n, 0),
@@ -1356,6 +1383,19 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.wait(1)  # SLIDES
         # # END INDENTATION
         self.play(FadeOut(final_title))
+
+    def make_background_grid(self):
+        grid = VGroup()
+        hw = config.frame_width  / 2 + GRID_SPACING
+        hh = config.frame_height / 2 + GRID_SPACING
+        for y in np.arange(-hh, hh + 0.001, GRID_SPACING):
+            grid.add(Line(LEFT * hw, RIGHT * hw,
+                          stroke_width=GRID_STROKE_WIDTH, color=GRID_COLOR).shift(y * UP))
+        for x in np.arange(-hw, hw + 0.001, GRID_SPACING):
+            grid.add(Line(DOWN * hh, UP * hh,
+                          stroke_width=GRID_STROKE_WIDTH, color=GRID_COLOR).shift(x * RIGHT))
+        grid.set_z_index(-10)
+        return grid
 
     def updated_object_animation(self,
                                  objects: Union[Mobject, list[Mobject], VGroup],

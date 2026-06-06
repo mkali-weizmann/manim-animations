@@ -4,8 +4,8 @@ import numpy as np
 from scipy import special
 from typing import Union, Optional, Callable
 # from manim_voiceover import VoiceoverScene
-from manim_voiceover.services.gtts import GTTSService
-from manim_voiceover.services.azure import AzureService
+# from manim_voiceover.services.gtts import GTTSService
+# from manim_voiceover.services.azure import AzureService
 
 # manim -pql phd-project/laser_phase_plate.py LaserPhasePlate
 # manim-slides convert Microscope slides/presentation.html
@@ -54,7 +54,7 @@ COLOR_PHASE_SHIFT_AMPLITUDE = PURPLE_B
 COLOR_SCANNING_DOT = GREEN
 COLOR_OPTICAL_ELEMENTS = TEAL_E
 COLOR_BACKGROUND = BLACK
-ZOOM_RATIO = 0.3
+ZOOM_RATIO = 0.1
 POSITION_TITLE = np.array([-6, 2.5, 0])
 POSITION_ENERGY_FILTER = (POSITION_CAMERA - WIDTH_CAMERA/2*RIGHT + POSITION_LENS_2 + 0.25 * RIGHT) / 2
 VELOCITIES_RATIO = WAVELENGTH_LASER / WAVELENGTH
@@ -1083,20 +1083,26 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         text="""Looking closely at the intersection point, we see that one can choose the angle of the
         #         laser tilt such that the electron's wavefronts surf on the intensity nodes. Each electron's wavefront
         #         experiences a constant intensity - which is different intensity than that of the following wavefront""") as tracker:
+        waves_vgroup = [incoming_waves, sample, lens_1, lens_2, camera, energy_filter,
+            sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1,
+            sample_outgoing_perturbed_waves_2, gaussian_beam_waves_phase_shifted,
+            gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
+            second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purterbed_1,
+            second_lens_outgoing_waves_purterbed_2, rotated_laser_waves, phase_image]
         self.camera.frame.save_state()
-        self.play(self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.4 * RIGHT))
+        self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.2 * RIGHT)])
 
         # --- Beating laser: tilt and interference fringes ---
         lines_original_width = line_complex_amplitude.stroke_width
-        laser_tilt = np.pi / 6
         laser_spacing = 0.2
-        dots_spacing = laser_spacing / np.sin(laser_tilt) / 2
-        dots_velocity = laser_spacing / np.sin(laser_tilt) * 2
+        dots_spacing = laser_spacing / np.sin(alpha) / 2
+        dots_velocity = laser_spacing / np.sin(alpha) * 2
+        alpha_with_respect_to_x = alpha + PI / 2
         laser_global_shift = laser_spacing * 2 / 8
 
         laser_lines_1 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
             tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
             start_parameter=laser_global_shift,
@@ -1105,8 +1111,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             width=0.5,
             z_index=0)
         laser_lines_2 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
             start_parameter=laser_spacing * 2 / 2 + laser_global_shift,
             tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
@@ -1115,8 +1121,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             opacities_generator=lambda t: np.array([0, 0.2, 0.2, 0]),
             z_index=0)
         laser_lines_3 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
             start_parameter=-laser_spacing * 2 / 4 + laser_global_shift,
             tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
@@ -1125,8 +1131,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]),
             z_index=0)
         laser_lines_4 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(laser_tilt), np.sin(laser_tilt), 0]),
+            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
+            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
             start_parameter=laser_spacing * 2 / 4 + laser_global_shift,
             tracker=TRACKER_TIME,
             wavelength=laser_spacing * 2,
@@ -1135,11 +1141,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]),
             z_index=0)
 
-        dots = VGroup(*[Dot(point=POSITION_WAIST + i * DOWN * dots_spacing, radius=0.02,
+        dots = VGroup(*[Dot(point=POSITION_WAIST + i * RIGHT * dots_spacing, radius=0.02,  # ATTENTION - WAS 0.02
                             color=COLOR_PHASE_SHIFT_AMPLITUDE) for i in range(32)])
-        dots.set_z_index(100)
+        # dots.set_z_index(100)
+        TRACKER_TIME.set_value(0)
         dots.add_updater(
-            lambda m: m.move_to(POSITION_WAIST + TRACKER_TIME.get_value() * DOWN * dots_velocity))
+            lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
         self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4], FadeIn,
                                       added_animation=[FadeIn(dots)])
         self.next_slide(loop=True)
@@ -1149,7 +1156,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # --- Complex plane axes with oscillating amplitude dot ---
         frame_center = self.camera.frame.get_center()
         frame_width = self.camera.frame.get_width()
-        axes_center = frame_center + (-frame_width / 3) * RIGHT + 0.05 * DOWN
+        axes_center = frame_center -frame_width / 3 * RIGHT + 1/2 * UP * ZOOM_RATIO
         axes_size = 5
         axes = Axes(
             x_range=[-1.5, 1.5, 1],
@@ -1158,14 +1165,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             y_length=axes_size,
             axis_config={"include_ticks": True, "stroke_width": 0.1, "include_tip": False},
         )
-        axes.move_to(axes_center).scale(1 / ZOOM_RATIO)
-        bg_square = Square(side_length=axes_size, fill_color=BLACK, fill_opacity=1.0,
-                           stroke_width=0).scale(1 / ZOOM_RATIO)
+        axes.move_to(axes_center).scale(ZOOM_RATIO)
+        bg_square = Square(side_length=axes_size * ZOOM_RATIO, fill_color=BLACK, fill_opacity=1.0,
+                           stroke_width=0)
         bg_square.move_to(axes_center)
         bg_square.set_z_index(10)
         axes.set_z_index(20)
         unit_radius = axes.x_axis.unit_size
-        unit_circle = Circle(radius=unit_radius / ZOOM_RATIO, color=TEAL,
+        unit_circle = Circle(radius=unit_radius * ZOOM_RATIO, color=TEAL,
                              stroke_width=0.5).move_to(axes.c2p(0, 0)).set_z_index(30)
 
         A_mod = np.pi / 6
@@ -1187,22 +1194,24 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                          stroke_width=0.1)).set_z_index(30)
 
         single_frequency_laser_tex = Tex(
-            r"Monochromatic laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(0.8 / ZOOM_RATIO)
+            r"Monochromatic laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(0.8 * ZOOM_RATIO)
         double_frequency_laser_tex = Tex(
             r"Bichromatic laser: $\psi\rightarrow\psi\cdot e^{i\left(\frac{\pi}{2}+A\sin\left(\omega_{\text{beating}}t\right)\right)}$",
-            r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$").scale(0.8 / ZOOM_RATIO)
+            r"$=e^{i\frac{\pi}{2}}\cdot\sum_{q\in\mathbb{Z}}a_{n}\cdot\psi\cdot e^{i\omega_{n}t}$").scale(0.8 * ZOOM_RATIO)
         single_frequency_laser_tex[0][21].set_color(COLOR_UNPERTURBED_AMPLITUDE)
         single_frequency_laser_tex[0][23:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
         double_frequency_laser_tex[0][18].set_color(COLOR_UNPERTURBED_AMPLITUDE)
         double_frequency_laser_tex[0][21:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
         double_frequency_laser_tex[1][1:].set_color(COLOR_PHASE_SHIFT_AMPLITUDE)
-        double_frequency_laser_tex.next_to(axes, 0.1 * UP).align_to(axes, LEFT).shift(0.05 * RIGHT)
-        single_frequency_laser_tex.next_to(double_frequency_laser_tex, 0.1 * UP).align_to(
-            double_frequency_laser_tex, LEFT)
+        single_frequency_laser_tex.next_to(axes, 0.1 * DOWN).align_to(
+            axes, LEFT).shift(0.05 * RIGHT)
+        double_frequency_laser_tex.next_to(single_frequency_laser_tex, 0.1 * DOWN).align_to(
+            single_frequency_laser_tex, LEFT)
 
-        axes_vgroup = VGroup(axes, unit_circle, line_to_dot, moving_dot, single_frequency_laser_tex,
+
+        axes_vgroup = VGroup(axes, bg_square, unit_circle, line_to_dot, moving_dot, single_frequency_laser_tex,
                              double_frequency_laser_tex)
-        self.add(axes, unit_circle, line_to_dot, moving_dot)
+        self.add(bg_square, axes, unit_circle, line_to_dot, moving_dot)
         self.next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
@@ -1211,19 +1220,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(FadeIn(double_frequency_laser_tex[0]), run_time=2)
         self.next_slide()
 
-        waves_vgroup = Group(
-            incoming_waves, sample, lens_1, lens_2, camera, energy_filter,
-            sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1,
-            sample_outgoing_perturbed_waves_2, gaussian_beam_waves_phase_shifted,
-            gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
-            second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purterbed_1,
-            second_lens_outgoing_waves_purterbed_2, rotated_laser_waves, phase_image)
         self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4, dots], FadeOut,
                                       added_animation=[FadeIn(double_frequency_laser_tex[1])])
         self.next_slide()
-        waves_vgroup.remove(rotated_laser_waves)
-        self.updated_object_animation(waves_vgroup, FadeIn,
-                                      added_animation=[Restore(self.camera.frame), FadeOut(axes_vgroup)])
+        # waves_vgroup.remove(rotated_laser_waves)
+        # self.updated_object_animation(waves_vgroup, FadeIn,
+        #                               added_animation=[Restore(self.camera.frame), FadeOut(axes_vgroup)])
+        self.play(Restore(self.camera.frame), FadeOut(axes_vgroup))
+
         ################################################################################################################
         if BOOKMARK < 10:
             return

@@ -931,12 +931,28 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         laser such that the rotation is exactly half pi. now - the unperturbed and perturbed components are
         #         parallel to first order!""") as tracker:
         #     self.wait_until_bookmark('A')
-        # CLAUDE: MAKE THE ROTATION OF THE LINE ROTATION AND NOT .BECOME. CURRENTLY THE HEAD OF THE LINE GOES IN STRAIGHT LINE FROM (1, 0) TO (0, 1) AND I WANT IT TO GO THER OVER THE CIRCLE
-        self.play(line_complex_amplitude.animate.become(Line(start=ax_complex_amplitude.c2p(0, 0),
-                                                             end=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE),
-                                                             color=COLOR_PHASE_SHIFT_AMPLITUDE,
-                                                             z_index=ax_complex_amplitude.z_index + 1)),
-              dot_complex_amplitude.animate.move_to(ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE)))
+        # CLAUDE: MAKE THE ROTATION OF THE LINE ROTATION AND NOT `.BECOME`. CURRENTLY THE HEAD OF THE LINE GOES IN STRAIGHT LINE FROM (1, 0) TO (0, 1) AND I WANT IT TO GO THER OVER THE CIRCLE
+        self.play(
+            UpdateFromAlphaFunc(
+                line_complex_amplitude,
+                lambda m, a: m.become(Line(
+                    start=ax_complex_amplitude.c2p(0, 0),
+                    end=ax_complex_amplitude.c2p(
+                        AMPLITUDE_SIZE * np.cos(a * PI / 2),
+                        AMPLITUDE_SIZE * np.sin(a * PI / 2),
+                    ),
+                    color=COLOR_PHASE_SHIFT_AMPLITUDE,
+                    z_index=ax_complex_amplitude.z_index + 1,
+                )),
+            ),
+            UpdateFromAlphaFunc(
+                dot_complex_amplitude,
+                lambda m, a: m.move_to(ax_complex_amplitude.c2p(
+                    AMPLITUDE_SIZE * np.cos(a * PI / 2),
+                    AMPLITUDE_SIZE * np.sin(a * PI / 2),
+                )),
+            ),
+        )
         self.next_slide()
         # # END INDENTATION
         if BOOKMARK < 6:

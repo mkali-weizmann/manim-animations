@@ -10,6 +10,9 @@ from typing import Union, Optional, Callable
 # manim -pql phd-project/laser_phase_plate.py LaserPhasePlate
 # manim-slides convert Microscope slides/presentation.html
 
+GRID_COLOR        = "#073247" #  "#D2D2D2"             # light-grey grid lines
+GRID_SPACING      = 0.11                   # scene units between grid lines  (easy to tune)
+GRID_STROKE_WIDTH = 0.3                   # thin so the grid stays in the background
 
 TRACKER_TIME = ValueTracker(0)
 TRACKER_SCANNING_SAMPLE = ValueTracker(0)
@@ -319,6 +322,7 @@ BOOKMARK = 20
 class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
         self.camera.background_color = COLOR_BACKGROUND
+        self.add(self.make_background_grid())
         # self.set_speech_service(GTTSService(transcription_model='base'))
         # # self.set_speech_service(
         # #     AzureService(
@@ -331,7 +335,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # Intro titles:
         #
         self.wait(1)
-        self.next_slide()
+        self.smooth_next_slide()
         title_0 = Tex("asd", color=BLACK, opacity=0).scale(0.5).to_corner(UL)
         title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
         title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
@@ -351,12 +355,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         text="Today we are going to talk about Transmission Electron Microscope image enhancement, using free electron-photon ponderomotive interaction.") as tracker:  #
         self.wait(1)
         self.play(FadeIn(bad_title, shift=DOWN))
-        self.next_slide()
+        self.smooth_next_slide()
         # with self.voiceover(
         #         text="This name is not very catchy. Simply speaking, we are going to see how <bookmark mark='A'/> Shooting laser on electrons makes images good.<bookmark mark='B'/>") as tracker:  #
         #     self.wait_until_bookmark("A")
         self.play(FadeOut(bad_title, shift=DOWN), FadeIn(good_title, shift=DOWN))
-        self.next_slide(auto_next=True)
+        self.smooth_next_slide(auto_next=True)
             # self.wait_until_bookmark("B")
         self.play(FadeOut(good_title, shift=DOWN))
         if BOOKMARK < 1:
@@ -437,7 +441,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
                   TRACKER_TIME.animate.increment_value(1/2),
                   run_time=1, rate_func=linear)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
         #           run_time=tracker.time_until_bookmark('B'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
@@ -445,7 +449,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
                   TRACKER_TIME.animate.increment_value(1/2),
                   run_time=1, rate_func=linear)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
         #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
@@ -454,7 +458,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
                   TRACKER_TIME.animate.increment_value(1),
                   run_time=1, rate_func=linear)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
         #           run_time=tracker.get_remaining_duration()-1, rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
@@ -480,7 +484,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(Create(scanning_dot_1), Create(scanning_dot_x_axis_1))
         # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(1), Create(amplitude_graph_1), run_time=max(tracker.time_until_bookmark('A'), 2))  # VOICEOVER
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), Create(amplitude_graph_1), run_time=2)  # SLIDES
-        self.next_slide()
+        self.smooth_next_slide()
         # # END INDENTATION
 
 
@@ -500,13 +504,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #                 on the camera equals exactly to the pattern right after the sample""") as tracker:
         self.play(FadeIn(focus_arrow))
         self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT + HEIGHT_CAMERA / 2 * UP + 0.05 * UP - 0.15*RIGHT)))
-        self.next_slide()
         self.play(Create(ax_2), Write(labels_2),  run_time=2)
         self.play(Create(scanning_dot_2), Create(scanning_dot_x_axis_2))
         # self.wait_until_bookmark('A')
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=tracker.get_remaining_duration())  # VOICEOVER
         self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=2)  # SLIDES
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeOut(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2,
                                  ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1, focus_arrow)))
         TRACKER_SCANNING_SAMPLE.set_value(0)
@@ -570,7 +573,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         and hard to see. Such objects are called phase objects and are common in electron microscopy.
         #         Since the wave slows down in the object it acquires more phase when passing through it and the wavefronts are distorted.""") as tracker:
         #
-        self.next_slide()
         self.play(FadeIn(phase_image))
         self.play(sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises),
                   second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
@@ -581,12 +583,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.add(sample_outgoing_waves_moises,
                  second_lens_outgoing_waves_moises,
                  gaussian_beam_waves_moises)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1),
                   run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide()
+        self.smooth_next_slide()
         # END INDENTATION
 
         microscope_VGroup.add(second_lens_outgoing_waves_moises,
@@ -647,7 +649,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)  # SLIDES
         # self.wait_until_bookmark('B')
         TRACKER_SCANNING_CAMERA.set_value(0)
-        self.next_slide()
+        self.smooth_next_slide()
         # self.play(Create(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2)), run_time=tracker.time_until_bookmark('C'))
         self.play(Create(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2)), run_time=2)
         constant_intensity_function = ax_2.plot(lambda x: 0.3, color=COLOR_INTENSITIES)
@@ -658,7 +660,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(focus_arrow.animate.become(Arrow(start=ax_2.c2p(-0.05, 0.3) - np.array([np.sqrt(2)*0.9, 0, 0]), end=ax_2.c2p(-0.05, 0.3), color=RED)))
         problem_label = Tex(r'Problem!').scale(0.5).next_to(focus_arrow, LEFT)
         self.play(FadeIn(problem_label, shift=0.5*DOWN))
-        self.next_slide()
+        self.smooth_next_slide()
         self.updated_object_animation([microscope_VGroup, phase_image, camera_scanner_group, scanning_dot_1, focus_arrow, problem_label],
                                       FadeOut)
         TRACKER_SCANNING_CAMERA.set_value(0)
@@ -683,7 +685,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # self.wait_until_bookmark('A')
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)
         # self.wait(tracker.time_until_bookmark('B'))
-        self.next_slide()
+        self.smooth_next_slide()
         def line_amplitude_perturbation_generator():
             line_amplitude_perturbation = Line(
                 start=ax_complex_amplitude.c2p(AMPLITUDE_SIZE, 0),
@@ -711,7 +713,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(2), run_time=max(4, tracker.get_remaining_duration()))  # VOICEOVER
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)  # SLIDES
         # self.wait(0.3)
-        self.next_slide()
+        self.smooth_next_slide()
         # # END INDENTATION
 
         # with self.voiceover(
@@ -785,14 +787,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                        tracker=TRACKER_TIME,
                                                                                        colors_generator=lambda
                                                                                            t: COLOR_UNPERTURBED_AMPLITUDE)
-        second_lens_outgoing_waves_purterbed_1 = generate_wavefronts_start_to_end_flat(
+        second_lens_outgoing_waves_purturbed_1 = generate_wavefronts_start_to_end_flat(
             start_point=POSITION_LENS_2 - 0.4 * UP,
             end_point=POSITION_CAMERA,
             wavelength=WAVELENGTH,
             width=HEIGHT_CAMERA,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
-        second_lens_outgoing_waves_purterbed_2 = generate_wavefronts_start_to_end_flat(
+        second_lens_outgoing_waves_purturbed_2 = generate_wavefronts_start_to_end_flat(
             start_point=POSITION_LENS_2 + 0.4 * UP,
             end_point=POSITION_CAMERA,
             wavelength=WAVELENGTH,
@@ -810,15 +812,15 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                        gaussian_beam_waves_perturbed_1,
                                        gaussian_beam_waves_perturbed_2,
                                        second_lens_outgoing_waves_unperturbed,
-                                       second_lens_outgoing_waves_purterbed_1,
-                                       second_lens_outgoing_waves_purterbed_2
+                                       second_lens_outgoing_waves_purturbed_1,
+                                       second_lens_outgoing_waves_purturbed_2
                                        ], FadeIn)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         self.next_slide(auto_next=True)
         self.play(TRACKER_TIME.animate.increment_value(1), FadeIn(focus_arrow, shift=0.2*DOWN), run_time=2, rate_func=linear)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         self.next_slide()
@@ -867,7 +869,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                   FadeIn(title_5, shift=dy * UP),
                   titles_square.animate.set_width(title_4.width + 0.1).move_to([title_4.get_center()[0], y_1, 0])
                   )
-        self.next_slide()
+        self.smooth_next_slide(auto_next=True)
         # self.wait_until_bookmark('A')
         self.play(FadeOut(focus_arrow))
         self.updated_object_animation(laser_waves, FadeIn)
@@ -882,7 +884,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                   second_lens_outgoing_waves_unperturbed.animate.become(second_lens_outgoing_waves_shifted))
         self.remove(gaussian_beam_waves_unperturbed, second_lens_outgoing_waves_unperturbed)
         self.add(gaussian_beam_waves_phase_shifted, second_lens_outgoing_waves_shifted)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()), run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)
         self.next_slide()
@@ -895,7 +897,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                  gaussian_beam_waves_perturbed_2, laser_waves, lens_1)
         # with self.voiceover(
         #         text="""Let's see how introducing the laser solves the problem""") as tracker:
-        self.next_slide()
+        self.smooth_next_slide()
         self.updated_object_animation([left_side_group, phase_image, sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
                     gaussian_beam_waves_opacities], FadeOut)
         # # END INDENTATION
@@ -922,7 +924,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         scanning_dot_2.move_to(POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT - HEIGHT_CAMERA / 2 * UP)
         complex_amplitude_graph_group -= line_complex_amplitude
         complex_amplitude_graph_group -= line_amplitude_perturbation
-        self.next_slide()
+        self.smooth_next_slide()
         # ################################################################################################################
         # Rotate the unperturbed component:
         # with self.voiceover(
@@ -953,7 +955,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                 )),
             ),
         )
-        self.next_slide()
+        self.smooth_next_slide()
         # # END INDENTATION
         if BOOKMARK < 6:
             return
@@ -986,7 +988,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.add(line_amplitude_perturbation)
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())  # VOICEOVER
         self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=4)  # SLIDES
-        self.next_slide()
+        self.smooth_next_slide()
         self.updated_object_animation([complex_amplitude_graph_group, scanning_dot_2], FadeOut)
         # # END INDENTATION
         TRACKER_SCANNING_CAMERA.set_value(0)
@@ -1003,7 +1005,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeIn)
         # self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=tracker.get_remaining_duration())  # VOICEOVER
         self.play(Create(phase_contrast_function), TRACKER_SCANNING_CAMERA.animate.set_value(1), run_time=2)  # SLIDES
-        self.next_slide()
+        self.smooth_next_slide()
         camera_scanner_group += phase_contrast_function
         self.updated_object_animation([camera_scanner_group, scanning_dot_2], FadeOut)
         # END INDENTATION
@@ -1046,7 +1048,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         microscope_VGroup += energy_filter
         self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
         self.play(FadeOut(focus_arrow))
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1),
@@ -1058,7 +1060,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         The red lines of the laser represent nodes of high intensity.""") as tracker:
         self.next_slide()
         self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
-        self.next_slide()
+        self.smooth_next_slide()
         self.remove(laser_waves)
         self.add(rotated_laser_waves)
         # # END INDENTATION
@@ -1066,7 +1068,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # with self.voiceover(
         #         text="""Since there are now two different wavelengths,
         #                 the intensity beats, and the intensity nodes propagate in space.""") as tracker:
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(Dt_e*tracker.get_remaining_duration()),
         #           TRACKER_TIME_LASER.animate.increment_value(Dt_l*tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
@@ -1084,11 +1086,11 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         laser tilt such that the electron's wavefronts surf on the intensity nodes. Each electron's wavefront
         #         experiences a constant intensity - which is different intensity than that of the following wavefront""") as tracker:
         waves_vgroup = [incoming_waves, sample, lens_1, lens_2, camera, energy_filter,
-            sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1,
-            sample_outgoing_perturbed_waves_2, gaussian_beam_waves_phase_shifted,
-            gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
-            second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purterbed_1,
-            second_lens_outgoing_waves_purterbed_2, rotated_laser_waves, phase_image]
+                        sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1,
+                        sample_outgoing_perturbed_waves_2, gaussian_beam_waves_phase_shifted,
+                        gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
+                        second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purturbed_1,
+                        second_lens_outgoing_waves_purturbed_2, rotated_laser_waves, phase_image]
         self.camera.frame.save_state()
         self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.2 * RIGHT)])
 
@@ -1149,7 +1151,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
         self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4], FadeIn,
                                       added_animation=[FadeIn(dots)])
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
 
@@ -1212,17 +1214,17 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         axes_vgroup = VGroup(axes, bg_square, unit_circle, line_to_dot, moving_dot, single_frequency_laser_tex,
                              double_frequency_laser_tex)
         self.add(bg_square, axes, unit_circle, line_to_dot, moving_dot)
-        self.next_slide(loop=True)
+        self.smooth_next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
         self.play(FadeIn(single_frequency_laser_tex), run_time=2)
-        self.next_slide()
+        self.smooth_next_slide()
         self.play(FadeIn(double_frequency_laser_tex[0]), run_time=2)
-        self.next_slide()
+        self.smooth_next_slide()
 
         self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4, dots], FadeOut,
                                       added_animation=[FadeIn(double_frequency_laser_tex[1])])
-        self.next_slide()
+        self.smooth_next_slide()
         # waves_vgroup.remove(rotated_laser_waves)
         # self.updated_object_animation(waves_vgroup, FadeIn,
         #                               added_animation=[Restore(self.camera.frame), FadeOut(axes_vgroup)])
@@ -1274,13 +1276,13 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #                  be left with attenuated amplitude of the original unperturbed wave""") as tracker:
         self.updated_object_animation([complex_amplitude_graph_group, energy_spectrum_axes, labels_complex_amplitude], FadeIn)
         self.updated_object_animation(spectral_lines, FadeIn)
-        self.next_slide()
+        self.smooth_next_slide()
         # self.wait_until_bookmark('R')
         focus_arrow = Arrow(start=energy_spectrum_axes.c2p(0, special.jv(0, TRACKER_PHASE_MODULATION.get_value())) + [-0.9, 0.9, 0],
                             end=energy_spectrum_axes.c2p(0, special.jv(0, TRACKER_PHASE_MODULATION.get_value())),
                             color=RED)
         self.play(FadeIn(focus_arrow, shift=0.3*DOWN))
-        self.next_slide()
+        self.smooth_next_slide()
         focus_arrow.add_updater(lambda l: l.become(Arrow(
             start=energy_spectrum_axes.c2p(0, special.jv(0, TRACKER_PHASE_MODULATION.get_value()) ** 2) + [-0.9, 0.9, 0],
             end=energy_spectrum_axes.c2p(0, special.jv(0, TRACKER_PHASE_MODULATION.get_value()) ** 2),
@@ -1315,7 +1317,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # # END INDENTATION
         if BOOKMARK < 11:
             return
-        self.next_slide()
+        self.smooth_next_slide()
         line_amplitude_perturbation.clear_updaters()
         line_amplitude_perturbation.add_updater(lambda l: l.become(
                                     Line(start=ax_complex_amplitude.c2p(0, AMPLITUDE_SIZE * special.jv(0, TRACKER_PHASE_MODULATION.get_value())),
@@ -1343,7 +1345,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(TRACKER_SCANNING_CAMERA.animate.increment_value(1), run_time=5)
         # # END INDENTATION
 
-        self.next_slide()
+        self.smooth_next_slide()
         # with self.voiceover(
         #         text="""Thank you for watching! To hear more about our work, search 'Osip Schwarz lab' in google.""") as tracker:
         self.updated_object_animation(self.mobjects, FadeOut)
@@ -1351,11 +1353,25 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # final_title = Tex("Questions?", color=WHITE).scale(1.5)
         final_title = Tex("To hear more search 'Osip Schwarz lab' in Google.", color=WHITE).scale(0.8)
         self.play(Write(final_title))
-        self.next_slide()
+        self.smooth_next_slide()
         # self.wait(tracker.get_remaining_duration())  # VOICEOVER
         self.wait(1)  # SLIDES
         # # END INDENTATION
         self.play(FadeOut(final_title))
+
+    # ── Background grid ─────────────────────────────────────────────────────
+    def make_background_grid(self):
+        grid = VGroup()
+        hw = config.frame_width  / 2 + GRID_SPACING
+        hh = config.frame_height / 2 + GRID_SPACING
+        for y in np.arange(-hh, hh + 0.001, GRID_SPACING):
+            grid.add(Line(LEFT * hw, RIGHT * hw,
+                          stroke_width=GRID_STROKE_WIDTH, color=GRID_COLOR).shift(y * UP))
+        for x in np.arange(-hw, hw + 0.001, GRID_SPACING):
+            grid.add(Line(DOWN * hh, UP * hh,
+                          stroke_width=GRID_STROKE_WIDTH, color=GRID_COLOR).shift(x * RIGHT))
+        grid.set_z_index(-10)
+        return grid
 
     def updated_object_animation(self,
                                  objects: Union[Mobject, list[Mobject], VGroup],
@@ -1387,3 +1403,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         for i, obj in enumerate(decomposed_objects):
             for updater in object_updaters[i]:
                 obj.add_updater(updater)
+
+    def smooth_next_slide(self, delay=0.1, **kwargs):
+        self.wait(delay)
+        self.next_slide(**kwargs)

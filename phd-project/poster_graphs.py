@@ -96,7 +96,7 @@ WIDTH_LINES_THICK = 3.5
 WIDTH_LINES_THIN = 1.5
 
 
-class ParametricArcScene(Scene):
+class PhaseShift(Scene):
     def construct(self):
         self.camera.background_color = BACKGROUND_COLOR
         radius = 3
@@ -233,6 +233,77 @@ class ParametricArcScene(Scene):
 
 
         # Display all
+        self.add(
+            left_axes, right_axes, x_label_left, y_label_left, x_label_right, y_label_right,
+            left_title, right_title, sup_title,
+            left_circle, right_circle,
+            left_arc, right_arc,
+            line_left, line_right,
+            arrow_left, arrow_right,
+            legend_signal, legend_dc, legend_total,
+            label_signal, label_dc, label_total
+        )
+
+
+class PhaseShiftAndAttenuation(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+        radius = 3
+        arc_angle = PI / 6
+        attenuation = 1 / 5
+
+        middle_point = (0, -1.5, 0)
+
+        # Style samples
+        legend_signal = Line(LEFT * 0.3, RIGHT * 0.3, color=COLOR_ARC, stroke_width=WIDTH_LINES_THICK)
+        legend_dc = Line(LEFT * 0.3, RIGHT * 0.3, color=COLOR_LINE, stroke_width=WIDTH_LINES_THICK)
+        legend_total = Line(LEFT * 0.3, RIGHT * 0.3, color=COLOR_ARROW, stroke_width=WIDTH_LINES_THICK)
+
+        legend_signal.next_to(middle_point, LEFT)
+        legend_dc.next_to(legend_signal, 3 * UP)
+        legend_total.next_to(legend_signal, 3 * DOWN)
+
+        label_dc = Tex("DC", font_size=35, color=TEXT_COLOR).next_to(legend_dc, RIGHT)
+        label_signal = Tex("Signal", font_size=35, color=TEXT_COLOR).next_to(legend_signal, RIGHT)
+        label_total = Tex("Total amplitude", font_size=35, color=TEXT_COLOR).next_to(legend_total, RIGHT)
+
+        left_axes = Axes(
+            x_range=[-4, 4], y_range=[-4, 4], x_length=4, y_length=4,
+            axis_config={"include_tip": False}, tips=False, color=TEXT_COLOR
+        ).shift(4.5 * LEFT + 1.5 * DOWN)
+
+        right_axes = Axes(
+            x_range=[-4, 4], y_range=[-4, 4], x_length=4, y_length=4,
+            axis_config={"include_tip": False}, tips=False, color=TEXT_COLOR
+        ).shift(4.5 * RIGHT + 1.5 * DOWN)
+
+        x_label_left = left_axes.get_x_axis_label(MathTex(r"\Re\left(\psi\right)", color=TEXT_COLOR).scale(0.6))
+        y_label_left = left_axes.get_y_axis_label(MathTex(r"\Im\left(\psi\right)", color=TEXT_COLOR).scale(0.6), edge=UP, direction=2 * UP)
+        x_label_right = right_axes.get_x_axis_label(MathTex(r"\Re\left(\psi\right)", color=TEXT_COLOR).scale(0.6))
+        y_label_right = right_axes.get_y_axis_label(MathTex(r"\Im\left(\psi\right)", color=TEXT_COLOR).scale(0.6), edge=UP, direction=2 * UP)
+
+        left_title = Tex("With original DC", color=TEXT_COLOR).next_to(left_axes, 2.7 * UP).scale(0.9)
+        right_title = Tex("With attenuated and phase shifted DC", color=TEXT_COLOR).next_to(right_axes, 2.7 * UP).scale(0.9)
+        sup_title = Tex(r"Wave function at some specific pixel: $\psi\left(x_{0},y_{0}\right)$", color=TEXT_COLOR).shift(3.2 * UP).scale(1.2)
+
+        circle_func = lambda t: radius * np.array([np.cos(t), np.sin(t), 0])
+        left_circle = left_axes.plot_parametric_curve(circle_func, use_vectorized=False, t_range=[0, TAU], color=COLOR_CIRCLE, stroke_width=WIDTH_LINES_THIN).move_to(left_axes.c2p(0, 0))
+        right_circle = right_axes.plot_parametric_curve(circle_func, use_vectorized=False, t_range=[0, TAU], color=COLOR_CIRCLE, stroke_width=WIDTH_LINES_THIN)
+
+        left_arc = left_axes.plot_parametric_curve(circle_func, use_vectorized=False, t_range=[0, arc_angle], color=COLOR_ARC, stroke_width=WIDTH_LINES_THICK)
+
+        # Right arc lifts by attenuated DC length instead of full radius
+        lifted_func = lambda t: circle_func(t) + np.array([-radius, radius * attenuation, 0])
+        right_arc = right_axes.plot_parametric_curve(lifted_func, use_vectorized=False, t_range=[0, arc_angle], color=COLOR_ARC, stroke_width=WIDTH_LINES_THICK)
+
+        left_end = circle_func(arc_angle)
+        line_left = Line(start=left_axes.c2p(0, 0), end=left_axes.c2p(radius, 0), color=COLOR_LINE, stroke_width=WIDTH_LINES_THICK)
+        arrow_left = Arrow(start=left_axes.c2p(0, 0), end=left_axes.c2p(*left_end[:2]), buff=0, color=COLOR_ARROW, stroke_width=WIDTH_LINES_THICK, max_tip_length_to_length_ratio=0.15)
+
+        right_end = lifted_func(arc_angle)
+        line_right = Line(start=right_axes.c2p(0, 0), end=right_axes.c2p(0, radius * attenuation), color=COLOR_LINE, stroke_width=WIDTH_LINES_THICK)
+        arrow_right = Arrow(start=right_axes.c2p(0, 0), end=right_axes.c2p(*right_end[:2]), buff=0, color=COLOR_ARROW, stroke_width=WIDTH_LINES_THICK, max_tip_length_to_length_ratio=0.1)
+
         self.add(
             left_axes, right_axes, x_label_left, y_label_left, x_label_right, y_label_right,
             left_title, right_title, sup_title,

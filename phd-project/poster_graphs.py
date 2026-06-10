@@ -2,6 +2,7 @@ from manim import *
 import numpy as np
 import matplotlib.pyplot as plt
 import colorsys
+from laser_phase_plate import generate_wavefronts_start_to_end_gaussian, X_R, W_0, COLOR_UNPERTURBED_AMPLITUDE
 
 BACKGROUND_COLOR = "#29505B"
 TEXT_COLOR = "#D8E1E3"

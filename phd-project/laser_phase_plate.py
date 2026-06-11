@@ -625,7 +625,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #           gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
         #           rate_func=linear)  # sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises)  # For when the first part is on
         self.play(FadeIn(second_lens_outgoing_waves_moises, gaussian_beam_waves_moises))  # For when the first part is off.
-        self.remove(second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities)  # sample_outgoing_waves_opacities
+        # self.remove(second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities)  # sample_outgoing_waves_opacities
         self.add(
                  second_lens_outgoing_waves_moises,
                  gaussian_beam_waves_moises)  # sample_outgoing_waves_moises,
@@ -940,8 +940,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # with self.voiceover(
         #         text="""Let's see how introducing the laser solves the problem""") as tracker:
         self.smooth_next_slide()
-        self.updated_object_animation([left_side_group, phase_image, second_lens_outgoing_waves_opacities,
-                    gaussian_beam_waves_opacities], FadeOut)  # sample_outgoing_waves_opacities,
+        self.updated_object_animation([left_side_group, phase_image,
+                    ], FadeOut)  # sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities
         # # END INDENTATION
         ################################################################################################################
         if BOOKMARK < 5:

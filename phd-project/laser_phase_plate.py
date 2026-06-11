@@ -23,7 +23,7 @@ TRACKER_PHASE_MODULATION_SECONDARY = ValueTracker(0)
 MICROSCOPE_Y = -0.75
 POSITION_SAMPLE = np.array([-5, MICROSCOPE_Y, 0])
 BEGINNING = - 7
-FIRST_LENS_X = -2.5
+FIRST_LENS_X = POSITION_SAMPLE[0] + 1
 POSITION_LENS_1 = np.array([FIRST_LENS_X, MICROSCOPE_Y, 0])
 SECOND_LENS_X = 4
 POSITION_LENS_2 = np.array([SECOND_LENS_X, MICROSCOPE_Y, 0])
@@ -317,7 +317,7 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
 def create_focus_arrow_object(point: np.ndarray):
     return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
 
-BOOKMARK = 3
+BOOKMARK = 20
 # class LaserPhasePlate(MovingCameraScene, VoiceoverScene):
 class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
@@ -333,7 +333,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # # )
         ################################################################################################################
         # Intro titles:
-        #
         # self.wait(1)
         # self.smooth_next_slide()
         title_0 = Tex("asd", color=BLACK, opacity=0).scale(0.5).to_corner(UL)
@@ -1085,11 +1084,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         laser tilt such that the electron's wavefronts surf on the intensity nodes. Each electron's wavefront
         #         experiences a constant intensity - which is different intensity than that of the following wavefront""") as tracker:
         waves_vgroup = [incoming_waves, sample, lens_1, lens_2, camera, energy_filter,
-                        sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1,
-                        sample_outgoing_perturbed_waves_2, gaussian_beam_waves_phase_shifted,
+                        gaussian_beam_waves_phase_shifted,
                         gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
                         second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purturbed_1,
-                        second_lens_outgoing_waves_purturbed_2, rotated_laser_waves, phase_image]
+                        second_lens_outgoing_waves_purturbed_2, rotated_laser_waves, phase_image]  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2
         self.camera.frame.save_state()
         self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.2 * RIGHT)])
 
@@ -1101,46 +1099,30 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         alpha_with_respect_to_x = alpha + PI / 2
         laser_global_shift = laser_spacing * 2 / 8
 
-        laser_lines_1 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            tracker=TRACKER_TIME,
-            wavelength=laser_spacing * 2,
-            start_parameter=laser_global_shift,
-            colors_generator=lambda t: RED,
-            opacities_generator=lambda t: np.array([0, 1, 1, 0]),
-            width=0.5,
-            z_index=0)
-        laser_lines_2 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            start_parameter=laser_spacing * 2 / 2 + laser_global_shift,
-            tracker=TRACKER_TIME,
-            wavelength=laser_spacing * 2,
-            colors_generator=lambda t: RED,
-            width=0.5,
-            opacities_generator=lambda t: np.array([0, 0.2, 0.2, 0]),
-            z_index=0)
-        laser_lines_3 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            start_parameter=-laser_spacing * 2 / 4 + laser_global_shift,
-            tracker=TRACKER_TIME,
-            wavelength=laser_spacing * 2,
-            colors_generator=lambda t: RED,
-            width=0.5,
-            opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]),
-            z_index=0)
-        laser_lines_4 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_WAIST + LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            end_point=POSITION_WAIST - LENGTH_LASER_BEAM * np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0]),
-            start_parameter=laser_spacing * 2 / 4 + laser_global_shift,
-            tracker=TRACKER_TIME,
-            wavelength=laser_spacing * 2,
-            colors_generator=lambda t: RED,
-            width=0.5,
-            opacities_generator=lambda t: np.array([0, 0.5, 0.5, 0]),
-            z_index=0)
+        laser_beam_half_width = 0.35
+        laser_beam_sigma = 0.12
+        img_W = 256
+        img_H = round(img_W * laser_beam_half_width / LENGTH_LASER_BEAM)
+
+        def make_laser_image(t):
+            s_along = np.linspace(-LENGTH_LASER_BEAM, LENGTH_LASER_BEAM, img_W)
+            s_perp  = np.linspace(-laser_beam_half_width, laser_beam_half_width, img_H)
+            S_along, S_perp = np.meshgrid(s_along, s_perp)
+            envelope = np.exp(-S_perp**2 / (2 * laser_beam_sigma**2))
+            phase = 2 * np.pi * np.mod(t, 1)
+            fringes = (1 + np.cos(2 * np.pi * S_along / laser_spacing - phase)) / 2
+            intensity = envelope * fringes
+            rgba = np.zeros((img_H, img_W, 4), dtype=np.uint8)
+            rgba[:, :, 0] = (255 * intensity).astype(np.uint8)
+            rgba[:, :, 3] = (200 * intensity).astype(np.uint8)
+            return rgba
+
+        laser_image = always_redraw(
+            lambda: ImageMobject(make_laser_image(TRACKER_TIME.get_value()))
+                .set_width(2 * LENGTH_LASER_BEAM)
+                .move_to(POSITION_WAIST)
+                .rotate(alpha + PI / 2)
+        )
 
         dots = VGroup(*[Dot(point=POSITION_WAIST + i * RIGHT * dots_spacing, radius=0.02,  # ATTENTION - WAS 0.02
                             color=COLOR_PHASE_SHIFT_AMPLITUDE) for i in range(32)])
@@ -1148,7 +1130,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         TRACKER_TIME.set_value(0)
         dots.add_updater(
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
-        self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4], FadeIn,
+        self.updated_object_animation([laser_image], FadeIn,
                                       added_animation=[FadeIn(dots)])
         self.smooth_next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
@@ -1221,8 +1203,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(FadeIn(double_frequency_laser_tex[0]), run_time=2)
         self.smooth_next_slide()
 
-        self.updated_object_animation([laser_lines_1, laser_lines_2, laser_lines_3, laser_lines_4, dots], FadeOut,
+        self.updated_object_animation([laser_image, dots], FadeOut,
                                       added_animation=[FadeIn(double_frequency_laser_tex[1])])
+        laser_image.clear_updaters()
+        self.remove(laser_image)
         self.smooth_next_slide()
         # waves_vgroup.remove(rotated_laser_waves)
         # self.updated_object_animation(waves_vgroup, FadeIn,

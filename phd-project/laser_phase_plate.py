@@ -21,6 +21,7 @@ TRACKER_TIME_LASER = ValueTracker(0)
 TRACKER_PHASE_MODULATION = ValueTracker(0)
 TRACKER_PHASE_MODULATION_SECONDARY = ValueTracker(0)
 MICROSCOPE_Y = -0.75
+POSITION_SAMPLE = np.array([-5, MICROSCOPE_Y, 0])
 BEGINNING = - 7
 FIRST_LENS_X = -2.5
 POSITION_LENS_1 = np.array([FIRST_LENS_X, MICROSCOPE_Y, 0])
@@ -35,7 +36,6 @@ W_0 = 0.14
 X_R = (FIRST_LENS_X - SECOND_LENS_X) / 9
 W_0_LASER = 0.14
 X_R_LASER = 0.5
-POSITION_SAMPLE = np.array([-5, MICROSCOPE_Y, 0])
 HEIGHT_SAMPLE = INITIAL_VERTICAL_LENGTH
 WIDTH_SAMPLE = HEIGHT_SAMPLE * (2 / 3)
 HEIGHT_CAMERA = FINAL_VERTICAL_LENGTH
@@ -317,7 +317,7 @@ def generate_scanning_axes(dot_start_point: Union[np.ndarray, list],
 def create_focus_arrow_object(point: np.ndarray):
     return Arrow(start=point + [0.9, 0.9, 0], end=point, color=RED)
 
-BOOKMARK = 20
+BOOKMARK = 3
 # class LaserPhasePlate(MovingCameraScene, VoiceoverScene):
 class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
@@ -334,8 +334,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         ################################################################################################################
         # Intro titles:
         #
-        self.wait(1)
-        self.smooth_next_slide()
+        # self.wait(1)
+        # self.smooth_next_slide()
         title_0 = Tex("asd", color=BLACK, opacity=0).scale(0.5).to_corner(UL)
         title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
         title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
@@ -349,20 +349,20 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         y_1 = title_1.get_center()[1]
         dy = 0.47
         focus_arrow = create_focus_arrow_object(point=POSITION_SAMPLE - WIDTH_SAMPLE / 2 * RIGHT + HEIGHT_SAMPLE / 2 * UP - 0.15*RIGHT + 0.05*UP)
-        bad_title = Tex("Transmission Electron Microscope image enhancement\nusing free electron-photon ponderomotive interaction",  color=WHITE).scale(0.75)
-        good_title = Tex("Shooting laser on electrons\nmakes images good", color=WHITE).scale(0.75)
+        # bad_title = Tex("Transmission Electron Microscope image enhancement\nusing free electron-photon ponderomotive interaction",  color=WHITE).scale(0.75)
+        # good_title = Tex("Shooting laser on electrons\nmakes images good", color=WHITE).scale(0.75)
         # with self.voiceover(
         #         text="Today we are going to talk about Transmission Electron Microscope image enhancement, using free electron-photon ponderomotive interaction.") as tracker:  #
         self.wait(1)
-        self.play(FadeIn(bad_title, shift=DOWN))
-        self.smooth_next_slide()
+        # self.play(FadeIn(bad_title, shift=DOWN))
+        # self.smooth_next_slide()
         # with self.voiceover(
         #         text="This name is not very catchy. Simply speaking, we are going to see how <bookmark mark='A'/> Shooting laser on electrons makes images good.<bookmark mark='B'/>") as tracker:  #
         #     self.wait_until_bookmark("A")
-        self.play(FadeOut(bad_title, shift=DOWN), FadeIn(good_title, shift=DOWN))
+        # self.play(FadeOut(bad_title, shift=DOWN), FadeIn(good_title, shift=DOWN))
         self.smooth_next_slide(auto_next=True)
             # self.wait_until_bookmark("B")
-        self.play(FadeOut(good_title, shift=DOWN))
+        # self.play(FadeOut(good_title, shift=DOWN))
         if BOOKMARK < 1:
             return
         # END INDENTATION
@@ -376,15 +376,15 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                width=HEIGHT_SAMPLE
                                                                )
 
-        sample_outgoing_waves_opacities = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
-                                                                                end_point=POSITION_LENS_1,
-                                                                                wavelength=WAVELENGTH,
-                                                                                width=HEIGHT_SAMPLE,
-                                                                                tracker=TRACKER_TIME,
-                                                                                opacities_generator=lambda t: np.array(
-                                                                                    [1, np.cos(2 * t) ** 2,
-                                                                                     np.sin(2 * t) ** 2,
-                                                                                     1 - 0.1 * np.cos(t) ** 2]))
+        # sample_outgoing_waves_opacities = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
+        #                                                                         end_point=POSITION_LENS_1,
+        #                                                                         wavelength=WAVELENGTH,
+        #                                                                         width=HEIGHT_SAMPLE,
+        #                                                                         tracker=TRACKER_TIME,
+        #                                                                         opacities_generator=lambda t: np.array(
+        #                                                                             [1, np.cos(2 * t) ** 2,
+        #                                                                              np.sin(2 * t) ** 2,
+        #                                                                              1 - 0.1 * np.cos(t) ** 2]))
         second_lens_outgoing_waves_opacities = generate_wavefronts_start_to_end_flat(start_point=POSITION_LENS_2,
                                                                                      end_point=POSITION_CAMERA,
                                                                                      wavelength=WAVELENGTH,
@@ -397,7 +397,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                           np.sin(2 * (2 - t)) ** 2,
                                                                                           np.cos(2 * (2 - t)) ** 2,
                                                                                           1]))
-        gaussian_beam_waves_opacities = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_LENS_1,
+        gaussian_beam_waves_opacities = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
                                                                                   end_point=POSITION_LENS_2,
                                                                                   tracker=TRACKER_TIME,
                                                                                   wavelength=WAVELENGTH,
@@ -412,8 +412,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                                    0.2 + 0.8 * np.cos(
                                                                                                        5 * t - 1) ** 2,
                                                                                                    0]))
-        lens_1 = Ellipse(width=0.5, height=FINAL_VERTICAL_LENGTH + 0.5, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_LENS_1)
-        lens_2 = Ellipse(width=0.5, height=FINAL_VERTICAL_LENGTH + 0.5, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_LENS_2)
+        _sq, _gap = 0.5, 1.5
+        lens_1 = VGroup(
+            Square(side_length=_sq, color=COLOR_OPTICAL_ELEMENTS, fill_color=COLOR_OPTICAL_ELEMENTS, fill_opacity=0.5).move_to(POSITION_LENS_1 + (_gap / 2 + _sq / 2) * UP),
+            Square(side_length=_sq, color=COLOR_OPTICAL_ELEMENTS, fill_color=COLOR_OPTICAL_ELEMENTS, fill_opacity=0.5).move_to(POSITION_LENS_1 - (_gap / 2 + _sq / 2) * UP),
+        )
+        lens_2 = VGroup(
+            *[Dot(radius=0.07, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_LENS_2 + (i - 1) * 0.3 * RIGHT) for i in range(3)]
+        )
         sample = Rectangle(height=HEIGHT_SAMPLE, width=WIDTH_SAMPLE, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_SAMPLE)
         camera = Rectangle(height=HEIGHT_CAMERA, width=WIDTH_CAMERA, color=GRAY, fill_color=GRAY_A,
                            fill_opacity=0.3).move_to(POSITION_CAMERA)
@@ -426,9 +432,9 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         image.width = WIDTH_SAMPLE
         image.set_z_index(sample.get_z_index() - 1)
 
-        microscope_VGroup = VGroup(incoming_waves, sample, lens_1, sample_outgoing_waves_opacities, lens_2,
+        microscope_VGroup = VGroup(incoming_waves, sample, lens_1, lens_2,
                                    gaussian_beam_waves_opacities,
-                                   second_lens_outgoing_waves_opacities, camera)
+                                   second_lens_outgoing_waves_opacities, camera)  # sample_outgoing_waves_opacities
         # with self.voiceover(
         #         text="""Let's start by seeing how does a transmission microscope work.
         #         This explanation applies both for a regular optical microscopes, and for electron microscopes.
@@ -529,16 +535,16 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(FadeOut(image))
 
 
-        sample_outgoing_waves_moises = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
-                                                                             end_point=POSITION_LENS_1,
-                                                                             wavelength=WAVELENGTH,
-                                                                             width=HEIGHT_SAMPLE,
-                                                                             tracker=TRACKER_TIME,
-                                                                             noise_generator=lambda t: np.array(
-                                                                                 [[0, 0, 0],
-                                                                                  [0.1 * np.sin(2 * np.pi * t), 0, 0],
-                                                                                  [0.05 * np.cos(2 * np.pi * t), 0, 0],
-                                                                                  [0.1 * np.cos(t), 0, 0]]))
+        # sample_outgoing_waves_moises = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
+        #                                                                      end_point=POSITION_LENS_1,
+        #                                                                      wavelength=WAVELENGTH,
+        #                                                                      width=HEIGHT_SAMPLE,
+        #                                                                      tracker=TRACKER_TIME,
+        #                                                                      noise_generator=lambda t: np.array(
+        #                                                                          [[0, 0, 0],
+        #                                                                           [0.1 * np.sin(2 * np.pi * t), 0, 0],
+        #                                                                           [0.05 * np.cos(2 * np.pi * t), 0, 0],
+        #                                                                           [0.1 * np.cos(t), 0, 0]]))
         second_lens_outgoing_waves_moises = generate_wavefronts_start_to_end_flat(start_point=POSITION_LENS_2,
                                                                                   end_point=POSITION_CAMERA,
                                                                                   wavelength=WAVELENGTH,
@@ -552,7 +558,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                        [0.1 * np.sin(2 * np.pi * t), 0,
                                                                                         0],
                                                                                        [0, 0, 0]]))
-        gaussian_beam_waves_moises = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_LENS_1,
+        gaussian_beam_waves_moises = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
                                                                                end_point=POSITION_LENS_2,
                                                                                tracker=TRACKER_TIME,
                                                                                wavelength=WAVELENGTH,
@@ -574,15 +580,13 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         Since the wave slows down in the object it acquires more phase when passing through it and the wavefronts are distorted.""") as tracker:
         #
         self.play(FadeIn(phase_image))
-        self.play(sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises),
-                  second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
+        self.play(second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
                   gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
-                  rate_func=linear)
-        self.remove(sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
-                    gaussian_beam_waves_opacities)
-        self.add(sample_outgoing_waves_moises,
+                  rate_func=linear)  # sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises)
+        self.remove(second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities)  # sample_outgoing_waves_opacities
+        self.add(
                  second_lens_outgoing_waves_moises,
-                 gaussian_beam_waves_moises)
+                 gaussian_beam_waves_moises)  # sample_outgoing_waves_moises,
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
@@ -592,8 +596,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # END INDENTATION
 
         microscope_VGroup.add(second_lens_outgoing_waves_moises,
-                              sample_outgoing_waves_moises,
-                              gaussian_beam_waves_moises)
+                              gaussian_beam_waves_moises)  # sample_outgoing_waves_moises,
 
         ax_complex_amplitude = Axes(x_range=[-AXES_RANGE, AXES_RANGE, 0.25],
                                     y_range=[-AXES_RANGE, AXES_RANGE, 0.25],
@@ -729,30 +732,30 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # Fourier decomposition of the outgoing wave:
         self.play(FadeIn(microscope_VGroup), FadeIn(phase_image), FadeOut(complex_amplitude_graph_group))
 
-        sample_outgoing_unperturbed_waves = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
-                                                                                  end_point=POSITION_LENS_1,
-                                                                                  wavelength=WAVELENGTH,
-                                                                                  width=HEIGHT_SAMPLE,
-                                                                                  tracker=TRACKER_TIME,
-                                                                                  colors_generator=lambda
-                                                                                      t: COLOR_UNPERTURBED_AMPLITUDE)
-        sample_outgoing_perturbed_waves_1 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_SAMPLE + 0.2 * UP,
-            end_point=POSITION_LENS_1 - 0.2 * UP,
-            wavelength=WAVELENGTH,
-            width=HEIGHT_SAMPLE,
-            tracker=TRACKER_TIME,
-            colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
-        sample_outgoing_perturbed_waves_2 = generate_wavefronts_start_to_end_flat(
-            start_point=POSITION_SAMPLE - 0.2 * UP,
-            end_point=POSITION_LENS_1 + 0.2 * UP,
-            wavelength=WAVELENGTH,
-            width=HEIGHT_SAMPLE,
-            tracker=TRACKER_TIME,
-            colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
+        # sample_outgoing_unperturbed_waves = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
+        #                                                                           end_point=POSITION_LENS_1,
+        #                                                                           wavelength=WAVELENGTH,
+        #                                                                           width=HEIGHT_SAMPLE,
+        #                                                                           tracker=TRACKER_TIME,
+        #                                                                           colors_generator=lambda
+        #                                                                               t: COLOR_UNPERTURBED_AMPLITUDE)
+        # sample_outgoing_perturbed_waves_1 = generate_wavefronts_start_to_end_flat(
+        #     start_point=POSITION_SAMPLE + 0.2 * UP,
+        #     end_point=POSITION_LENS_1 - 0.2 * UP,
+        #     wavelength=WAVELENGTH,
+        #     width=HEIGHT_SAMPLE,
+        #     tracker=TRACKER_TIME,
+        #     colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
+        # sample_outgoing_perturbed_waves_2 = generate_wavefronts_start_to_end_flat(
+        #     start_point=POSITION_SAMPLE - 0.2 * UP,
+        #     end_point=POSITION_LENS_1 + 0.2 * UP,
+        #     wavelength=WAVELENGTH,
+        #     width=HEIGHT_SAMPLE,
+        #     tracker=TRACKER_TIME,
+        #     colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
 
         gaussian_beam_waves_unperturbed = generate_wavefronts_start_to_end_gaussian(
-            start_point=POSITION_LENS_1,
+            start_point=POSITION_SAMPLE,
             end_point=POSITION_LENS_2,
             tracker=TRACKER_TIME,
             wavelength=WAVELENGTH,
@@ -762,7 +765,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             colors_generator=lambda
                 t: COLOR_UNPERTURBED_AMPLITUDE)
         gaussian_beam_waves_perturbed_1 = generate_wavefronts_start_to_end_gaussian(
-            start_point=POSITION_LENS_1 + W_0 * UP,
+            start_point=POSITION_SAMPLE + W_0 * UP,
             end_point=POSITION_LENS_2 + 4 * W_0 * UP,
             tracker=TRACKER_TIME,
             wavelength=WAVELENGTH,
@@ -771,7 +774,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             center=POSITION_WAIST + 2.3 * W_0 * UP,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
         gaussian_beam_waves_perturbed_2 = generate_wavefronts_start_to_end_gaussian(
-            start_point=POSITION_LENS_1 - W_0 * UP,
+            start_point=POSITION_SAMPLE - W_0 * UP,
             end_point=POSITION_LENS_2 - 4 * W_0 * UP,
             tracker=TRACKER_TIME,
             wavelength=WAVELENGTH,
@@ -801,20 +804,17 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             width=HEIGHT_CAMERA,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
-        self.updated_object_animation([sample_outgoing_waves_moises,
-                                       gaussian_beam_waves_moises,
-                                       second_lens_outgoing_waves_moises], FadeOut)
+        self.updated_object_animation([gaussian_beam_waves_moises,
+                                       second_lens_outgoing_waves_moises], FadeOut)  # sample_outgoing_waves_moises
         focus_arrow = create_focus_arrow_object(point=POSITION_WAIST + 0.1*UP - 0.07*RIGHT)
-        self.updated_object_animation([sample_outgoing_unperturbed_waves,
-                                       sample_outgoing_perturbed_waves_1,
-                                       sample_outgoing_perturbed_waves_2,
+        self.updated_object_animation([
                                        gaussian_beam_waves_unperturbed,
                                        gaussian_beam_waves_perturbed_1,
                                        gaussian_beam_waves_perturbed_2,
                                        second_lens_outgoing_waves_unperturbed,
                                        second_lens_outgoing_waves_purturbed_1,
                                        second_lens_outgoing_waves_purturbed_2
-                                       ], FadeIn)
+                                       ], FadeIn)  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
@@ -891,15 +891,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # # END INDENTATION
 
 
-        left_side_group = VGroup(incoming_waves, sample, sample_outgoing_unperturbed_waves,
-                                 sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
-                                 gaussian_beam_waves_phase_shifted, gaussian_beam_waves_perturbed_1,
-                                 gaussian_beam_waves_perturbed_2, laser_waves, lens_1)
+        left_side_group = VGroup(incoming_waves, sample,  gaussian_beam_waves_phase_shifted,
+                                 gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2, laser_waves, lens_1)
+        #sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
         # with self.voiceover(
         #         text="""Let's see how introducing the laser solves the problem""") as tracker:
         self.smooth_next_slide()
-        self.updated_object_animation([left_side_group, phase_image, sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities,
-                    gaussian_beam_waves_opacities], FadeOut)
+        self.updated_object_animation([left_side_group, phase_image, second_lens_outgoing_waves_opacities,
+                    gaussian_beam_waves_opacities], FadeOut)  # sample_outgoing_waves_opacities,
         # # END INDENTATION
         ################################################################################################################
         if BOOKMARK < 5:

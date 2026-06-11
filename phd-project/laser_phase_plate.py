@@ -790,14 +790,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                        tracker=TRACKER_TIME,
                                                                                        colors_generator=lambda
                                                                                            t: COLOR_UNPERTURBED_AMPLITUDE)
-        second_lens_outgoing_waves_purturbed_1 = generate_wavefronts_start_to_end_flat(
+        second_lens_outgoing_waves_perturbed_1 = generate_wavefronts_start_to_end_flat(
             start_point=POSITION_LENS_2 - 0.4 * UP,
             end_point=POSITION_CAMERA,
             wavelength=WAVELENGTH,
             width=HEIGHT_CAMERA,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
-        second_lens_outgoing_waves_purturbed_2 = generate_wavefronts_start_to_end_flat(
+        second_lens_outgoing_waves_perturbed_2 = generate_wavefronts_start_to_end_flat(
             start_point=POSITION_LENS_2 + 0.4 * UP,
             end_point=POSITION_CAMERA,
             wavelength=WAVELENGTH,
@@ -812,8 +812,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                        gaussian_beam_waves_perturbed_1,
                                        gaussian_beam_waves_perturbed_2,
                                        second_lens_outgoing_waves_unperturbed,
-                                       second_lens_outgoing_waves_purturbed_1,
-                                       second_lens_outgoing_waves_purturbed_2
+                                       second_lens_outgoing_waves_perturbed_1,
+                                       second_lens_outgoing_waves_perturbed_2
                                        ], FadeIn)  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
@@ -1087,8 +1087,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         waves_vgroup = [incoming_waves, sample, lens_1, lens_2, camera, energy_filter,
                         gaussian_beam_waves_phase_shifted,
                         gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
-                        second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_purturbed_1,
-                        second_lens_outgoing_waves_purturbed_2, rotated_laser_waves, phase_image]  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2
+                        second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_perturbed_1,
+                        second_lens_outgoing_waves_perturbed_2, rotated_laser_waves, phase_image]  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2
         self.camera.frame.save_state()
         self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.2 * RIGHT)])
 
@@ -1133,17 +1133,17 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         arrow_lambda_1 = Arrow(
             start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
             end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
-            color=RED, stroke_width=1.0, max_tip_length_to_length_ratio=0.25, buff=0,
+            color=RED, stroke_width=1/2, max_tip_length_to_length_ratio=0.05, buff=0,
         )
         tex_lambda_1 = MathTex(r"\lambda_1", color=RED).scale(0.8 * ZOOM_RATIO).next_to(
             arrow_lambda_1.get_center(), fringe_dir_vec, buff=0.03)
 
         arrow_lambda_2 = Arrow(
-            start=POSITION_WAIST - arrow_side_offset * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
-            end=POSITION_WAIST - arrow_side_offset * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
-            color=RED_B, stroke_width=1.0, max_tip_length_to_length_ratio=0.25, buff=0,
+            start=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
+            end=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
+            color=RED_B, stroke_width=1/2, max_tip_length_to_length_ratio=0.05, buff=0,
         )
-        tex_lambda_2 = MathTex(r"\lambda_2", color=RED_B).scale(0.8 * ZOOM_RATIO).next_to(
+        tex_lambda_2 = MathTex(r"\lambda_2", color=RED_C).scale(0.8 * ZOOM_RATIO).next_to(
             arrow_lambda_2.get_center(), -fringe_dir_vec, buff=0.03)
 
         laser_annotation = VGroup(arrow_lambda_1, tex_lambda_1, arrow_lambda_2, tex_lambda_2)

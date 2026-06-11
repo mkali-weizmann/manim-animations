@@ -8,7 +8,7 @@ from typing import Union, Optional, Callable
 # from manim_voiceover.services.azure import AzureService
 
 # manim -pql phd-project/laser_phase_plate.py LaserPhasePlate
-# manim-slides convert Microscope slides/presentation.html
+# manim-slides convert LaserPhasePlate slides/Laser_phase_plate.pptx
 
 GRID_COLOR        = "#073247" #  "#D2D2D2"             # light-grey grid lines
 GRID_SPACING      = 0.11                   # scene units between grid lines  (easy to tune)
@@ -64,7 +64,7 @@ R_BEND = 1.4
 RING_THICKNESS = 1
 RING_CENTER = POSITION_ENERGY_FILTER + R_BEND * UP
 RING_EXIT = RING_CENTER + R_BEND * RIGHT
-POSITION_CAMERA_NEW = RING_EXIT + (FINAL_VERTICAL_LENGTH / 2 + 0.5) * UP
+POSITION_CAMERA_NEW = RING_EXIT + (FINAL_VERTICAL_LENGTH / 2 + 0.8) * UP
 VELOCITIES_RATIO = WAVELENGTH_LASER / WAVELENGTH
 TITLE_COUNTER = 0
 PHASE_OBJECT_SPATIAL_FREQUENCY = 4
@@ -341,11 +341,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # self.wait(1)
         # self.smooth_next_slide()
         title_0 = Tex("asd", color=BLACK, opacity=0).scale(0.5).to_corner(UL)
-        title_1 = Tex("1) Microscope").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
-        title_2 = Tex("2) Phase Object").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
-        title_3 = Tex("3) Waves Decomposition").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
-        title_4 = Tex("4) Phase Mask").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
-        title_5 = Tex("5) Phase Mask + Attenuation").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_1 = Tex("1) Phase Objects").scale(0.5).next_to(title_0, DOWN).align_to(title_0, LEFT)
+        title_2 = Tex("2) Waves Decomposition").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_3 = Tex("3) Phase Mask").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
+        title_4 = Tex("4) Phase Mask + Attenuation").scale(0.5).next_to(title_1, DOWN).align_to(title_0, LEFT)
         titles_square = Rectangle(height=title_1.height + 0.1,
                                   width=title_1.width + 0.1,
                                   stroke_width=2).move_to(title_1.get_center()).set_fill(opacity=0)
@@ -453,7 +452,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         <bookmark mark='A'/> An incoming plane wave is approaching the sample we want to image from the left.
         #         <bookmark mark='B'/> The sample scatters or absorbs parts of the wave, and so
         #         <bookmark mark='C'/> the intensity of the wave after the sample changes accordingly.""") as tracker:
-        self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, image], FadeIn)
+        # self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, image], FadeIn)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
         # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         # self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
@@ -539,12 +538,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         phase_image = ImageMobject(np.uint8([[2, 100], [40, 5], [170, 50]])).move_to(POSITION_SAMPLE)
         phase_image.width = WIDTH_SAMPLE
         phase_image.set_z_index(sample.get_z_index() - 1)
-        self.play(FadeOut(title_0, shift=dy * UP),
-                  title_1.animate.move_to([title_1.get_center()[0], y_0, 0]),
-                  title_2.animate.move_to([title_2.get_center()[0], y_1, 0]),
-                  FadeIn(title_3, shift=dy * UP),
-                  titles_square.animate.set_width(title_2.width + 0.1).move_to([title_2.get_center()[0], y_1, 0]))
-        self.play(FadeOut(image))
+        # self.play(FadeOut(title_0, shift=dy * UP),
+        #           title_1.animate.move_to([title_1.get_center()[0], y_0, 0]),
+        #           title_2.animate.move_to([title_2.get_center()[0], y_1, 0]),
+        #           FadeIn(title_3, shift=dy * UP),
+        #           titles_square.animate.set_width(title_2.width + 0.1).move_to([title_2.get_center()[0], y_1, 0]))
+        # self.play(FadeOut(image))
 
 
         # sample_outgoing_waves_moises = generate_wavefronts_start_to_end_flat(start_point=POSITION_SAMPLE,
@@ -557,7 +556,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #                                                                           [0.1 * np.sin(2 * np.pi * t), 0, 0],
         #                                                                           [0.05 * np.cos(2 * np.pi * t), 0, 0],
         #                                                                           [0.1 * np.cos(t), 0, 0]]))
-        second_lens_outgoing_waves_moises = generate_wavefronts_start_to_end_flat(start_point=POSITION_LENS_2,
+        second_lens_outgoing_waves_noises = generate_wavefronts_start_to_end_flat(start_point=POSITION_LENS_2,
                                                                                   end_point=POSITION_CAMERA,
                                                                                   wavelength=WAVELENGTH,
                                                                                   width=HEIGHT_CAMERA,
@@ -570,7 +569,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                        [0.1 * np.sin(2 * np.pi * t), 0,
                                                                                         0],
                                                                                        [0, 0, 0]]))
-        gaussian_beam_waves_moises = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
+        gaussian_beam_waves_noises = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
                                                                                end_point=POSITION_LENS_2,
                                                                                tracker=TRACKER_TIME,
                                                                                wavelength=WAVELENGTH,
@@ -591,7 +590,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         and hard to see. Such objects are called phase objects and are common in electron microscopy.
         #         Since the wave slows down in the object it acquires more phase when passing through it and the wavefronts are distorted.""") as tracker:
         #
-        self.play(FadeIn(phase_image))
+        self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, gaussian_beam_waves_noises, second_lens_outgoing_waves_noises], FadeIn, added_animation=[FadeIn(phase_image)])
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         self.play(FadeIn(focus_arrow, shift=UP / 2, rate_func=smooth),
                   TRACKER_TIME.animate.increment_value(1 / 2),
@@ -624,11 +623,11 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # self.play(second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
         #           gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
         #           rate_func=linear)  # sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises)  # For when the first part is on
-        self.play(FadeIn(second_lens_outgoing_waves_moises, gaussian_beam_waves_moises))  # For when the first part is off.
+        self.play(FadeIn(second_lens_outgoing_waves_noises, gaussian_beam_waves_noises))  # For when the first part is off.
         # self.remove(second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities)  # sample_outgoing_waves_opacities
         self.add(
-                 second_lens_outgoing_waves_moises,
-                 gaussian_beam_waves_moises)  # sample_outgoing_waves_moises,
+                 second_lens_outgoing_waves_noises,
+                 gaussian_beam_waves_noises)  # sample_outgoing_waves_moises,
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
@@ -637,8 +636,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.smooth_next_slide()
         # END INDENTATION
 
-        microscope_VGroup.add(second_lens_outgoing_waves_moises,
-                              gaussian_beam_waves_moises)  # sample_outgoing_waves_moises,
+        microscope_VGroup.add(second_lens_outgoing_waves_noises,
+                              gaussian_beam_waves_noises)  # sample_outgoing_waves_moises,
 
         ax_complex_amplitude = Axes(x_range=[-AXES_RANGE, AXES_RANGE, 0.25],
                                     y_range=[-AXES_RANGE, AXES_RANGE, 0.25],
@@ -721,11 +720,11 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         which we added a small almost perpendicular perturbation""") as tracker:
         self.play(complex_amplitude_ax_group.animate.move_to([0, 0, 0]).scale(scale_factor=2.5),
                   dot_complex_amplitude.animate.set_fill(COLOR_SCANNING_DOT),
-                  FadeOut(title_1, shift=dy * UP),
-                  title_2.animate.move_to([title_2.get_center()[0], y_0, 0]),
-                  title_3.animate.move_to([title_3.get_center()[0], y_1, 0]),
-                  FadeIn(title_4, shift=dy * UP),
-                  titles_square.animate.set_width(title_3.width + 0.1).move_to([title_3.get_center()[0], y_1, 0])
+                  FadeOut(title_0, shift=dy * UP),
+                  title_1.animate.move_to([title_1.get_center()[0], y_0, 0]),
+                  title_2.animate.move_to([title_2.get_center()[0], y_1, 0]),
+                  FadeIn(title_3, shift=dy * UP),
+                  titles_square.animate.set_width(title_2.width + 0.1).move_to([title_2.get_center()[0], y_1, 0])
                   )  # ,
         # self.wait_until_bookmark('A')
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)
@@ -846,8 +845,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             width=HEIGHT_CAMERA,
             tracker=TRACKER_TIME,
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
-        self.updated_object_animation([gaussian_beam_waves_moises,
-                                       second_lens_outgoing_waves_moises], FadeOut)  # sample_outgoing_waves_moises
+        self.updated_object_animation([gaussian_beam_waves_noises,
+                                       second_lens_outgoing_waves_noises], FadeOut)  # sample_outgoing_waves_moises
         focus_arrow = create_focus_arrow_object(point=POSITION_WAIST + 0.1*UP - 0.07*RIGHT)
         self.updated_object_animation([
                                        gaussian_beam_waves_unperturbed,
@@ -887,7 +886,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         white_rgb = color_to_rgb(COLOR_UNPERTURBED_AMPLITUDE)
         phase_shift_color_generator = lambda x: white_rgb * (1 - sigmoid(x)) + orange_rgb * sigmoid(x)
         gaussian_beam_waves_phase_shifted = generate_wavefronts_start_to_end_gaussian(
-            start_point=POSITION_LENS_1,
+            start_point=POSITION_SAMPLE,
             end_point=POSITION_LENS_2,
             tracker=TRACKER_TIME,
             wavelength=WAVELENGTH,
@@ -905,10 +904,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # with self.voiceover(
         #         text="""It is now time to introduce our solution to the problem: <bookmark mark='A'/> The laser phase plate.
         #         """) as tracker:
-        self.play(FadeOut(title_2, shift=dy * UP),
-                  title_3.animate.move_to([title_3.get_center()[0], y_0, 0]),
-                  title_4.animate.move_to([title_4.get_center()[0], y_1, 0]),
-                  FadeIn(title_5, shift=dy * UP),
+        self.play(FadeOut(title_1, shift=dy * UP),
+                  title_2.animate.move_to([title_2.get_center()[0], y_0, 0]),
+                  title_3.animate.move_to([title_3.get_center()[0], y_1, 0]),
+                  FadeIn(title_4, shift=dy * UP),
                   titles_square.animate.set_width(title_4.width + 0.1).move_to([title_4.get_center()[0], y_1, 0])
                   )
         self.smooth_next_slide(auto_next=True)
@@ -1079,10 +1078,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         different energies than the original electron energy. If we could only give or take some of the energy
         #         of the unperturbed wave, it would be filtered out later by the energy filter.
         #         The current set-up does not add or take energy from the electron, but only delays it.""") as tracker:
-        self.play(FadeOut(title_3, shift=dy * UP),
-                  title_4.animate.move_to([title_4.get_center()[0], y_0, 0]),
-                  title_5.animate.move_to([title_5.get_center()[0], y_1, 0]),
-                  titles_square.animate.set_width(title_5.width + 0.1).move_to([title_5.get_center()[0], y_1, 0])
+        self.play(FadeOut(title_2, shift=dy * UP),
+                  title_3.animate.move_to([title_3.get_center()[0], y_0, 0]),
+                  title_4.animate.move_to([title_4.get_center()[0], y_1, 0]),
+                  titles_square.animate.set_width(title_4.width + 0.1).move_to([title_4.get_center()[0], y_1, 0])
                   )
         # New vertical waves from ring exit upward to new camera position
         second_lens_outgoing_waves_shifted_new = generate_wavefronts_start_to_end_flat(
@@ -1184,7 +1183,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         alpha_with_respect_to_x = alpha + PI / 2
 
         laser_beam_half_width = 0.35
-        laser_beam_sigma = 0.12
+        laser_beam_sigma = 0.2
         img_W = 256
         img_H = round(img_W * laser_beam_half_width / LENGTH_LASER_BEAM)
 
@@ -1192,9 +1191,9 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             s_along = np.linspace(-LENGTH_LASER_BEAM, LENGTH_LASER_BEAM, img_W)
             s_perp  = np.linspace(-laser_beam_half_width, laser_beam_half_width, img_H)
             S_along, S_perp = np.meshgrid(s_along, s_perp)
-            envelope = np.exp(-S_perp**2 / (2 * laser_beam_sigma**2))
+            envelope = np.exp(-S_perp**4 / (2 * laser_beam_sigma**4))
             phase = 2 * np.pi * np.mod(t, 1)
-            fringes = (1 + np.cos(2 * np.pi * S_along / laser_spacing + phase)) / 2
+            fringes = (1.2 + 0.8*np.cos(2 * np.pi * S_along / laser_spacing + phase)) / 2
             intensity = envelope * fringes
             rgba = np.zeros((img_H, img_W, 4), dtype=np.uint8)
             rgba[:, :, 0] = (255 * intensity).astype(np.uint8)

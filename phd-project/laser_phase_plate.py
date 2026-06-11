@@ -628,12 +628,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.add(
                  second_lens_outgoing_waves_noises,
                  gaussian_beam_waves_noises)  # sample_outgoing_waves_moises,
-        self.smooth_next_slide(loop=True)
+        # self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1),
-                  run_time=2, rate_func=linear)  # SLIDES
-        self.smooth_next_slide()
+        # self.play(TRACKER_TIME.animate.increment_value(1),
+        #           run_time=2, rate_func=linear)  # SLIDES
+        # self.smooth_next_slide()
         # END INDENTATION
 
         microscope_VGroup.add(second_lens_outgoing_waves_noises,
@@ -690,6 +690,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                line_complex_amplitude, dot_complex_amplitude)
         # self.wait_until_bookmark('A')
         # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(tracker.time_until_bookmark('B')), run_time=4)  # VOICEOVER
+        self.smooth_next_slide()
         self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), run_time=4)  # SLIDES
         # self.wait_until_bookmark('B')
         TRACKER_SCANNING_CAMERA.set_value(0)
@@ -910,7 +911,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                   FadeIn(title_4, shift=dy * UP),
                   titles_square.animate.set_width(title_4.width + 0.1).move_to([title_4.get_center()[0], y_1, 0])
                   )
-        self.smooth_next_slide(auto_next=True)
+        # self.smooth_next_slide(auto_next=True)
         # self.wait_until_bookmark('A')
         self.play(FadeOut(focus_arrow))
         self.updated_object_animation(laser_waves, FadeIn)
@@ -938,7 +939,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2,
         # with self.voiceover(
         #         text="""Let's see how introducing the laser solves the problem""") as tracker:
-        self.smooth_next_slide()
         self.updated_object_animation([left_side_group, phase_image,
                     ], FadeOut)  # sample_outgoing_waves_opacities, second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities
         # # END INDENTATION
@@ -1113,7 +1113,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             _w.clear_updaters()
         self.play(
             FadeIn(energy_filter, shift=DOWN),
-            FadeIn(focus_arrow, shift=0.3 * LEFT),
             camera.animate.move_to(POSITION_CAMERA_NEW).rotate(-PI / 2),
             FadeOut(second_lens_outgoing_waves_shifted),
             FadeOut(second_lens_outgoing_waves_perturbed_1),
@@ -1129,7 +1128,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                        second_lens_outgoing_waves_perturbed_2], FadeIn)
         microscope_VGroup += energy_filter
         self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
-        self.play(FadeOut(focus_arrow))
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
@@ -1142,7 +1140,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         The red lines of the laser represent nodes of high intensity.""") as tracker:
         self.next_slide()
         self.play(laser_waves.animate.become(rotated_laser_waves), run_time=2)
-        self.smooth_next_slide()
         self.remove(laser_waves)
         self.add(rotated_laser_waves)
         # # END INDENTATION
@@ -1156,7 +1153,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
                   TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
-                  run_time=4, rate_func=linear)  # SLIDES
+                  run_time=Dt_l*4, rate_func=linear)  # SLIDES
         self.next_slide()
         # END INDENTATION
         if BOOKMARK < 8:
@@ -1193,7 +1190,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             S_along, S_perp = np.meshgrid(s_along, s_perp)
             envelope = np.exp(-S_perp**4 / (2 * laser_beam_sigma**4))
             phase = 2 * np.pi * np.mod(t, 1)
-            fringes = (1.2 + 0.8*np.cos(2 * np.pi * S_along / laser_spacing + phase)) / 2
+            fringes = (1 + np.cos(2 * np.pi * S_along / laser_spacing + phase)) / 2
             intensity = envelope * fringes
             rgba = np.zeros((img_H, img_W, 4), dtype=np.uint8)
             rgba[:, :, 0] = (255 * intensity).astype(np.uint8)
@@ -1210,7 +1207,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         beam_dir_vec  = np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0])
         fringe_dir_vec = np.array([np.cos(alpha), np.sin(alpha), 0])
         arrow_len = laser_spacing * 1.0
-        arrow_side_offset = laser_beam_half_width/2
+        arrow_side_offset = 3*laser_beam_half_width/4
 
         arrow_lambda_1 = Arrow(
             start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec,
@@ -1230,14 +1227,32 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
         laser_annotation = VGroup(arrow_lambda_1, tex_lambda_1, arrow_lambda_2, tex_lambda_2)
 
+        n_fringe_lines = int(np.ceil(2 * LENGTH_LASER_BEAM / laser_spacing)) + 4
+        half = n_fringe_lines // 2
+        fringe_lines = VGroup(*[DashedLine(
+            start=POSITION_WAIST + (i - half) * laser_spacing * beam_dir_vec - laser_beam_half_width * fringe_dir_vec,
+            end=POSITION_WAIST + (i - half) * laser_spacing * beam_dir_vec + laser_beam_half_width * fringe_dir_vec,
+            color=DARK_GREY, stroke_width=0.8, dash_length=0.05) for i in range(n_fringe_lines)])
+
         dots = VGroup(*[Dot(point=POSITION_WAIST + i * RIGHT * dots_spacing, radius=0.02,  # ATTENTION - WAS 0.02
                             color=COLOR_PHASE_SHIFT_AMPLITUDE) for i in range(32)])
         # dots.set_z_index(100)
         TRACKER_TIME.set_value(0)
         dots.add_updater(
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
-        self.updated_object_animation([laser_image], FadeIn,
-                                      added_animation=[FadeIn(dots), FadeIn(laser_annotation)])
+
+        fringe_lines.add_updater(
+            lambda m: m.move_to(POSITION_WAIST - TRACKER_TIME.get_value() * laser_spacing * beam_dir_vec))
+
+        self.updated_object_animation(
+            [laser_image],
+            FadeIn,
+            added_animation=[
+                FadeIn(fringe_lines),
+                FadeIn(dots),
+                FadeIn(laser_annotation),
+            ],
+        )
         self.smooth_next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
@@ -1309,11 +1324,13 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.play(FadeIn(double_frequency_laser_tex[0]), run_time=2)
         self.smooth_next_slide()
 
-        self.updated_object_animation([laser_image, dots], FadeOut,
+        self.updated_object_animation([laser_image, dots, fringe_lines], FadeOut,
                                       added_animation=[FadeIn(double_frequency_laser_tex[1]),
                                                        FadeOut(laser_annotation)])
         laser_image.clear_updaters()
         self.remove(laser_image)
+        fringe_lines.clear_updaters()
+        self.remove(fringe_lines)
         self.smooth_next_slide()
         # waves_vgroup.remove(rotated_laser_waves)
         # self.updated_object_animation(waves_vgroup, FadeIn,

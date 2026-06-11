@@ -563,10 +563,10 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                   tracker=TRACKER_TIME,
                                                                                   noise_generator=lambda
                                                                                       t: np.array(
-                                                                                      [[0.1 * np.cos(t), 0, 0],
-                                                                                       [0.05 * np.cos(2 * np.pi * t), 0,
+                                                                                      [[0.5 * np.cos(t), 0, 0],
+                                                                                       [0.025 * np.cos(2 * np.pi * t), 0,
                                                                                         0],
-                                                                                       [0.1 * np.sin(2 * np.pi * t), 0,
+                                                                                       [0.05 * np.sin(2 * np.pi * t), 0,
                                                                                         0],
                                                                                        [0, 0, 0]]))
         gaussian_beam_waves_noises = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
@@ -578,9 +578,9 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                                center=POSITION_WAIST,
                                                                                noise_generator=lambda
                                                                                    t: np.array(
-                                                                                   [[0.08 * np.sin(5 * t - 1), 0, 0],
-                                                                                    [0.09 * np.sin(3 * t + 1), 0, 0],
-                                                                                    [0.07 * np.cos(8 * t), 0, 0],
+                                                                                   [[0.04 * np.sin(5 * t - 1), 0, 0],
+                                                                                    [0.045 * np.sin(3 * t + 1), 0, 0],
+                                                                                    [0.035 * np.cos(8 * t), 0, 0],
                                                                                     [0, 0, 0]]))
 
         # with self.voiceover(
@@ -1153,7 +1153,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
                   TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
-                  run_time=Dt_l*4, rate_func=linear)  # SLIDES
+                  run_time=Dt_e*4, rate_func=linear)  # SLIDES
         self.next_slide()
         # END INDENTATION
         if BOOKMARK < 8:
@@ -1174,11 +1174,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
         # --- Beating laser: tilt and interference fringes ---
         lines_original_width = line_complex_amplitude.stroke_width
-        laser_spacing = 0.2
+        laser_spacing = 0.1
         dots_spacing = laser_spacing / np.sin(alpha) / 2
         dots_velocity = laser_spacing / np.sin(alpha) * 2
         alpha_with_respect_to_x = alpha + PI / 2
 
+        lattice_period = laser_spacing * 2  # matches the old wavefronts' wavelength so the dots stay in sync
         laser_beam_half_width = 0.35
         laser_beam_sigma = 0.2
         img_W = 256
@@ -1190,7 +1191,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             S_along, S_perp = np.meshgrid(s_along, s_perp)
             envelope = np.exp(-S_perp**4 / (2 * laser_beam_sigma**4))
             phase = 2 * np.pi * np.mod(t, 1)
-            fringes = (1 + np.cos(2 * np.pi * S_along / laser_spacing + phase)) / 2
+            fringes = (1 + np.cos(2 * np.pi * S_along / lattice_period + phase)) / 2
             intensity = envelope * fringes
             rgba = np.zeros((img_H, img_W, 4), dtype=np.uint8)
             rgba[:, :, 0] = (255 * intensity).astype(np.uint8)
@@ -1227,11 +1228,11 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
         laser_annotation = VGroup(arrow_lambda_1, tex_lambda_1, arrow_lambda_2, tex_lambda_2)
 
-        n_fringe_lines = int(np.ceil(2 * LENGTH_LASER_BEAM / laser_spacing)) + 4
+        n_fringe_lines = int(np.ceil(2 * LENGTH_LASER_BEAM / lattice_period)) + 4
         half = n_fringe_lines // 2
         fringe_lines = VGroup(*[DashedLine(
-            start=POSITION_WAIST + (i - half) * laser_spacing * beam_dir_vec - laser_beam_half_width * fringe_dir_vec,
-            end=POSITION_WAIST + (i - half) * laser_spacing * beam_dir_vec + laser_beam_half_width * fringe_dir_vec,
+            start=POSITION_WAIST + (i - half) * lattice_period * beam_dir_vec - laser_beam_half_width * fringe_dir_vec,
+            end=POSITION_WAIST + (i - half) * lattice_period * beam_dir_vec + laser_beam_half_width * fringe_dir_vec,
             color=DARK_GREY, stroke_width=0.8, dash_length=0.05) for i in range(n_fringe_lines)])
 
         dots = VGroup(*[Dot(point=POSITION_WAIST + i * RIGHT * dots_spacing, radius=0.02,  # ATTENTION - WAS 0.02
@@ -1242,7 +1243,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
 
         fringe_lines.add_updater(
-            lambda m: m.move_to(POSITION_WAIST - TRACKER_TIME.get_value() * laser_spacing * beam_dir_vec))
+            lambda m: m.move_to(POSITION_WAIST - TRACKER_TIME.get_value() * lattice_period * beam_dir_vec))
 
         self.updated_object_animation(
             [laser_image],

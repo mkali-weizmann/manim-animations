@@ -25,7 +25,7 @@ POSITION_SAMPLE = np.array([-5, MICROSCOPE_Y, 0])
 BEGINNING = - 7
 FIRST_LENS_X = POSITION_SAMPLE[0] + 1
 POSITION_LENS_1 = np.array([FIRST_LENS_X, MICROSCOPE_Y, 0])
-SECOND_LENS_X = 3.5
+SECOND_LENS_X = 3
 POSITION_LENS_2 = np.array([SECOND_LENS_X, MICROSCOPE_Y, 0])
 INITIAL_VERTICAL_LENGTH = 1
 FINAL_VERTICAL_LENGTH = 2
@@ -60,6 +60,11 @@ COLOR_BACKGROUND = BLACK
 ZOOM_RATIO = 0.1
 POSITION_TITLE = np.array([-6, 2.5, 0])
 POSITION_ENERGY_FILTER = (POSITION_CAMERA - WIDTH_CAMERA/2*RIGHT + POSITION_LENS_2 + 0.25 * RIGHT) / 2
+R_BEND = 1.4
+RING_THICKNESS = 1
+RING_CENTER = POSITION_ENERGY_FILTER + R_BEND * UP
+RING_EXIT = RING_CENTER + R_BEND * RIGHT
+POSITION_CAMERA_NEW = RING_EXIT + (FINAL_VERTICAL_LENGTH / 2 + 0.5) * UP
 VELOCITIES_RATIO = WAVELENGTH_LASER / WAVELENGTH
 TITLE_COUNTER = 0
 PHASE_OBJECT_SPATIAL_FREQUENCY = 4
@@ -423,8 +428,15 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         sample = Rectangle(height=HEIGHT_SAMPLE, width=WIDTH_SAMPLE, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_SAMPLE)
         camera = Rectangle(height=HEIGHT_CAMERA, width=WIDTH_CAMERA, color=GRAY, fill_color=GRAY_A,
                            fill_opacity=0.3).move_to(POSITION_CAMERA)
-        energy_filter = Rectangle(height=HEIGHT_CAMERA, width=WIDTH_CAMERA/5, color=GREEN_E, fill_color=GREEN_C,
-                           fill_opacity=0.3).move_to(POSITION_ENERGY_FILTER)
+        energy_filter = AnnularSector(
+            inner_radius=R_BEND - RING_THICKNESS / 2,
+            outer_radius=R_BEND + RING_THICKNESS / 2,
+            angle=PI / 2,
+            start_angle=-PI / 2,
+            color=GREEN_E,
+            fill_color=GREEN_C,
+            fill_opacity=0.3,
+        ).shift(RING_CENTER)
 
         image = ImageMobject(np.uint8([[[250, 100, 80], [100, 40, 32]],
                                              [[20, 8, 6], [100, 40, 32]],
@@ -462,7 +474,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.next_slide(auto_next=True)
         self.play(focus_arrow.animate.become(
             create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
-                  TRACKER_TIME.animate.increment_value(1),
+                  TRACKER_TIME.animate.increment_value(1/2),
                   run_time=1, rate_func=linear)
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
@@ -881,7 +893,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         and therefore travels slower than components of the electron wave that pass by the laser. This adds
         #         relative phase shift to the unperturbed wave. the phase-shifted unperturbed wave is drawn in purple.""") as tracker:
         self.play(gaussian_beam_waves_unperturbed.animate.become(gaussian_beam_waves_phase_shifted),
-                  second_lens_outgoing_waves_unperturbed.animate.become(second_lens_outgoing_waves_shifted))
+                  second_lens_outgoing_waves_unperturbed.animate.become(second_lens_outgoing_waves_shifted)
+                  )  #
         self.remove(gaussian_beam_waves_unperturbed, second_lens_outgoing_waves_unperturbed)
         self.add(gaussian_beam_waves_phase_shifted, second_lens_outgoing_waves_shifted)
         self.smooth_next_slide(loop=True)
@@ -1041,9 +1054,50 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                   title_5.animate.move_to([title_5.get_center()[0], y_1, 0]),
                   titles_square.animate.set_width(title_5.width + 0.1).move_to([title_5.get_center()[0], y_1, 0])
                   )
+        # New vertical waves from ring exit upward to new camera position
+        second_lens_outgoing_waves_shifted_new = generate_wavefronts_start_to_end_flat(
+            start_point=RING_EXIT,
+            end_point=POSITION_CAMERA_NEW,
+            wavelength=WAVELENGTH,
+            width=HEIGHT_CAMERA,
+            tracker=TRACKER_TIME,
+            colors_generator=phase_shift_color_generator)
+        second_lens_outgoing_waves_perturbed_1_new = generate_wavefronts_start_to_end_flat(
+            start_point=RING_EXIT - 0.4 * RIGHT,
+            end_point=POSITION_CAMERA_NEW + 0.4 * RIGHT,
+            wavelength=WAVELENGTH,
+            width=HEIGHT_CAMERA,
+            tracker=TRACKER_TIME,
+            colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
+        second_lens_outgoing_waves_perturbed_2_new = generate_wavefronts_start_to_end_flat(
+            start_point=RING_EXIT + 0.4 * RIGHT,
+            end_point=POSITION_CAMERA_NEW - 0.4 * RIGHT,
+            wavelength=WAVELENGTH,
+            width=HEIGHT_CAMERA,
+            tracker=TRACKER_TIME,
+            colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
+
         # self.wait_until_bookmark("A")
-        focus_arrow = create_focus_arrow_object(point=POSITION_ENERGY_FILTER + HEIGHT_CAMERA / 2 * UP)
-        self.play(FadeIn(energy_filter, shift=DOWN), FadeIn(focus_arrow, shift=0.3*LEFT))
+        focus_arrow = create_focus_arrow_object(point=RING_CENTER)
+        for _w in [second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_perturbed_1,
+                   second_lens_outgoing_waves_perturbed_2]:
+            _w.clear_updaters()
+        self.play(
+            FadeIn(energy_filter, shift=DOWN),
+            FadeIn(focus_arrow, shift=0.3 * LEFT),
+            camera.animate.move_to(POSITION_CAMERA_NEW).rotate(-PI / 2),
+            FadeOut(second_lens_outgoing_waves_shifted),
+            FadeOut(second_lens_outgoing_waves_perturbed_1),
+            FadeOut(second_lens_outgoing_waves_perturbed_2),
+        )
+        self.remove(second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_perturbed_1,
+                    second_lens_outgoing_waves_perturbed_2)
+        second_lens_outgoing_waves_shifted = second_lens_outgoing_waves_shifted_new
+        second_lens_outgoing_waves_perturbed_1 = second_lens_outgoing_waves_perturbed_1_new
+        second_lens_outgoing_waves_perturbed_2 = second_lens_outgoing_waves_perturbed_2_new
+        self.updated_object_animation([second_lens_outgoing_waves_shifted,
+                                       second_lens_outgoing_waves_perturbed_1,
+                                       second_lens_outgoing_waves_perturbed_2], FadeIn)
         microscope_VGroup += energy_filter
         self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
         self.play(FadeOut(focus_arrow))
@@ -1088,7 +1142,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                         gaussian_beam_waves_phase_shifted,
                         gaussian_beam_waves_perturbed_1, gaussian_beam_waves_perturbed_2,
                         second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_perturbed_1,
-                        second_lens_outgoing_waves_perturbed_2, rotated_laser_waves, phase_image]  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2
+                        second_lens_outgoing_waves_perturbed_2, rotated_laser_waves, phase_image]  # sample_outgoing_unperturbed_waves, sample_outgoing_perturbed_waves_1, sample_outgoing_perturbed_waves_2, second_lens_outgoing_waves,
         self.camera.frame.save_state()
         self.updated_object_animation(waves_vgroup, FadeOut, added_animation=[self.camera.frame.animate.scale(ZOOM_RATIO).move_to(POSITION_WAIST - 0.2 * RIGHT)])
 
@@ -1098,7 +1152,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         dots_spacing = laser_spacing / np.sin(alpha) / 2
         dots_velocity = laser_spacing / np.sin(alpha) * 2
         alpha_with_respect_to_x = alpha + PI / 2
-        laser_global_shift = laser_spacing * 2 / 8
 
         laser_beam_half_width = 0.35
         laser_beam_sigma = 0.12
@@ -1127,20 +1180,20 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
         beam_dir_vec  = np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0])
         fringe_dir_vec = np.array([np.cos(alpha), np.sin(alpha), 0])
-        arrow_len = laser_spacing * 2.0
-        arrow_side_offset = laser_beam_half_width + 0.08
+        arrow_len = laser_spacing * 1.0
+        arrow_side_offset = laser_beam_half_width/2
 
         arrow_lambda_1 = Arrow(
-            start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
-            end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
+            start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec,
+            end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + arrow_len * beam_dir_vec,
             color=RED, stroke_width=1/2, max_tip_length_to_length_ratio=0.05, buff=0,
         )
         tex_lambda_1 = MathTex(r"\lambda_1", color=RED).scale(0.8 * ZOOM_RATIO).next_to(
             arrow_lambda_1.get_center(), fringe_dir_vec, buff=0.03)
 
         arrow_lambda_2 = Arrow(
-            start=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
-            end=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
+            start=POSITION_WAIST + arrow_side_offset*2 * fringe_dir_vec + arrow_len * beam_dir_vec,
+            end=POSITION_WAIST + arrow_side_offset*2 * fringe_dir_vec,
             color=RED_B, stroke_width=1/2, max_tip_length_to_length_ratio=0.05, buff=0,
         )
         tex_lambda_2 = MathTex(r"\lambda_2", color=RED_C).scale(0.8 * ZOOM_RATIO).next_to(

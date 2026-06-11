@@ -389,33 +389,33 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #                                                                             [1, np.cos(2 * t) ** 2,
         #                                                                              np.sin(2 * t) ** 2,
         #                                                                              1 - 0.1 * np.cos(t) ** 2]))
-        second_lens_outgoing_waves_opacities = generate_wavefronts_start_to_end_flat(start_point=POSITION_LENS_2,
-                                                                                     end_point=POSITION_CAMERA,
-                                                                                     wavelength=WAVELENGTH,
-                                                                                     width=HEIGHT_CAMERA,
-                                                                                     tracker=TRACKER_TIME,
-                                                                                     opacities_generator=lambda
-                                                                                         t: np.array(
-                                                                                         [1 - 0.1 * np.cos(
-                                                                                             (2 - t)) ** 2,
-                                                                                          np.sin(2 * (2 - t)) ** 2,
-                                                                                          np.cos(2 * (2 - t)) ** 2,
-                                                                                          1]))
-        gaussian_beam_waves_opacities = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
-                                                                                  end_point=POSITION_LENS_2,
-                                                                                  tracker=TRACKER_TIME,
-                                                                                  wavelength=WAVELENGTH,
-                                                                                  x_R=X_R,
-                                                                                  w_0=W_0,
-                                                                                  center=POSITION_WAIST,
-                                                                                  opacities_generator=lambda
-                                                                                      t: np.array([0,
-                                                                                                   0.5 + 0.5 * np.cos(
-                                                                                                       6 * t + 1) ** 2,
-                                                                                                   np.cos(8 * t) ** 2,
-                                                                                                   0.2 + 0.8 * np.cos(
-                                                                                                       5 * t - 1) ** 2,
-                                                                                                   0]))
+        # second_lens_outgoing_waves_opacities = generate_wavefronts_start_to_end_flat(start_point=POSITION_LENS_2,
+        #                                                                              end_point=POSITION_CAMERA,
+        #                                                                              wavelength=WAVELENGTH,
+        #                                                                              width=HEIGHT_CAMERA,
+        #                                                                              tracker=TRACKER_TIME,
+        #                                                                              opacities_generator=lambda
+        #                                                                                  t: np.array(
+        #                                                                                  [1 - 0.1 * np.cos(
+        #                                                                                      (2 - t)) ** 2,
+        #                                                                                   np.sin(2 * (2 - t)) ** 2,
+        #                                                                                   np.cos(2 * (2 - t)) ** 2,
+        #                                                                                   1]))
+        # gaussian_beam_waves_opacities = generate_wavefronts_start_to_end_gaussian(start_point=POSITION_SAMPLE,
+        #                                                                           end_point=POSITION_LENS_2,
+        #                                                                           tracker=TRACKER_TIME,
+        #                                                                           wavelength=WAVELENGTH,
+        #                                                                           x_R=X_R,
+        #                                                                           w_0=W_0,
+        #                                                                           center=POSITION_WAIST,
+        #                                                                           opacities_generator=lambda
+        #                                                                               t: np.array([0,
+        #                                                                                            0.5 + 0.5 * np.cos(
+        #                                                                                                6 * t + 1) ** 2,
+        #                                                                                            np.cos(8 * t) ** 2,
+        #                                                                                            0.2 + 0.8 * np.cos(
+        #                                                                                                5 * t - 1) ** 2,
+        #                                                                                            0]))
         _sq, _gap = 0.5, 1.5
         lens_1 = VGroup(
             Square(side_length=_sq, color=COLOR_OPTICAL_ELEMENTS, fill_color=COLOR_OPTICAL_ELEMENTS, fill_opacity=0.5).move_to(POSITION_LENS_1 + (_gap / 2 + _sq / 2) * UP),
@@ -444,9 +444,9 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         image.width = WIDTH_SAMPLE
         image.set_z_index(sample.get_z_index() - 1)
 
-        microscope_VGroup = VGroup(incoming_waves, sample, lens_1, lens_2,
-                                   gaussian_beam_waves_opacities,
-                                   second_lens_outgoing_waves_opacities, camera)  # sample_outgoing_waves_opacities
+        microscope_VGroup = VGroup(incoming_waves, sample, lens_1, lens_2, camera)  # ,
+                                   # gaussian_beam_waves_opacities,
+                                   # second_lens_outgoing_waves_opacities)  # sample_outgoing_waves_opacities
         # with self.voiceover(
         #         text="""Let's start by seeing how does a transmission microscope work.
         #         This explanation applies both for a regular optical microscopes, and for electron microscopes.
@@ -455,33 +455,33 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         <bookmark mark='C'/> the intensity of the wave after the sample changes accordingly.""") as tracker:
         self.updated_object_animation([microscope_VGroup, title_0, title_1, title_2, titles_square, image], FadeIn)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('A')), run_time=tracker.time_until_bookmark('A'), rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
-                  TRACKER_TIME.animate.increment_value(1/2),
-                  run_time=1, rate_func=linear)
-        self.smooth_next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
-        #           run_time=tracker.time_until_bookmark('B'), rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide(auto_next=True)
-        self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
-                  TRACKER_TIME.animate.increment_value(1/2),
-                  run_time=1, rate_func=linear)
-        self.smooth_next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
-        #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide(auto_next=True)
-        self.play(focus_arrow.animate.become(
-            create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
-                  TRACKER_TIME.animate.increment_value(1/2),
-                  run_time=1, rate_func=linear)
-        self.smooth_next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
-        #           run_time=tracker.get_remaining_duration()-1, rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide()
-        self.play(FadeOut(focus_arrow))
+        # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        # self.play(FadeIn(focus_arrow, shift=UP/2, rate_func=smooth),
+        #           TRACKER_TIME.animate.increment_value(1/2),
+        #           run_time=1, rate_func=linear)
+        # self.smooth_next_slide(loop=True)
+        # # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
+        # #           run_time=tracker.time_until_bookmark('B'), rate_func=linear)  # VOICEOVER
+        # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        # self.next_slide(auto_next=True)
+        # self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
+        #           TRACKER_TIME.animate.increment_value(1/2),
+        #           run_time=1, rate_func=linear)
+        # self.smooth_next_slide(loop=True)
+        # # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
+        # #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
+        # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        # self.next_slide(auto_next=True)
+        # self.play(focus_arrow.animate.become(
+        #     create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05*RIGHT)),
+        #           TRACKER_TIME.animate.increment_value(1/2),
+        #           run_time=1, rate_func=linear)
+        # self.smooth_next_slide(loop=True)
+        # # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
+        # #           run_time=tracker.get_remaining_duration()-1, rate_func=linear)  # VOICEOVER
+        # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        # self.next_slide()
+        # self.play(FadeOut(focus_arrow))
         # END INDENTATION
 
         ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1 = generate_scanning_axes(
@@ -498,11 +498,11 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         Intensity as a function of position would be our image.
         #         <bookmark mark='A'/>  However, the sample is small, and so we can not probe the field at such
         #         small scales.""") as tracker:
-        self.play(Create(ax_1), Write(labels_1), run_time=2)
-        self.play(Create(scanning_dot_1), Create(scanning_dot_x_axis_1))
+        # self.play(Create(ax_1), Write(labels_1), run_time=2)
+        # self.play(Create(scanning_dot_1), Create(scanning_dot_x_axis_1))
         # self.play(TRACKER_SCANNING_SAMPLE.animate.set_value(1), Create(amplitude_graph_1), run_time=max(tracker.time_until_bookmark('A'), 2))  # VOICEOVER
-        self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), Create(amplitude_graph_1), run_time=2)  # SLIDES
-        self.smooth_next_slide()
+        # self.play(TRACKER_SCANNING_SAMPLE.animate.increment_value(1), Create(amplitude_graph_1), run_time=2)  # SLIDES
+        # self.smooth_next_slide()
         # # END INDENTATION
 
 
@@ -520,16 +520,16 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #                 The magnified field hits the camera which measures it's intensity.
         #                 <bookmark mark='A'/> Since the optics copy the field exactly as it is, the intensity pattern
         #                 on the camera equals exactly to the pattern right after the sample""") as tracker:
-        self.play(FadeIn(focus_arrow))
-        self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT + HEIGHT_CAMERA / 2 * UP + 0.05 * UP - 0.15*RIGHT)))
-        self.play(Create(ax_2), Write(labels_2),  run_time=2)
-        self.play(Create(scanning_dot_2), Create(scanning_dot_x_axis_2))
+        # self.play(FadeIn(focus_arrow))
+        # self.play(focus_arrow.animate.become(create_focus_arrow_object(point=POSITION_CAMERA - WIDTH_CAMERA / 2 * RIGHT + HEIGHT_CAMERA / 2 * UP + 0.05 * UP - 0.15*RIGHT)))
+        # self.play(Create(ax_2), Write(labels_2),  run_time=2)
+        # self.play(Create(scanning_dot_2), Create(scanning_dot_x_axis_2))
         # self.wait_until_bookmark('A')
         # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=tracker.get_remaining_duration())  # VOICEOVER
-        self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=2)  # SLIDES
-        self.smooth_next_slide()
-        self.play(FadeOut(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2,
-                                 ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1, focus_arrow)))
+        # self.play(TRACKER_SCANNING_CAMERA.animate.set_value(1), Create(amplitude_graph_2), run_time=2)  # SLIDES
+        # self.smooth_next_slide()
+        # self.play(FadeOut(VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2,
+        #                          ax_1, labels_1, scanning_dot_1, scanning_dot_x_axis_1, amplitude_graph_1, focus_arrow)))
         TRACKER_SCANNING_SAMPLE.set_value(0)
         # END INDENTATION
         if BOOKMARK < 2:
@@ -592,9 +592,39 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #         Since the wave slows down in the object it acquires more phase when passing through it and the wavefronts are distorted.""") as tracker:
         #
         self.play(FadeIn(phase_image))
-        self.play(second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
-                  gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
-                  rate_func=linear)  # sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises)
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        self.play(FadeIn(focus_arrow, shift=UP / 2, rate_func=smooth),
+                  TRACKER_TIME.animate.increment_value(1 / 2),
+                  run_time=1, rate_func=linear)
+        self.smooth_next_slide(loop=True)
+        # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
+        #           run_time=tracker.time_until_bookmark('B'), rate_func=linear)  # VOICEOVER
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        self.next_slide(auto_next=True)
+        self.play(focus_arrow.animate.become(
+            create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
+                  TRACKER_TIME.animate.increment_value(1 / 2),
+                  run_time=1, rate_func=linear)
+        self.smooth_next_slide(loop=True)
+        # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
+        #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        self.next_slide(auto_next=True)
+        self.play(focus_arrow.animate.become(
+            create_focus_arrow_object(
+                point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + WIDTH_SAMPLE / 2 * RIGHT + 0.05 * UP + 0.05 * RIGHT)),
+            TRACKER_TIME.animate.increment_value(1 / 2),
+            run_time=1, rate_func=linear)
+        self.smooth_next_slide(loop=True)
+        # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()-1),
+        #           run_time=tracker.get_remaining_duration()-1, rate_func=linear)  # VOICEOVER
+        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        self.next_slide()
+        self.play(FadeOut(focus_arrow))
+        # self.play(second_lens_outgoing_waves_opacities.animate.become(second_lens_outgoing_waves_moises),
+        #           gaussian_beam_waves_opacities.animate.become(gaussian_beam_waves_moises), run_time=2,
+        #           rate_func=linear)  # sample_outgoing_waves_opacities.animate.become(sample_outgoing_waves_moises)  # For when the first part is on
+        self.play(FadeIn(second_lens_outgoing_waves_moises, gaussian_beam_waves_moises))  # For when the first part is off.
         self.remove(second_lens_outgoing_waves_opacities, gaussian_beam_waves_opacities)  # sample_outgoing_waves_opacities
         self.add(
                  second_lens_outgoing_waves_moises,
@@ -1164,7 +1194,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             S_along, S_perp = np.meshgrid(s_along, s_perp)
             envelope = np.exp(-S_perp**2 / (2 * laser_beam_sigma**2))
             phase = 2 * np.pi * np.mod(t, 1)
-            fringes = (1 + np.cos(2 * np.pi * S_along / laser_spacing - phase)) / 2
+            fringes = (1 + np.cos(2 * np.pi * S_along / laser_spacing + phase)) / 2
             intensity = envelope * fringes
             rgba = np.zeros((img_H, img_W, 4), dtype=np.uint8)
             rgba[:, :, 0] = (255 * intensity).astype(np.uint8)
@@ -1186,7 +1216,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         arrow_lambda_1 = Arrow(
             start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec,
             end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + arrow_len * beam_dir_vec,
-            color=RED, stroke_width=1/2, max_tip_length_to_length_ratio=0.05, buff=0,
+            color=RED, stroke_width=1/2, max_tip_length_to_length_ratio=0.15, buff=0,
         )
         tex_lambda_1 = MathTex(r"\lambda_1", color=RED).scale(0.8 * ZOOM_RATIO).next_to(
             arrow_lambda_1.get_center(), fringe_dir_vec, buff=0.03)
@@ -1194,7 +1224,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         arrow_lambda_2 = Arrow(
             start=POSITION_WAIST + arrow_side_offset*2 * fringe_dir_vec + arrow_len * beam_dir_vec,
             end=POSITION_WAIST + arrow_side_offset*2 * fringe_dir_vec,
-            color=RED_B, stroke_width=1/2, max_tip_length_to_length_ratio=0.05, buff=0,
+            color=RED_B, stroke_width=1/2, max_tip_length_to_length_ratio=0.15, buff=0,
         )
         tex_lambda_2 = MathTex(r"\lambda_2", color=RED_C).scale(0.8 * ZOOM_RATIO).next_to(
             arrow_lambda_2.get_center(), -fringe_dir_vec, buff=0.03)

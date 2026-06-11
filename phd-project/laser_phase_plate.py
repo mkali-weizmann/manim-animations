@@ -25,7 +25,7 @@ POSITION_SAMPLE = np.array([-5, MICROSCOPE_Y, 0])
 BEGINNING = - 7
 FIRST_LENS_X = POSITION_SAMPLE[0] + 1
 POSITION_LENS_1 = np.array([FIRST_LENS_X, MICROSCOPE_Y, 0])
-SECOND_LENS_X = 4
+SECOND_LENS_X = 3.5
 POSITION_LENS_2 = np.array([SECOND_LENS_X, MICROSCOPE_Y, 0])
 INITIAL_VERTICAL_LENGTH = 1
 FINAL_VERTICAL_LENGTH = 2
@@ -417,7 +417,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             Square(side_length=_sq, color=COLOR_OPTICAL_ELEMENTS, fill_color=COLOR_OPTICAL_ELEMENTS, fill_opacity=0.5).move_to(POSITION_LENS_1 - (_gap / 2 + _sq / 2) * UP),
         )
         lens_2 = VGroup(
-            *[Dot(radius=0.07, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_LENS_2 + (i - 1) * 0.3 * RIGHT) for i in range(3)]
+            Square(side_length=_sq, color=COLOR_OPTICAL_ELEMENTS, fill_color=COLOR_OPTICAL_ELEMENTS, fill_opacity=0.5).move_to(POSITION_LENS_2 + (_gap / 2 + _sq / 2) * UP),
+            Square(side_length=_sq, color=COLOR_OPTICAL_ELEMENTS, fill_color=COLOR_OPTICAL_ELEMENTS, fill_opacity=0.5).move_to(POSITION_LENS_2 - (_gap / 2 + _sq / 2) * UP),
         )
         sample = Rectangle(height=HEIGHT_SAMPLE, width=WIDTH_SAMPLE, color=COLOR_OPTICAL_ELEMENTS).move_to(POSITION_SAMPLE)
         camera = Rectangle(height=HEIGHT_CAMERA, width=WIDTH_CAMERA, color=GRAY, fill_color=GRAY_A,
@@ -1124,6 +1125,29 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                 .rotate(alpha + PI / 2)
         )
 
+        beam_dir_vec  = np.array([np.cos(alpha_with_respect_to_x), np.sin(alpha_with_respect_to_x), 0])
+        fringe_dir_vec = np.array([np.cos(alpha), np.sin(alpha), 0])
+        arrow_len = laser_spacing * 2.0
+        arrow_side_offset = laser_beam_half_width + 0.08
+
+        arrow_lambda_1 = Arrow(
+            start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
+            end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
+            color=RED, stroke_width=1.0, max_tip_length_to_length_ratio=0.25, buff=0,
+        )
+        tex_lambda_1 = MathTex(r"\lambda_1", color=RED).scale(0.8 * ZOOM_RATIO).next_to(
+            arrow_lambda_1.get_center(), fringe_dir_vec, buff=0.03)
+
+        arrow_lambda_2 = Arrow(
+            start=POSITION_WAIST - arrow_side_offset * fringe_dir_vec + (arrow_len / 2) * beam_dir_vec,
+            end=POSITION_WAIST - arrow_side_offset * fringe_dir_vec - (arrow_len / 2) * beam_dir_vec,
+            color=RED_B, stroke_width=1.0, max_tip_length_to_length_ratio=0.25, buff=0,
+        )
+        tex_lambda_2 = MathTex(r"\lambda_2", color=RED_B).scale(0.8 * ZOOM_RATIO).next_to(
+            arrow_lambda_2.get_center(), -fringe_dir_vec, buff=0.03)
+
+        laser_annotation = VGroup(arrow_lambda_1, tex_lambda_1, arrow_lambda_2, tex_lambda_2)
+
         dots = VGroup(*[Dot(point=POSITION_WAIST + i * RIGHT * dots_spacing, radius=0.02,  # ATTENTION - WAS 0.02
                             color=COLOR_PHASE_SHIFT_AMPLITUDE) for i in range(32)])
         # dots.set_z_index(100)
@@ -1131,7 +1155,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         dots.add_updater(
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
         self.updated_object_animation([laser_image], FadeIn,
-                                      added_animation=[FadeIn(dots)])
+                                      added_animation=[FadeIn(dots), FadeIn(laser_annotation)])
         self.smooth_next_slide(loop=True)
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=8, rate_func=linear)
         self.next_slide()
@@ -1204,7 +1228,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.smooth_next_slide()
 
         self.updated_object_animation([laser_image, dots], FadeOut,
-                                      added_animation=[FadeIn(double_frequency_laser_tex[1])])
+                                      added_animation=[FadeIn(double_frequency_laser_tex[1]),
+                                                       FadeOut(laser_annotation)])
         laser_image.clear_updaters()
         self.remove(laser_image)
         self.smooth_next_slide()

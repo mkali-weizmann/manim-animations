@@ -1153,7 +1153,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(Dt_e * 2),
                   TRACKER_TIME_LASER.animate.increment_value(Dt_l * 2),
-                  run_time=Dt_e*4, rate_func=linear)  # SLIDES
+                  run_time=Dt_e*8, rate_func=linear)  # SLIDES
         self.next_slide()
         # END INDENTATION
         if BOOKMARK < 8:

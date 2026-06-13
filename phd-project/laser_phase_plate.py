@@ -328,6 +328,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
     def construct(self):
         self.camera.background_color = COLOR_BACKGROUND
         self.add(self.make_background_grid())
+        self.introduction()
         # self.set_speech_service(GTTSService(transcription_model='base'))
         # # self.set_speech_service(
         # #     AzureService(
@@ -490,7 +491,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             tracker=TRACKER_SCANNING_SAMPLE,
             function_to_plot=lambda x: 1 - 0.2 * np.exp(-(6 * (x - 0.7)) ** 2),
             axis_x_label="Position",
-            axis_y_label="Intensity")
+            axis_y_label="Current Density")
 
         # with self.voiceover(
         #         text="""If we measured the intensity of the field right after the sample. The
@@ -512,7 +513,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             tracker=TRACKER_SCANNING_CAMERA,
             function_to_plot=lambda x: 1 - 0.2 * np.exp(-(6 * (x - 0.7)) ** 2),
             axis_x_label="Position",
-            axis_y_label="Intensity")
+            axis_y_label="Current Density")
         camera_scanner_group = VGroup(ax_2, labels_2, scanning_dot_2, scanning_dot_x_axis_2, amplitude_graph_2)
         # with self.voiceover(
         #         text="""Therefore, we use optics elements to take the field and magnify it as it is.
@@ -599,15 +600,15 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('B')),
         #           run_time=tracker.time_until_bookmark('B'), rate_func=linear)  # VOICEOVER
         self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
-        self.next_slide(auto_next=True)
-        self.play(focus_arrow.animate.become(
-            create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
-                  TRACKER_TIME.animate.increment_value(1 / 2),
-                  run_time=1, rate_func=linear)
-        self.smooth_next_slide(loop=True)
-        # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
-        #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
-        self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
+        # self.next_slide(auto_next=True)
+        # self.play(focus_arrow.animate.become(
+        #     create_focus_arrow_object(point=POSITION_SAMPLE + HEIGHT_SAMPLE / 2 * UP + 0.05 * UP)),
+        #           TRACKER_TIME.animate.increment_value(1 / 2),
+        #           run_time=1, rate_func=linear)
+        # self.smooth_next_slide(loop=True)
+        # # self.play(TRACKER_TIME.animate.increment_value(tracker.time_until_bookmark('C')),
+        # #           run_time=tracker.time_until_bookmark('C'), rate_func=linear)  # VOICEOVER
+        # self.play(TRACKER_TIME.animate.increment_value(1), run_time=2, rate_func=linear)  # SLIDES
         self.next_slide(auto_next=True)
         self.play(focus_arrow.animate.become(
             create_focus_arrow_object(
@@ -750,7 +751,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                                                    z_index=ax_complex_amplitude.z_index + 1)),
                                            )
         tex = MathTex(r"\psi_{\text{out}}\left(x\right)="
-                      r"\psi_{\text{unperturbed}}+i\psi_{\text{perturbation}}\left(x\right)").next_to(
+                      r"\psi_{\text{unscattered}}+i\psi_{\text{scattered}}\left(x\right)").next_to(
             ax_complex_amplitude.get_bottom(), RIGHT + UP).scale(0.6)
         tex[0][8:20].set_color(COLOR_UNPERTURBED_AMPLITUDE)
         tex[0][22:].set_color(COLOR_PERTURBED_AMPLITUDE)
@@ -881,7 +882,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         #     w_0=W_0_LASER,
         #     center=POSITION_WAIST,
         #     colors_generator=lambda t: RED)
-        laser_waves = Dot(point=POSITION_WAIST, radius=0.1, color=RED, fill_opacity=0.8, stroke_opacity=1, stroke_width=4, stroke_color=RED_E)
+        laser_waves = Dot(point=POSITION_WAIST, radius=0.14, color=RED, fill_opacity=0.8, stroke_opacity=1, stroke_width=4, stroke_color=RED_E)
 
         orange_rgb = color_to_rgb(COLOR_PHASE_SHIFT_AMPLITUDE)
         white_rgb = color_to_rgb(COLOR_UNPERTURBED_AMPLITUDE)
@@ -1052,6 +1053,20 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         # END INDENTATION
 
         self.updated_object_animation(left_side_group, FadeIn)
+        focus_arrow = Arrow(start=POSITION_WAIST + [0.1, +1.3, 0],
+                            end=POSITION_WAIST, color=RED)
+        large_is_bad_label = Tex("Large beam waist ", "(BAD)").scale(0.5).next_to(focus_arrow, UP)
+        large_is_bad_label[1].set_color(RED)
+        smaller_is_better_label = Tex("Smaller beam waist ", "(GOOD)").scale(0.5).next_to(focus_arrow, UP)
+        smaller_is_better_label[1].set_color(GREEN)
+        self.play(FadeIn(focus_arrow, shift=0.2*DOWN))
+        self.play(FadeIn(large_is_bad_label, shift=0.2*UP))
+        self.smooth_next_slide()
+        self.play(FadeIn(smaller_is_better_label, shift=0.2*UP), FadeOut(large_is_bad_label, shift=UP), laser_waves.animate.become(Dot(point=POSITION_WAIST, radius=0.033, color=RED_A, fill_opacity=1, stroke_opacity=1, stroke_width=4, stroke_color=RED_E)))
+        self.smooth_next_slide()
+        self.play(FadeOut(smaller_is_better_label, focus_arrow, shift=0.2*UP))
+
+
         Dt_e = 3/2
         Dt_l = 1/2
         alpha = np.arcsin(Dt_l * WAVELENGTH_LASER / (Dt_e * WAVELENGTH))
@@ -1083,6 +1098,14 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                   title_4.animate.move_to([title_4.get_center()[0], y_1, 0]),
                   titles_square.animate.set_width(title_4.width + 0.1).move_to([title_4.get_center()[0], y_1, 0])
                   )
+        focus_arrow = Arrow(start=ORIGIN, end=1.5*DOWN + 0.1 * LEFT, color=RED).next_to(camera, UP).shift(0.1*LEFT)
+        camera_is_slow = Tex(r"$\tilde 10$ Electrons / pixel / second", " SLOW").scale(0.5).next_to(focus_arrow, UP)
+        camera_is_slow[1].set_color(RED)
+        self.play(FadeIn(focus_arrow, shift=0.2*DOWN))
+        self.play(FadeIn(camera_is_slow, shift=0.2*UP))
+        self.smooth_next_slide()
+        self.play(FadeOut(focus_arrow, shift=0.2 * DOWN), FadeOut(camera_is_slow, shift=0.2 * UP))
+        self.smooth_next_slide()
         # New vertical waves from ring exit upward to new camera position
         second_lens_outgoing_waves_shifted_new = generate_wavefronts_start_to_end_flat(
             start_point=RING_EXIT,
@@ -1107,7 +1130,6 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             colors_generator=lambda t: COLOR_PERTURBED_AMPLITUDE)
 
         # self.wait_until_bookmark("A")
-        focus_arrow = create_focus_arrow_object(point=RING_CENTER)
         for _w in [second_lens_outgoing_waves_shifted, second_lens_outgoing_waves_perturbed_1,
                    second_lens_outgoing_waves_perturbed_2]:
             _w.clear_updaters()
@@ -1127,7 +1149,13 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
                                        second_lens_outgoing_waves_perturbed_1,
                                        second_lens_outgoing_waves_perturbed_2], FadeIn)
         microscope_VGroup += energy_filter
-        self.play(Flash(energy_filter, color=RED, line_length=0.2, flash_radius=0.2))
+        focus_arrow = Arrow(start=ORIGIN + [0.1, -1.2, 0],
+                            end=ORIGIN, color=RED).next_to(energy_filter, DOWN).shift(0.2*LEFT)
+        energy_filter_label = Tex("Knows how to filter out electrons").scale(0.5).next_to(focus_arrow, DOWN)
+        self.play(FadeIn(focus_arrow))
+        self.play(FadeIn(energy_filter_label))
+        self.smooth_next_slide()
+        self.play(FadeOut(focus_arrow, energy_filter_label))
         self.smooth_next_slide(loop=True)
         # self.play(TRACKER_TIME.animate.increment_value(tracker.get_remaining_duration()),
         #           run_time=tracker.get_remaining_duration(), rate_func=linear)  # VOICEOVER
@@ -1211,16 +1239,16 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         arrow_side_offset = 5/6 * laser_beam_half_width
 
         arrow_lambda_1 = Arrow(
-            start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec,
-            end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + arrow_len * beam_dir_vec,
+            start=POSITION_WAIST + arrow_side_offset * fringe_dir_vec+0.1*UP,
+            end=POSITION_WAIST + arrow_side_offset * fringe_dir_vec + arrow_len * beam_dir_vec+0.1*UP,
             color=RED, stroke_width=1/2, max_tip_length_to_length_ratio=0.2, buff=0,
         )
         tex_lambda_1 = MathTex(r"\lambda_1", color=RED).scale(0.8 * ZOOM_RATIO).next_to(
             arrow_lambda_1.get_center(), fringe_dir_vec, buff=0.03)
 
         arrow_lambda_2 = Arrow(
-            start=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec + arrow_len * beam_dir_vec,
-            end=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec,
+            start=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec + arrow_len * beam_dir_vec+0.1*UP,
+            end=POSITION_WAIST + arrow_side_offset*1.5 * fringe_dir_vec+0.1*UP,
             color=RED_B, stroke_width=1/2, max_tip_length_to_length_ratio=0.2, buff=0,
         )
         tex_lambda_2 = MathTex(r"\lambda_2", color=RED_C).scale(0.8 * ZOOM_RATIO).next_to(
@@ -1228,12 +1256,12 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
 
         laser_annotation = VGroup(arrow_lambda_1, tex_lambda_1, arrow_lambda_2, tex_lambda_2)
 
-        n_fringe_lines = int(np.ceil(2 * LENGTH_LASER_BEAM / lattice_period)) + 4
+        n_fringe_lines = int(np.ceil(2 * LENGTH_LASER_BEAM / lattice_period))*2 + 8
         half = n_fringe_lines // 2
         fringe_lines = VGroup(*[DashedLine(
-            start=POSITION_WAIST + (i - half+0.1) * lattice_period * beam_dir_vec - laser_beam_half_width*0.8 * fringe_dir_vec,
-            end=POSITION_WAIST + (i - half+0.1) * lattice_period * beam_dir_vec + laser_beam_half_width*0.8 * fringe_dir_vec,
-            color=DARK_GREY, stroke_width=0.8, dash_length=0.05, stroke_opacity=0.6) for i in range(n_fringe_lines)])
+            start=POSITION_WAIST + (i/4 - half) * lattice_period * beam_dir_vec - laser_beam_half_width*0.8 * fringe_dir_vec,
+            end=POSITION_WAIST + (i/4 - half) * lattice_period * beam_dir_vec + laser_beam_half_width*0.8 * fringe_dir_vec,
+            color=WHITE, stroke_width=0.5, dash_length=0.05, stroke_opacity=0.25) for i in range(n_fringe_lines)])
 
         dots = VGroup(*[Dot(point=POSITION_WAIST + i * RIGHT * dots_spacing, radius=0.02,  # ATTENTION - WAS 0.02
                             color=COLOR_PHASE_SHIFT_AMPLITUDE) for i in range(32)])
@@ -1243,7 +1271,7 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             lambda m: m.move_to(POSITION_WAIST + (TRACKER_TIME.get_value() - 1) * RIGHT * dots_velocity))
 
         fringe_lines.add_updater(
-            lambda m: m.move_to(POSITION_WAIST - TRACKER_TIME.get_value() * lattice_period * beam_dir_vec))
+            lambda m: m.move_to(POSITION_WAIST - (TRACKER_TIME.get_value()) * lattice_period * beam_dir_vec))
 
         self.updated_object_animation(
             [laser_image],
@@ -1299,8 +1327,8 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
             np.sin(theta(TRACKER_TIME.get_value())))))
 
         line_to_dot = always_redraw(
-            lambda: Line(axes.c2p(0, 0), moving_dot.get_center(), color=YELLOW,
-                         stroke_width=0.1)).set_z_index(30)
+            lambda: Line(axes.c2p(0, 0), moving_dot.get_center(), color=COLOR_UNPERTURBED_AMPLITUDE,
+                         stroke_width=0.5)).set_z_index(30)
 
         single_frequency_laser_tex = Tex(
             r"Monochromatic laser: $\psi\rightarrow\psi\cdot e^{i\frac{\pi}{2}}$").scale(0.8 * ZOOM_RATIO)
@@ -1469,6 +1497,32 @@ class LaserPhasePlate(MovingCameraScene, Slide):  # , ZoomedScene
         self.wait(1)  # SLIDES
         # # END INDENTATION
         self.play(FadeOut(final_title))
+
+    # ── Introduction title slide ────────────────────────────────────────────
+    def introduction(self):
+        title = Tex("Laser Phase Plate", color=WHITE).scale(1.2).to_edge(UP, buff=1.0)
+
+        bullet_texts = [
+            "1) Introduction",
+            "2) Laser Phase Plate",
+            "3) Attenuating Laser Phase Plate",
+        ]
+        bullets = VGroup()
+        for text in bullet_texts:
+            bullet = Tex(text, color=WHITE).scale(0.8)
+            if len(bullets) == 0:
+                bullet.next_to(title, DOWN, buff=0.8).shift(2*LEFT+1*DOWN)
+            else:
+                bullet.next_to(bullets[-1], DOWN, buff=0.8).align_to(bullets[0], LEFT)
+            bullets.add(bullet)
+
+        self.play(FadeIn(title))
+        self.smooth_next_slide()
+        for bullet in bullets:
+            self.play(FadeIn(bullet, shift=0.3 * RIGHT))
+            self.smooth_next_slide()
+
+        self.play(FadeOut(title), FadeOut(bullets))
 
     # ── Background grid ─────────────────────────────────────────────────────
     def make_background_grid(self):
